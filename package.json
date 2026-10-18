@@ -28,7 +28,8 @@
     "worker:deploy": "bun --cwd infra run deploy:demo",
     "worker:smoke-native": "bun run scripts/smoke-native.ts",
     "worker:smoke-fallback": "bun run scripts/smoke-native.ts --exercise-fallback",
-    "worker:smoke-pair": "bun run scripts/smoke-pair.ts"
+    "worker:smoke-pair": "bun run scripts/smoke-pair.ts",
+    "hooks:install": "git config core.hooksPath .beads/hooks"
   },
   "dependencies": {
     "@astrojs/markdown-remark": "^7.3.1",

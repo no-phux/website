@@ -1,0 +1,7 @@
+# Generated, tool-written, or vendored files. Also exempts them from the
+# pre-commit file-size gate (scripts/check-file-tokens.sh).
+.beads/*.jsonl linguist-generated=true
+src/lib/phux-web/phux_web* linguist-generated=true
+motion/*.plan.json linguist-generated=true
+public/benchmarks/** linguist-generated=true
+public/demos/**/*.cast linguist-generated=true

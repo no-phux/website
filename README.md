@@ -12,6 +12,7 @@ Locally, put the phux checkout at `../../phux` (this repo lives at
 
 ```sh
 bun install
+bun run hooks:install   # pre-commit rejects staged files over 5,000 tokens
 bun run dev
 ```
 
