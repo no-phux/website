@@ -25,6 +25,8 @@
         frame=document.createElement("iframe");
         frame.title="PHUX live workspace — interactive homepage";
         frame.src="/concepts/vgpu?variant=combo&embedded=home";
+        // The install hook copies and shares from inside the frame.
+        frame.allow="clipboard-write; web-share";
         light.append(frame);
       }else if(!enabled&&frame){
         frame.remove();frame=null;light.style.removeProperty("height");

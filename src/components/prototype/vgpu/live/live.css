@@ -76,3 +76,59 @@
 
 @media(min-width:700px) and (max-width:999px){.live-satellite-grid[data-count="3"]{grid-template-columns:repeat(3,minmax(0,1fr))}.live-satellite-grid[data-count="3"]>.live-secondary:last-child{grid-column:auto;width:auto;justify-self:stretch}}
 @media(min-width:561px) and (max-width:699px){.vibe-stage.live-session-stage{padding-top:66px;padding-bottom:64px}.live-session-layout{gap:24px}.live-secondary .live-pane-preview{height:108px}}
+
+/* Legible chrome: the panes read as real windows, not decoration. */
+.live-glass header small{font-size:8px}.live-secondary header small{font-size:7px}
+.live-primary>footer{font-size:8px;color:#a1bfce99}
+.live-enter{font-size:10px}
+@media(hover:none){.live-enter{opacity:1;color:#cfe6ee}}
+
+/* The install hook: one real command, the proof beside it, nothing to dismiss. */
+.install-hook{position:relative;z-index:4;grid-column:1;min-width:0;display:grid;gap:12px;color:#c9dbe3}
+.install-hook-lede{margin:0;font:600 clamp(17px,1.6vw,21px)/1.35 var(--font-reading);letter-spacing:-.02em;color:#e3eff4;text-wrap:balance}
+.install-hook-tabs{display:flex;gap:4px}
+.install-hook-tabs button{min-height:32px;padding:0 12px;border-radius:999px;font:11px var(--lab-mono);color:#86a2b1;transition:color .2s,background .2s}
+.install-hook-tabs button:hover{color:#dcecf2}
+.install-hook-tabs button[aria-pressed=true]{color:#e6f3f8;background:#c8e6f212}
+.install-hook-line{position:relative;display:flex;align-items:center;gap:12px;min-height:56px;padding:8px 8px 8px 18px;border-radius:16px;background:linear-gradient(120deg,#d9efff0d,#0a141c66 55%),#071017b8;box-shadow:inset 0 0 0 1px #c8e6f21f,0 18px 60px #0004;overflow:hidden;isolation:isolate}
+.install-hook-prompt{font:13px var(--lab-mono);color:#b5ceaa}
+.install-hook-line code{flex:1;min-width:0;font:13px/1.5 var(--lab-mono);color:#eef7fa;white-space:nowrap;overflow-x:auto;scrollbar-width:none;user-select:all;cursor:copy}
+.install-hook-line code::-webkit-scrollbar{display:none}
+.install-hook-copy{flex-shrink:0;min-width:92px;min-height:40px;padding:0 18px;border-radius:999px;background:#dff4fb;color:#06121a;font:600 12px var(--font-reading);transition:transform .18s,background .2s,box-shadow .3s}
+.install-hook-copy:hover{background:#fff}
+.install-hook-copy:active{transform:scale(.94)}
+.install-hook-line[data-copied=true] .install-hook-copy{background:#b5ceaa}
+.install-hook-status{min-height:1.5em;margin:0;font:11px/1.5 var(--lab-mono);color:#91aebd}
+.install-hook-proof{display:flex;flex-wrap:wrap;gap:6px 16px;margin:2px 0 0;padding:0;list-style:none;font:10px/1.6 var(--lab-mono);color:#8ea9b7}
+.install-hook-proof i{margin-right:6px;font-style:normal;color:#b5ceaa}
+.install-hook-proof a,.install-hook-proof button{color:#b9d2dd;text-decoration:underline;text-decoration-color:#b9d2dd44;text-underline-offset:3px}
+.install-hook-proof a:hover,.install-hook-proof button:hover{color:#eef7fa;text-decoration-color:currentColor}
+.install-hook-proof button[aria-pressed=true]{color:#eef7fa}
+.install-hook-share{justify-self:start;min-height:40px;padding:0 16px;border-radius:999px;box-shadow:inset 0 0 0 1px #c8e6f230;font:12px var(--font-reading);color:#dcecf2}
+.install-hook-request{display:flex;flex-wrap:wrap;gap:8px}
+.install-hook-request input{flex:1 1 220px;min-height:44px;padding:0 16px;border:0;border-radius:999px;background:#071017b8;box-shadow:inset 0 0 0 1px #c8e6f226;color:#eef7fa;font:14px var(--font-reading)}
+.install-hook-request input::placeholder{color:#7f99a7}
+.install-hook-request button{min-height:44px;padding:0 20px;border-radius:999px;background:#dff4fb;color:#06121a;font:600 12px var(--font-reading)}
+.install-hook-request .install-hook-trap{position:absolute;left:-10000px;width:1px;height:1px;opacity:0}
+.install-hook :is(button,a,input,code):focus-visible{outline:2px solid #d6f3ffaa;outline-offset:2px}
+/* Attention reached the terminals: light sweeps the command once and the copy breathes. */
+.install-hook-line::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(100deg,transparent 30%,#d6f3ff1c 48%,transparent 66%);transform:translateX(-100%);pointer-events:none}
+.install-hook:not([data-moment=idle]) .install-hook-line::after{animation:install-sweep 1.6s cubic-bezier(.3,.6,.2,1) .15s both}
+.install-hook[data-moment=engaged] .install-hook-copy,.install-hook[data-moment=drove] .install-hook-copy{animation:install-breathe 2.4s ease-in-out .4s 2}
+.install-hook[data-moment=drove] .install-hook-lede{animation:install-lede .5s cubic-bezier(.2,.8,.2,1) both}
+@keyframes install-sweep{to{transform:translateX(100%)}}
+@keyframes install-breathe{50%{box-shadow:0 0 0 6px #dff4fb1f,0 0 28px #bfe6f533}}
+@keyframes install-lede{from{opacity:0;transform:translateY(4px)}}
+.live-dialog-install{margin-left:auto;padding:6px 12px;border-radius:999px;background:#dff4fb;color:#06121a;font:600 10px var(--font-reading)}
+.live-dialog-install:hover{background:#fff}
+.live-dialog-caption{align-items:center}
+@media(max-width:999px){.install-hook{grid-column:1/-1}}
+@media(max-width:560px){
+  .install-hook-line{flex-wrap:wrap;padding:14px 14px 10px 16px}
+  .install-hook-line code{flex-basis:calc(100% - 24px);white-space:normal;overflow-wrap:anywhere;font-size:12px}
+  .install-hook-copy{flex:1 1 100%;min-height:46px;font-size:14px}
+  .install-hook-share{justify-self:stretch;min-height:46px}
+  .install-hook-proof{gap:4px 12px}
+  .live-dialog-caption>span:nth-child(2){display:none}
+}
+@media(prefers-reduced-motion:reduce){.install-hook-line::after,.install-hook-copy,.install-hook-lede{animation:none!important}.install-hook-tabs button,.install-hook-copy{transition:none}}

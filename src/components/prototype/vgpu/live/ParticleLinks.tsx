@@ -37,7 +37,7 @@ export function ParticleLinks({links,signal}:{links:MutableRefObject<LightLink[]
   useEffect(()=>{
     const element=canvas.current!,ctx=element.getContext("2d",{alpha:true});
     if(!ctx)return;
-    let width=0,height=0,visible=true,raf=0,last=0,dirty=true;
+    let width=0,height=0,visible=true,raf=0,last=0,dirty=true,blank=false;
     const reduced=matchMedia("(prefers-reduced-motion: reduce)");
     const invalidate=()=>{dirty=true;};
     const resize=new ResizeObserver(invalidate);resize.observe(element);
@@ -53,10 +53,14 @@ export function ParticleLinks({links,signal}:{links:MutableRefObject<LightLink[]
       raf=requestAnimationFrame(render);
       if(document.hidden||!visible||now-last<1000/30)return;
       if(reduced.matches&&!dirty)return;
+      const current=links.current;
+      // Nothing to carry: clear once, then stop touching the canvas.
+      if(!dirty&&blank&&current.length===0)return;
       last=now;if(dirty)fit();
       ctx.clearRect(0,0,width,height);
-      if(reduced.matches)return;
-      paintLinks(ctx,links.current,now,signal.current);
+      blank=reduced.matches||current.length===0;
+      if(blank)return;
+      paintLinks(ctx,current,now,signal.current);
     };
     raf=requestAnimationFrame(render);
     return()=>{cancelAnimationFrame(raf);resize.disconnect();intersection.disconnect();window.removeEventListener("resize",invalidate);reduced.removeEventListener("change",invalidate);};

@@ -57,7 +57,7 @@ function presentLayout(list:Pane[],width:number,height:number) {
 }
 
 /** One spring loop owns DOM transforms, optical geometry and particle attachment. */
-export function useLiquidLayout(stage:RefObject<HTMLElement|null>,identity:string,expanded:boolean,attention:MutableRefObject<Attention>,parents:Record<string,string>) {
+export function useLiquidLayout(stage:RefObject<HTMLElement|null>,identity:string,expanded:boolean,attention:MutableRefObject<Attention>,parents:Record<string,string>,pinned?:MutableRefObject<boolean>) {
   const glass=useRef<GlassLayout>({rects:[]}),links=useRef<LightLink[]>([]);
   const panes=useRef(new Map<string,Pane>());
   const engaged=useRef(false);
@@ -89,7 +89,7 @@ export function useLiquidLayout(stage:RefObject<HTMLElement|null>,identity:strin
       const list=Array.from(panes.current.values()),primary=list[0];if(!primary)return;
       const input=attention.current,x=(input.x+1)*width/2,y=(1-input.y)*height/2;
       const distance=Math.min(...list.map(p=>distanceToRect(x,y,p.rest)));
-      gate.current=advanceAttention(gate.current,distance,Boolean(input.active),now);
+      gate.current=pinned?.current?{awake:true,candidate:true,since:now}:advanceAttention(gate.current,distance,Boolean(input.active),now);
       const awake=gate.current.awake;
       engaged.current=awake;
       if(awake===previousEngaged&&settled)return;
@@ -133,6 +133,6 @@ export function useLiquidLayout(stage:RefObject<HTMLElement|null>,identity:strin
     window.addEventListener("resize",invalidate);window.addEventListener("scroll",invalidate,{passive:true,capture:true});
     measure();raf=requestAnimationFrame(tick);
     return()=>{cancelAnimationFrame(raf);observer.disconnect();visibility.disconnect();window.removeEventListener("resize",invalidate);window.removeEventListener("scroll",invalidate,true);};
-  },[identity,expanded,stage,attention,parents]);
+  },[identity,expanded,stage,attention,parents,pinned]);
   return {glass,links,pulse,engaged};
 }
