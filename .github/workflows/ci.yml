@@ -61,5 +61,19 @@ jobs:
       - name: Test
         run: bun run test
 
-      - name: Sync docs
-        run: bun run sync-docs
+      # Native-image tests above intentionally use their immutable source pin.
+      # Documentation is a separate product: validate current phux main.
+      - name: Check out current documentation source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: no-phux/phux
+          ref: main
+          path: phux
+          persist-credentials: false
+
+      - name: Build and verify current documentation
+        run: |
+          bun run build
+          bun run check
+          bun run check:links
+          bun run verify:docs

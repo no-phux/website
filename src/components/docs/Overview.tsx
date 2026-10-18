@@ -11,7 +11,7 @@ export function OverviewBody() {
       </section>
 
       <div className="overview-actions">
-        <a className="overview-primary" href="/quickstart/install">Install phux <span aria-hidden="true">→</span></a>
+        <a className="overview-primary" href="/installation">Install phux <span aria-hidden="true">→</span></a>
         <a href={`${SITE.url}/embed`}>Try in your browser <span aria-hidden="true">↗</span></a>
         <a href="#overview-agent-title">Use with an agent <span aria-hidden="true">↓</span></a>
       </div>
@@ -19,7 +19,7 @@ export function OverviewBody() {
       <section className="overview-first-run" aria-labelledby="overview-first-run-title">
         <div className="overview-first-run-heading">
           <h2 id="overview-first-run-title">Try it</h2>
-          <a href="/quickstart">Full quickstart →</a>
+          <a href="/getting-started">Full quickstart →</a>
         </div>
         <ol className="overview-first-run-steps">
           {OVERVIEW.firstRun.map(({ label, action, detail }) => (
@@ -30,7 +30,7 @@ export function OverviewBody() {
             </li>
           ))}
         </ol>
-        <p className="overview-first-run-result">Detach leaves it running. A server crash or reboot ends it. <a href="/quickstart#what-survives">Continuity details →</a></p>
+        <p className="overview-first-run-result">{OVERVIEW.continuity} <a href="/concepts#what-survives-what">Continuity details →</a></p>
       </section>
 
       <section aria-labelledby="overview-model-title">
@@ -53,7 +53,7 @@ export function OverviewBody() {
             <span><strong>View · desktop tile</strong></span>
             <span><strong>Agent · read / type</strong></span>
           </div>
-          <figcaption id="overview-model-caption">Sessions own resources. Arrangements place them. Views show them. <a href="/concepts">Full model →</a></figcaption>
+          <figcaption id="overview-model-caption">{OVERVIEW.model} <a href="/concepts">Full model →</a></figcaption>
         </figure>
       </section>
 
@@ -78,9 +78,10 @@ export function OverviewBody() {
         <div className="overview-reference-links">
           <a href="/concepts">Core concepts</a>
           <a href="/reference">CLI and configuration</a>
-          <a href="/wire">Wire protocol</a>
+          <a href="/protocol">Wire protocol</a>
           <a href="/architecture">Architecture</a>
-          <a href="/concepts/when-to-use">Compare tools</a>
+          <a href="/clients">Clients and embedding</a>
+          <a href={`${SITE.url}/mcp`}>Docs MCP (read-only)</a>
           <a href="/troubleshooting">Troubleshooting</a>
           <a href="/docs">All documentation</a>
         </div>

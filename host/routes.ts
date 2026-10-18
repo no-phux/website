@@ -20,11 +20,17 @@ export const DOCS_PREFIXES = [
   "/config",
   "/scripting",
   "/agents",
+  "/acp",
   "/remote",
   "/clients",
+  "/desktop-capture",
+  "/desktop-changes",
+  "/desktop-panes",
+  "/embedding",
   "/troubleshooting",
   "/reference",
   "/architecture",
+  "/organization",
   "/protocol",
   "/development",
   "/releasing",
@@ -65,8 +71,8 @@ export function isDocsPath(pathname: string): boolean {
 
 export function isMarketingOnlyPath(pathname: string): boolean {
   const path = stripPageSuffix(pathname);
-  return isVgpuConceptPath(path) || path === "/embed" || path.startsWith("/embed/") ||
-    path === "/install" || path.startsWith("/install") ||
+  return isVgpuConceptPath(path) || isEmbedPath(path) ||
+    /^\/install(?:$|[./-])/.test(path) ||
     path === "/demos" || path.startsWith("/demos/");
 }
 
@@ -92,7 +98,13 @@ export function routeRequest(host: string, url: URL): HostRoute {
   return { kind: "asset" };
 }
 
-function isVgpuConceptPath(path: string): boolean {
+export function isEmbedPath(pathname: string): boolean {
+  const path = stripPageSuffix(pathname);
+  return path === "/embed" || path.startsWith("/embed/");
+}
+
+export function isVgpuConceptPath(pathname: string): boolean {
+  const path = stripPageSuffix(pathname);
   return path === "/concepts/vgpu" || path.startsWith("/concepts/vgpu/");
 }
 

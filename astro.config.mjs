@@ -12,7 +12,7 @@ import {
   remarkNpm,
 } from "fumadocs-core/mdx-plugins";
 import { buildSearchIndex } from "./scripts/build-search.mjs";
-import { isDocsPath } from "./host/routes.ts";
+import { isDocsPath, isEmbedPath, isVgpuConceptPath } from "./host/routes.ts";
 import { wgslVitePlugin } from "@vgpu/wgsl/loader-vite";
 
 // The docs pages render with the Fumadocs markdown pipeline: anchored headings
@@ -152,7 +152,7 @@ export default defineConfig({
     react(),
     mdx({ extendMarkdownConfig: true, syntaxHighlight: false }),
     sitemap({
-      filter: (page) => !page.includes("/embed") && !new URL(page).pathname.startsWith("/concepts/vgpu"),
+      filter: (page) => !isEmbedPath(new URL(page).pathname) && !isVgpuConceptPath(new URL(page).pathname),
       serialize(item) {
         const url = new URL(item.url);
         if (isDocsPath(url.pathname)) {
