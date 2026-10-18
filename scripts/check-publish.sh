@@ -42,11 +42,13 @@ require .github/workflows/site-deploy.yml 'cmp phux/scripts/install-desktop.sh "
 require .github/workflows/site-deploy.yml 'Verify the installers are served'
 require .github/workflows/site-deploy.yml 'if [ "$shebang" != '"'"'#!/bin/sh'"'"' ]; then'
 
-require src/pages/index.astro 'install-desktop | sh'
-require src/pages/index.astro 'id: "mobile", label: "Mobile", command: ""'
+require src/lib/install.ts 'install-desktop | sh'
+require src/lib/install.ts 'id: "mobile", label: "Mobile", command: ""'
+require src/pages/index.astro 'installTargets'
 require src/pages/index.astro 'class="install-request" id="beta-form"'
 require src/pages/index.astro 'wireBetaRequest('
 forbid src/pages/index.astro '-s -- --channel next'
+forbid src/lib/install.ts '-s -- --channel next'
 
 if [ "$failures" -ne 0 ]; then
   echo "publish contract: $failures failure(s)" >&2
