@@ -18,7 +18,7 @@ const TASK_GROUPS = [
   },
   {
     folder: "(use)", title: `Use ${SITE.name}`,
-    pages: ["../config", "../scripting", "../agents", "../remote", "../clients", "../desktop-capture", "../desktop-changes", "../desktop-panes", "../troubleshooting"],
+    pages: ["../config", "../scripting", "../agents", "../acp", "../remote", "../clients", "../desktop-capture", "../desktop-changes", "../desktop-panes", "../troubleshooting"],
   },
   {
     folder: "(contribute)", title: "Work on phux",

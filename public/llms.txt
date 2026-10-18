@@ -50,6 +50,7 @@ npx skills add no-phux/skills                    # agent skills
 - [Install](https://docs.phux.sh/installation): supported platforms and installation channels.
 - [Quickstart](https://docs.phux.sh/getting-started): start, split, detach, and inspect your first terminal.
 - [Run coding agents](https://docs.phux.sh/agents): choose an integration and verify it works.
+- [ACP-owned sessions](https://docs.phux.sh/acp): provider readiness, typed commands, human permissions, and uncertain outcomes.
 - [Terminal MCP adapter](https://docs.phux.sh/agents): connect to your running local phux server, not the hosted docs service.
 - [Remote access](https://docs.phux.sh/remote): connect machines and repair connections.
 - [Clients](https://docs.phux.sh/clients): TUI, desktop, web, and native consumer paths.

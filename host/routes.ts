@@ -20,6 +20,7 @@ export const DOCS_PREFIXES = [
   "/config",
   "/scripting",
   "/agents",
+  "/acp",
   "/remote",
   "/clients",
   "/desktop-capture",

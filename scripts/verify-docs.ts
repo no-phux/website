@@ -98,6 +98,7 @@ async function verifyPublishedContent() {
   assert.ok(pages.every(({ url }) => !/^\/(?:adr|decisions)(?:\/|$)/.test(url)), "historical ADRs are not live search pages");
   const clients = await readFile(resolve(root, "clients.md"), "utf8");
   assert.ok(pages.some(({ url }) => url === "/organization"), "organization: published and MCP-indexed");
+  assert.ok(pages.some(({ url }) => url === "/acp"), "ACP: published and MCP-indexed");
   for (const slug of ["embedding", "desktop-capture", "desktop-changes", "desktop-panes"]) {
     assert.ok(pages.some(({ url }) => url === `/${slug}`), `${slug}: published and MCP-indexed`);
     assert.ok(clients.includes(`](/${slug}`), `${slug}: discoverable from Clients`);
@@ -184,6 +185,10 @@ try {
     assert.ok(await page.getByRole("heading", { level: 1 }).isVisible(), `${slug}: readable task page`);
     await verifyPageCopy(page, base, `/${slug}`);
   }
+  await page.goto(`${base}/agents`);
+  await page.locator('main a[href="/acp"]').first().click();
+  await page.waitForURL(`${base}/acp`);
+  await verifyPageCopy(page, base, "/acp");
   await verifyPageCopy(page, base, "/agents");
   await verifyPageCopy(page, base, "/protocol");
   await page.route("**/protocol.md", (route) => route.fulfill({ status: 503, body: "unavailable" }));

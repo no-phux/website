@@ -156,7 +156,7 @@ describe("collection output interface", () => {
     expect(await readFile(join(out, "reference/index.md"), "utf8")).toContain('sourcePath: "docs/reference/README.md"');
     expect(await metadata(out, "reference")).toEqual({ title: "Reference", pages: ["index", "cli", "config", "zebra"] });
     expect(await metadata(out)).toEqual({ pages: ["overview", "(start)", "(use)", "reference", "(contribute)"] });
-    expect((await metadata(out, "(use)")).pages).toEqual(["../config", "../scripting", "../agents", "../remote", "../clients", "../desktop-capture", "../desktop-changes", "../desktop-panes", "../troubleshooting"]);
+    expect((await metadata(out, "(use)")).pages).toEqual(["../config", "../scripting", "../agents", "../acp", "../remote", "../clients", "../desktop-capture", "../desktop-changes", "../desktop-panes", "../troubleshooting"]);
     expect((await metadata(out, "(contribute)")).pages).toEqual(["../architecture", "../organization", "../protocol", "../embedding", "../development", "../releasing", "../docs"]);
     const overview = await readFile(join(out, "overview.md"), "utf8");
     expect(overview).toContain(`sourcePath: "src/pages/overview.astro"\nsourceBase: "https://github.com/no-phux/website"\nsourceRevision: "${siteRevision}"`);
