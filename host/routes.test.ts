@@ -188,3 +188,27 @@ describe("public concept gallery", () => {
     }
   });
 });
+
+describe("published documentation boundaries", () => {
+  test("flat task guides and installation stay on the docs host for every page suffix", () => {
+    for (const page of ["embedding", "desktop-capture", "desktop-changes", "desktop-panes", "organization", "installation"]) {
+      for (const suffix of ["", "/", ".html", ".md", "/index.html"]) {
+        const path = `/${page}${suffix}`;
+        expect(isDocsPath(path)).toBe(true);
+        expect(isMarketingOnlyPath(path)).toBe(false);
+        expect(routeRequest(DOCS_HOST, urlOn(DOCS_HOST, path))).toEqual({ kind: "asset" });
+        expect(routeRequest(SITE_HOST, urlOn(SITE_HOST, path))).toEqual({
+          kind: "redirect", location: `https://${DOCS_HOST}${path}`, status: 301,
+        });
+      }
+    }
+  });
+  test("installer boundaries preserve scripts without capturing installation", () => {
+    for (const path of ["/install", "/install.sh", "/install-desktop", "/install-desktop.sh", "/install/example"]) {
+      expect(isMarketingOnlyPath(path)).toBe(true);
+      expect(routeRequest(DOCS_HOST, urlOn(DOCS_HOST, path))).toEqual({
+        kind: "redirect", location: `https://${SITE_HOST}${path}`, status: 301,
+      });
+    }
+  });
+});

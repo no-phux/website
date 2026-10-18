@@ -32,6 +32,8 @@ export const OVERVIEW = {
     text:
       "A background server owns the terminal. The TUI, desktop, and agents connect to it.",
   },
+  continuity: "Detach leaves it running. A server crash or reboot ends it.",
+  model: "Sessions own resources. Arrangements place them. Views show them.",
   firstRun: [
     { label: "Start", action: "phux", detail: "Open a shell." },
     { label: "Detach", action: "Ctrl-A, then d", detail: "Leave it running." },

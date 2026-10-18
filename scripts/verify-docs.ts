@@ -6,6 +6,7 @@ import { mkdir, readFile } from "node:fs/promises";
 import { extname, resolve } from "node:path";
 import { chromium, webkit, type Page } from "playwright-core";
 import handler from "../host/index";
+import { DOCS_HOST, SITE_HOST, routeRequest } from "../host/routes";
 import { htmlToMarkdown } from "../host/markdown";
 import { AGENT_START, OVERVIEW } from "../src/lib/site";
 
@@ -29,28 +30,45 @@ async function asset(request: Request) {
   });
 }
 
-async function verifyPublishedContent() {
-  const index = JSON.parse(await readFile(resolve(root, "api/mcp-search.json"), "utf8"));
-  for (const { url } of index.pages as { url: string }[]) {
-    const markdown = await readFile(resolve(root, `.${url}.md`), "utf8");
-    assert.match(markdown, /^---\n/);
-    assert.match(markdown, /\n# .+/);
-    assert.match(markdown, /source: "https:\/\/github.com\/no-phux\/phux\/blob\/[0-9a-f]{40}\//);
-    assert.ok(!/^\w+: undefined$/m.test(markdown) && !markdown.endsWith("\n\nundefined"), `${url}: complete Markdown`);
+async function verifyPublishedPage(url: string, sitemap: string) {
+  const markdown = await readFile(resolve(root, `.${url}.md`), "utf8");
+  assert.ok(sitemap.includes(`<loc>https://${DOCS_HOST}${url}</loc>`), `${url}: canonical sitemap entry`);
+  assert.match(markdown, /^---\n/);
+  assert.match(markdown, /\n# .+/);
+  const repository = url === "/overview" ? "website" : "phux";
+  assert.match(markdown, new RegExp(`source: "https://github.com/no-phux/${repository}/blob/[0-9a-f]{40}/`));
+  assert.ok(!/^\w+: undefined$/m.test(markdown) && !markdown.endsWith("\n\nundefined"), `${url}: complete Markdown`);
+  for (const suffix of ["", ".md"]) {
+    const path = `${url}${suffix}`;
+    assert.deepEqual(routeRequest(DOCS_HOST, new URL(path, `https://${DOCS_HOST}`)), { kind: "asset" }, `${path}: docs host`);
+    assert.deepEqual(routeRequest(SITE_HOST, new URL(path, `https://${SITE_HOST}`)), {
+      kind: "redirect", location: `https://${DOCS_HOST}${path}`, status: 301,
+    }, `${path}: canonical host`);
   }
+}
+
+async function verifyOverview() {
   const overview = await readFile(resolve(root, "overview.md"), "utf8");
+  const html = await readFile(resolve(root, "overview.html"), "utf8");
   assert.ok(overview.includes(AGENT_START.prompt));
   for (const { label, action, detail } of OVERVIEW.firstRun) {
     assert.ok(overview.includes(`**${label}:** \`${action}\` — ${detail}`), `overview Markdown shows ${label}`);
   }
-  assert.ok(overview.includes("A server crash or reboot ends it"));
-  assert.ok(overview.includes("Sessions own resources. Arrangements place them. Views show them."));
+  for (const text of [OVERVIEW.continuity, OVERVIEW.model]) {
+    assert.ok(overview.includes(text), `overview Markdown: ${text}`);
+    assert.ok(htmlToMarkdown(html).includes(text), `visible overview: ${text}`);
+  }
+  assert.ok(html.includes('href="/concepts#what-survives-what"'), "continuity uses the live Concepts heading");
+  const concepts = await readFile(resolve(root, "concepts.html"), "utf8");
+  assert.ok(concepts.includes('id="what-survives-what"'), "continuity heading exists");
   assert.ok(overview.includes("[All documentation](/docs)"));
   assert.ok(overview.includes("[Docs MCP (read-only)]"));
-  const negotiated = htmlToMarkdown(await readFile(resolve(root, "overview.html"), "utf8"));
+  const negotiated = htmlToMarkdown(html);
   assert.ok(negotiated.includes(AGENT_START.prompt), "negotiated Markdown retains the handoff");
   assert.ok(negotiated.includes("[All documentation](/docs)"), "negotiated Markdown retains reference links");
+}
 
+async function verifyDiscovery() {
   const skills = JSON.parse(await readFile(resolve(root, ".well-known/agent-skills/index.json"), "utf8"));
   assert.deepEqual(skills.skills.map((skill: { name: string }) => skill.name), ["using-phux", "using-phux-mcp", "using-phux-tools"]);
   for (const skill of skills.skills) {
@@ -59,17 +77,34 @@ async function verifyPublishedContent() {
   }
   const catalog = JSON.parse(await readFile(resolve(root, ".well-known/ai-catalog.json"), "utf8"));
   const llms = await readFile(resolve(root, "llms.txt"), "utf8");
+  assert.ok(llms.includes("https://docs.phux.sh/agents.md"), "Markdown entrypoint is a published route");
   for (const skill of skills.skills) {
     assert.ok(catalog.entries.some((entry: { url: string }) => entry.url.endsWith(skill.url)));
     assert.ok(llms.includes(skill.name));
   }
   for (const match of llms.matchAll(/\]\((https:\/\/(?:docs\.)?phux\.sh[^)]+)\)/g)) {
     const path = new URL(match[1]!).pathname;
-    if (path === "/mcp") continue; // handled by the host, not a static page
+    if (path === "/mcp") continue;
     const response = await asset(new Request(`http://localhost${path}`));
     assert.ok(response.ok, `llms.txt link resolves: ${path}`);
   }
-  return index.pages.length;
+}
+
+async function verifyPublishedContent() {
+  const index = JSON.parse(await readFile(resolve(root, "api/mcp-search.json"), "utf8"));
+  const pages = index.pages as { url: string }[];
+  const sitemap = await readFile(resolve(root, "sitemap-0.xml"), "utf8");
+  for (const { url } of pages) await verifyPublishedPage(url, sitemap);
+  assert.ok(pages.every(({ url }) => !/^\/(?:adr|decisions)(?:\/|$)/.test(url)), "historical ADRs are not live search pages");
+  const clients = await readFile(resolve(root, "clients.md"), "utf8");
+  assert.ok(pages.some(({ url }) => url === "/organization"), "organization: published and MCP-indexed");
+  for (const slug of ["embedding", "desktop-capture", "desktop-changes", "desktop-panes"]) {
+    assert.ok(pages.some(({ url }) => url === `/${slug}`), `${slug}: published and MCP-indexed`);
+    assert.ok(clients.includes(`](/${slug}`), `${slug}: discoverable from Clients`);
+  }
+  await verifyOverview();
+  await verifyDiscovery();
+  return pages.length;
 }
 
 async function verifyPageCopy(page: Page, base: string, path: string) {
@@ -142,6 +177,13 @@ try {
     await page.evaluate(() => window.scrollTo(0, 0));
     await page.screenshot({ path: `${artifacts}/overview-${theme}.png`, fullPage: true });
   }
+  for (const slug of ["desktop-capture", "desktop-changes", "desktop-panes", "embedding"]) {
+    await page.goto(`${base}/clients`);
+    await page.locator(`main a[href="/${slug}"]`).first().click();
+    await page.waitForURL(`${base}/${slug}`);
+    assert.ok(await page.getByRole("heading", { level: 1 }).isVisible(), `${slug}: readable task page`);
+    await verifyPageCopy(page, base, `/${slug}`);
+  }
   await verifyPageCopy(page, base, "/agents");
   await verifyPageCopy(page, base, "/protocol");
   await page.route("**/protocol.md", (route) => route.fulfill({ status: 503, body: "unavailable" }));
@@ -162,6 +204,9 @@ try {
   assert.ok((await markdown.text()).includes(AGENT_START.prompt));
   await staticPage.getByRole("link", { name: "Open Markdown" }).click();
   await staticPage.waitForURL(`${base}/overview.md`, { timeout: 5000 });
+  await staticPage.goto(`${base}/embedding`);
+  assert.ok(await staticPage.getByRole("heading", { level: 1 }).isVisible(), "embedding is readable without JavaScript");
+  assert.equal(await staticPage.getByRole("link", { name: "Open Markdown" }).getAttribute("href"), "/embedding.md");
   await staticContext.close();
   console.log(`PASS docs (${useWebKit ? "WebKit, no pre-granted clipboard permissions" : "Chrome"}): ${count} Markdown pages, discovery links/digests, page and prompt copy, failure recovery, light/dark, 320/390/768/1280px, no-JS. Screenshots: ${artifacts}`);
 } finally {

@@ -66,6 +66,9 @@ jobs:
       - name: Check built links
         run: bun run check:links
 
+      - name: Verify documentation before publication
+        run: bun run verify:docs
+
       # infra/alchemy.run.ts declares the Worker. CI starts from empty state
       # and Alchemy re-adopts the live Worker by its alchemy:* tags.
       - name: Install infra dependencies
