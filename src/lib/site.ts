@@ -38,9 +38,9 @@ export const OVERVIEW = {
     { label: "Return", action: "phux", detail: "Same shell, same output." },
   ],
   paths: [
-    { href: "/agents", title: "Coding agents", text: "Connect your agent host and see what its agents are doing." },
-    { href: "/remote", title: "Remote machines", text: "Reach another machine's server with one command." },
-    { href: "/getting-started", title: "Getting started", text: "First session, keys, and the tmux differences." },
+    { href: "/consumers/getting-started", title: "Coding agents", text: "Choose an integration and verify it." },
+    { href: "/remote-access", title: "Remote access", text: "Connect hosts over SSH or QUIC." },
+    { href: "/concepts/coming-from", title: "From tmux", text: "Find familiar keys and concepts." },
   ],
 } as const;
 
@@ -67,8 +67,8 @@ export function docsHref(path: string): string {
 export const MARKETING_NAV = [
   { href: docsHref("/overview"), label: "Docs" },
   { href: "/demos", label: "Demos" },
-  { href: docsHref("/clients"), label: "Apps" },
-  { href: docsHref("/agents"), label: "Agents" },
+  { href: docsHref("/consumers"), label: "Apps" },
+  { href: docsHref("/consumers/getting-started"), label: "Agents" },
   { href: SITE.github, label: "GitHub", external: true },
 ] as const;
 

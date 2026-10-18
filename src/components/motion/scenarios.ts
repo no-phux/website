@@ -69,7 +69,7 @@ export const SCENARIOS: readonly Scenario[] = [
     title: "An agent works. You stay in the loop.",
     summary:
       "Automation and people reach the same terminal runtime through public interfaces.",
-    href: "/scripting",
+    href: "/consumers/agents",
     beats: [
       {
         title: "Give it a task",

@@ -356,7 +356,7 @@ try {
     reducedMotion: "reduce",
   });
   const phone = await mobile.newPage();
-  for (const path of ["/", "/getting-started"]) {
+  for (const path of ["/", "/quickstart"]) {
     await phone.goto(`${BASE}${path}`);
     report(
       `mobile ${path}: no horizontal overflow`,

@@ -142,9 +142,9 @@ try {
     await page.evaluate(() => window.scrollTo(0, 0));
     await page.screenshot({ path: `${artifacts}/overview-${theme}.png`, fullPage: true });
   }
-  await verifyPageCopy(page, base, "/agents");
-  await verifyPageCopy(page, base, "/protocol");
-  await page.route("**/protocol.md", (route) => route.fulfill({ status: 503, body: "unavailable" }));
+  await verifyPageCopy(page, base, "/consumers/getting-started");
+  await verifyPageCopy(page, base, "/wire/l1");
+  await page.route("**/wire/l1.md", (route) => route.fulfill({ status: 503, body: "unavailable" }));
   await page.getByRole("button", { name: "Copy page for agent" }).click();
   await page.locator("[data-page-actions] [role=status]").filter({ hasText: "Open Markdown" }).waitFor();
   assert.ok(await page.getByRole("button", { name: "Copy page for agent" }).isEnabled(), "failure allows retry");

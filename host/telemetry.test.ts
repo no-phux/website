@@ -73,7 +73,7 @@ describe("classifySignal", () => {
 describe("classifyRequest", () => {
   test("produces dimension events for a page view", () => {
     const request = Object.assign(
-      new Request("https://docs.phux.sh/protocol", {
+      new Request("https://docs.phux.sh/wire/proto", {
         headers: { "user-agent": "ClaudeBot/1.0" },
       }),
       { cf: { country: "DE" } },
@@ -109,7 +109,7 @@ describe("shouldSkipPath", () => {
 
   test("keeps pages and agent documents", () => {
     expect(shouldSkipPath("/")).toBe(false);
-    expect(shouldSkipPath("/protocol")).toBe(false);
+    expect(shouldSkipPath("/wire/proto")).toBe(false);
     expect(shouldSkipPath("/llms.txt")).toBe(false);
     expect(shouldSkipPath("/auth.md")).toBe(false);
     expect(shouldSkipPath("/.well-known/api-catalog")).toBe(false);
