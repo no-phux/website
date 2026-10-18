@@ -34,14 +34,25 @@ type ModelContextScope = {
 
 const DOC_PATHS: Record<string, string> = {
   overview: "/overview",
-  quickstart: "/quickstart/install",
+  install: "/installation",
+  installation: "/installation",
+  quickstart: "/getting-started",
+  "getting-started": "/getting-started",
   concepts: "/concepts",
-  consumers: "/consumers",
-  agents: "/consumers/agents",
-  "remote-access": "/remote-access",
-  wire: "/wire/proto",
+  config: "/config",
+  scripting: "/scripting",
+  agents: "/agents",
+  remote: "/remote",
+  "remote-access": "/remote",
+  clients: "/clients",
+  consumers: "/clients",
+  troubleshooting: "/troubleshooting",
+  reference: "/reference",
+  protocol: "/protocol",
+  wire: "/protocol",
   architecture: "/architecture",
-  decisions: "/decisions",
+  decisions: "/architecture",
+  development: "/development",
 };
 
 function installCommand(facts: SiteFacts, target: unknown): string {
