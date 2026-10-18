@@ -269,7 +269,7 @@ export default function HeroDemo({ wsUrl = "" }: { wsUrl?: string }) {
       <noscript>
         <p>
           <a href="/embed">Open the hosted shell</a> or{" "}
-          <a href={docsHref("/quickstart")}>start locally</a>.
+          <a href={docsHref("/getting-started")}>start locally</a>.
         </p>
       </noscript>
       <dialog

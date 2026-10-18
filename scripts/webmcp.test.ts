@@ -53,7 +53,7 @@ describe("site WebMCP registration", () => {
       command: "npx skills add no-phux/skills",
     });
     expect(await docs.execute({ topic: "Wire" })).toEqual({
-      url: "https://docs.phux.sh/wire/proto",
+      url: "https://docs.phux.sh/protocol",
     });
     expect(await release.execute({})).toEqual({
       tag: facts.releaseTag,

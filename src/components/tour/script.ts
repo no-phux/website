@@ -116,7 +116,7 @@ export const CHAPTERS: readonly Chapter[] = [
     label: "Agents",
     title: "Agents",
     text: "",
-    href: "/consumers/getting-started",
+    href: "/agents",
     seconds: 4.8,
     steps: [
       { at: 0, focus: "claude" },
@@ -168,7 +168,7 @@ export const CHAPTERS: readonly Chapter[] = [
     label: "Remote",
     title: "Remote",
     text: "",
-    href: "/remote-access",
+    href: "/remote",
     seconds: 4.2,
     steps: [
       { at: 0, log: "" },
