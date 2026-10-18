@@ -94,6 +94,7 @@ export default function LiveWorkspace({runtime}:{runtime:RuntimeControl}) {
   const [seen,setSeen] = useState(false);
   const [touch,setTouch] = useState(false);
   const [moment,setMoment] = useState<HookMoment>("idle");
+  const [landing,setLanding] = useState(0);
   const advance = (next:HookMoment) => setMoment(current=>advanceMoment(current,next));
   const hook = useRef<HTMLElement>(null), copy = useRef<HTMLButtonElement>(null);
   // Without hover there is no attention to follow: the topology stays unfolded.
@@ -169,13 +170,15 @@ export default function LiveWorkspace({runtime}:{runtime:RuntimeControl}) {
   // Closing a terminal the visitor actually drove is the moment to offer their own.
   const finish = (install=false) => {
     setSelected(null);advance("drove");
-    if(!install)return;
-    requestAnimationFrame(()=>{
-      const still=matchMedia("(prefers-reduced-motion: reduce)").matches;
-      hook.current?.scrollIntoView({block:"center",behavior:still?"auto":"smooth"});
-      copy.current?.focus({preventScroll:true});
-    });
+    if(install)setLanding(n=>n+1);
   };
+  // Runs after the dialog's close() has restored focus to its opener, so Copy keeps it.
+  useEffect(()=>{
+    if(!landing)return;
+    const still=matchMedia("(prefers-reduced-motion: reduce)").matches;
+    hook.current?.scrollIntoView({block:"center",behavior:still?"auto":"smooth"});
+    copy.current?.focus({preventScroll:true});
+  },[landing]);
   const move = (event:PointerEvent<HTMLElement>) => {
     const box = event.currentTarget.getBoundingClientRect(), x = (event.clientX-box.x)/box.width, y = (event.clientY-box.y)/box.height;
     Object.assign(pointer.current,{x:x*2-1,y:1-y*2,active:1});
