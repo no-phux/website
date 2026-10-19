@@ -7,9 +7,7 @@ import { canAutoGrow } from "./automation";
 import { useLiquidLayout } from "./useLiquidLayout";
 import { ParticleLinks } from "./ParticleLinks";
 import InstallHook from "./InstallHook";
-import { advanceMoment, installLink, type HookMoment } from "./install-hook";
-import type { LiquidRect } from "./living";
-import type { LightLink } from "./useLiquidLayout";
+import { advanceMoment, type HookMoment } from "./install-hook";
 import "./live.css";
 
 function PaneView({workspace,id,large=false}:{workspace:Workspace;id:string;large?:boolean}) {
@@ -27,31 +25,27 @@ function SessionStatus({state,retry}:{state:WorkspaceState;retry:()=>void}) {
   const closed=["closed","error"].includes(state.phase);
   return <div className={state.panes.length?"live-reconnect":"live-connection-state"} role="status"><span>{state.phase==="connecting"?"Connecting your workspace…":state.error||"Opening PHUX…"}</span>{closed&&<button onClick={retry}>Start a fresh workspace ↗</button>}</div>;
 }
-function PrimaryPane({workspace,state,open,retry}:LayoutProps) {
+function PrimaryPane({workspace,state,open,retry,children}:LayoutProps) {
   const primary=state.panes[0],closed=["closed","error"].includes(state.phase);
   return <article className="live-glass live-primary" data-pane-id={primary?.id}>
     <PrimaryTitle workspace={workspace} state={state}/>
+    <div className="live-pane-body">
     {primary?<button className="live-pane-preview" disabled={state.phase!=="live"||state.pending} aria-label={`Open ${workspace.label(primary.id)} live terminal`} onClick={event=>open(primary.id,event.currentTarget.closest<HTMLElement>(".live-glass")!)}><PaneView workspace={workspace} id={primary.id} large/><span className="live-enter">Enter terminal ↗</span></button>:<SessionStatus state={state} retry={retry}/>}
     {primary&&closed&&<SessionStatus state={state} retry={retry}/>}
-    <footer><span>{state.phase==="live"?"LIVE SESSION":state.phase.toUpperCase()}</span><span>{state.panes.length>1?`${state.panes.length} terminals · one connection`:""}</span></footer>
+    </div>
+    {children}
+    <footer><span>{state.phase.toUpperCase()}</span></footer>
   </article>;
 }
 function WorkspaceLayout(props:LayoutProps) {
   const {workspace,state,open}=props;
   return <div className="live-session-layout">
     <PrimaryPane {...props}/>
-    <div className="live-satellite-grid" data-count={state.panes.length-1} aria-label="Terminals in this workspace">{state.panes.slice(1).map(pane=><article className="live-glass live-secondary" data-pane-id={pane.id} key={pane.id}><header><span><i className="live-status-dot"/>{workspace.label(pane.id)}</span><small>SAME WORKSPACE</small></header><button className="live-pane-preview" disabled={state.phase!=="live"||state.pending} aria-label={`Open ${workspace.label(pane.id)} live terminal`} onClick={event=>open(pane.id,event.currentTarget.closest<HTMLElement>(".live-glass")!)}><PaneView workspace={workspace} id={pane.id}/><span className="live-enter">↗</span></button></article>)}</div>
-    {props.children}
+    <div className="live-satellite-grid" data-count={state.panes.length-1} aria-label="Terminals in this workspace">{state.panes.slice(1).map(pane=><article className="live-glass live-secondary" data-pane-id={pane.id} key={pane.id}><header><span><i className="live-status-dot"/>{workspace.label(pane.id)}</span></header><button className="live-pane-preview" disabled={state.phase!=="live"||state.pending} aria-label={`Open ${workspace.label(pane.id)} live terminal`} onClick={event=>open(pane.id,event.currentTarget.closest<HTMLElement>(".live-glass")!)}><PaneView workspace={workspace} id={pane.id}/><span className="live-enter">↗</span></button></article>)}</div>
   </div>;
 }
 
 type SelectedView = {id:string;origin:DOMRect};
-/** Layout position ignoring the living transforms, relative to the stage. */
-function restRect(node:HTMLElement,root:HTMLElement):LiquidRect {
-  let x=0,y=0,current:HTMLElement|null=node;
-  while(current&&current!==root){x+=current.offsetLeft;y+=current.offsetTop;current=current.offsetParent as HTMLElement|null;}
-  return {x,y,width:node.offsetWidth,height:node.offsetHeight};
-}
 function WorkspaceDialog({workspace,selected,close,pulse}:{workspace:Workspace;selected:SelectedView;close:(install?:boolean)=>void;pulse:()=>void}) {
   const state = useSyncExternalStore(workspace.subscribe,workspace.getSnapshot,workspace.getSnapshot);
   const dialog = useRef<HTMLDialogElement>(null), target = useRef<HTMLDivElement>(null);
@@ -92,7 +86,6 @@ export default function LiveWorkspace({runtime}:{runtime:RuntimeControl}) {
   const settings = useLiveScene(runtime.state), pointer = useRef({x:0,y:0,active:0});
   const [selected,setSelected] = useState<SelectedView|null>(null), [attempt,setAttempt] = useState(0);
   const [seen,setSeen] = useState(false);
-  const [touch,setTouch] = useState(false);
   const [moment,setMoment] = useState<HookMoment>("idle");
   const [landing,setLanding] = useState(0);
   const advance = (next:HookMoment) => setMoment(current=>advanceMoment(current,next));
@@ -106,35 +99,14 @@ export default function LiveWorkspace({runtime}:{runtime:RuntimeControl}) {
   const wake = useRef<ReturnType<typeof setTimeout>|undefined>(undefined);
   const {glass,links,pulse,engaged} = useLiquidLayout(stage,state.panes.map(p=>p.id).join("|"),selected!==null,pointer,state.parents,pinned);
   const signal = useRef(-10000);
-  const geometry = useRef<{panes:LiquidRect[];hook:LiquidRect|null}>({panes:[],hook:null});
   const momentRef = useRef(moment); momentRef.current = moment;
-  const glow = useRef(0);
-  // The particle stream gains one more path once attention arrives: from the terminals into the install line.
-  const streams = useMemo(()=>({get current():LightLink[] {
-    glow.current+=((momentRef.current==="idle"?0:1)-glow.current)*.06;
-    const {panes,hook:target}=geometry.current;
-    const visible=engaged.current||pinned.current?panes:panes.slice(0,1);
-    const extra=target?installLink(visible,target,glow.current):null;
-    return extra?[...links.current,extra]:links.current;
-  }}),[links,engaged]);
   useEffect(()=>{
-    setTouch(matchMedia("(hover: none)").matches);
     // Without hover, or stacked, the terminals are the first thing in view: that already counts as attention.
     const media=matchMedia("(hover: none), (max-width: 999px)");
     const sync=()=>{stacked.current=media.matches;};
     sync();media.addEventListener("change",sync);
     return()=>media.removeEventListener("change",sync);
   },[]);
-  useLayoutEffect(()=>{
-    const root=stage.current;if(!root)return;
-    const measure=()=>{
-      const panes=Array.from(root.querySelectorAll<HTMLElement>(".live-glass")).map(node=>restRect(node,root));
-      geometry.current={panes,hook:hook.current?restRect(hook.current,root):null};
-    };
-    measure();
-    const observer=new ResizeObserver(measure);observer.observe(root);if(hook.current)observer.observe(hook.current);
-    return()=>observer.disconnect();
-  },[state.panes.length,selected]);
   useEffect(()=>{
     if(state.phase!=="live"||state.panes.length<2)return;
     pinned.current=true;
@@ -201,11 +173,10 @@ export default function LiveWorkspace({runtime}:{runtime:RuntimeControl}) {
   };
   return <section ref={stage} data-phase={state.phase} className={`vibe-stage live-session-stage ${seen?"has-attention":""} ${selected?"has-terminal-open":""}`} aria-label="Live PHUX session workspace" onPointerMove={move} onPointerLeave={()=>{pointer.current.active=0;clearTimeout(grow.current);grow.current=undefined;}}>
     <div className="vibe-universe"><Scene variant={1} settings={settings} ambient input={pointer} glass={glass}/></div><div className="vibe-shade"/>
-    {!selected&&<ParticleLinks links={streams} signal={signal}/>}
+    {!selected&&<ParticleLinks links={links} signal={signal}/>}
     <WorkspaceLayout workspace={workspace} state={state} open={open} retry={()=>setAttempt(a=>a+1)}>
-      <InstallHook moment={moment} live={state.phase==="live"||state.phase==="connecting"} onCopy={()=>advance("copied")} hookRef={hook} copyRef={copy}/>
+      <InstallHook moment={moment} onCopy={()=>advance("copied")} hookRef={hook} copyRef={copy}/>
     </WorkspaceLayout>
-    <p className="live-session-hint">{touch?"Tap a terminal. It’s yours.":"Open a terminal. It’s yours."}</p>
     <div className="live-source-home" ref={home}/>
     {selected&&<WorkspaceDialog workspace={workspace} selected={selected} close={finish} pulse={pulse}/>}
   </section>;
