@@ -26,7 +26,8 @@ async function verifyWorkspaceLayout(hero: FrameLocator, width: number) {
     const stage = root.getBoundingClientRect();
     const panes = [...root.querySelectorAll(".live-glass")].map(node => {
       const box = node.getBoundingClientRect();
-      return { left: box.left, right: box.right, top: box.top, bottom: box.bottom, height: box.height };
+      const controlsHeight = node.querySelector(".install-hook")?.getBoundingClientRect().height ?? 0;
+      return { left: box.left, right: box.right, top: box.top, bottom: box.bottom, height: box.height, controlsHeight };
     });
     const satellites = root.querySelector(".live-satellite-grid")!;
     return { panes, emptySatellites: satellites.childElementCount === 0, satelliteDisplay: getComputedStyle(satellites).display, stageHeight: stage.height, viewportHeight: innerHeight, viewportWidth: innerWidth };
@@ -36,14 +37,14 @@ async function verifyWorkspaceLayout(hero: FrameLocator, width: number) {
   for (const pane of layout.panes) {
     assert.ok(pane.left >= -1 && pane.right <= layout.viewportWidth + 1, `terminal fits horizontally at ${width}`);
     assert.ok(pane.top >= -1 && pane.bottom <= layout.stageHeight + 1, `terminal fits vertically at ${width}`);
-    assert.ok(pane.height <= 230, `terminal chrome stays compact at ${width}`);
+    assert.ok(pane.height <= 230 + pane.controlsHeight, `terminal chrome stays compact around its inline controls at ${width}`);
   }
 }
 
 try {
   await mkdir(artifacts, { recursive: true });
   for (const width of [320, 390, 768, 1440]) {
-    const context = await browser.newContext({ viewport: { width, height: 900 }, isMobile: width < 600, hasTouch: width < 600, reducedMotion: "reduce" });
+    const context = await browser.newContext({ viewport: { width, height: 900 }, isMobile: width < 600, hasTouch: width < 600, reducedMotion: "reduce", permissions: ["clipboard-read", "clipboard-write"] });
     // Serve the local build under the public browser origin, which the real
     // demo WebSocket requires. This never serves or modifies production assets.
     await context.route("https://phux.sh/**", async route => {
@@ -59,10 +60,22 @@ try {
     await page.goto("https://phux.sh/");
     const hero = page.frameLocator("#home-light iframe");
     await hero.locator(".install-hook").waitFor();
+    assert.equal(await hero.locator(".install-hook-lede, .install-hook-proof, .live-session-hint").count(), 0, "no marketing prose around the controls");
+    assert.equal(await hero.locator(".live-primary > .install-hook").count(), 1, "install controls belong to the terminal frame");
+    assert.equal(await hero.locator(".live-session-layout > .install-hook").count(), 0, "no external CTA block");
+    assert.equal(await hero.locator(".live-pane-body .install-hook").count(), 0, "terminal connection overlays cannot cover the install controls");
     if (process.env.HERO_LIVE === "1") await hero.locator('.live-session-stage[data-phase="live"] .live-secondary canvas[data-renderer]').first().waitFor({ timeout: 45_000 });
     await verifyWorkspaceLayout(hero, width);
     await hero.locator(".install-hook").screenshot({ path: `${artifacts}install-${baseline ? "before" : "after"}-${width}.png` });
     await page.screenshot({ path: `${artifacts}hero-${baseline ? "before" : "after"}-${width}.png`, fullPage: true });
+    assert.ok(await hero.getByRole("region", { name: "Install phux", exact: true }).isVisible(), "install controls keep an accessible name without a heading");
+    await hero.getByRole("button", { name: "Desktop", exact: true }).click();
+    await hero.getByRole("button", { name: "Copy the Desktop install command", exact: true }).click();
+    await hero.getByRole("status").filter({ hasText: "Copied." }).waitFor();
+    assert.equal(await page.evaluate(() => navigator.clipboard.readText()), "curl -fsSL https://phux.sh/install-desktop | sh");
+    assert.equal(await hero.locator(".install-hook-status").innerText(), "Copied.", "copy feedback stays concise");
+    await hero.getByRole("button", { name: "CLI", exact: true }).click();
+    assert.equal(await hero.locator(".install-hook-line code").innerText(), "curl -fsSL https://phux.sh/install | sh");
     await hero.getByRole("button", { name: "iPhone", exact: true }).click();
     const input = hero.getByRole("textbox", { name: "Email address for the TestFlight invite" });
     const geometry = await input.evaluate(node => {
@@ -83,6 +96,8 @@ try {
       await hero.getByRole("button", { name: "Request access", exact: true }).click();
       await hero.getByRole("status").filter({ hasText: "Invite sent" }).waitFor();
       assert.equal(submitted, "layout@example.com", "signup still posts the entered address");
+      assert.ok(await input.evaluate(node => Boolean(node.closest(".live-primary"))), "email entry is inside the terminal");
+      assert.equal(await hero.locator(".live-terminal-dialog[open]").count(), 0, "copy/signup do not open or type into the terminal");
       await verifyWorkspaceLayout(hero, width);
     }
     if (process.env.HERO_LIVE === "1") {
