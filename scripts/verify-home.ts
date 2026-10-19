@@ -153,7 +153,7 @@ try {
   assert.equal(await page.locator("dialog[open]").count(), 0);
   assert.ok(await page.getByRole("link", { name: "Open demo", exact: true }).evaluate((link) => link === document.activeElement), "closing restores focus");
   await page.goto(`${base}/more`);
-  assert.equal(await page.getByRole("link", { name: /Built for automation/ }).getAttribute("href"), "https://docs.phux.sh/consumers/getting-started");
+  assert.equal(await page.getByRole("link", { name: /Built for automation/ }).getAttribute("href"), "https://docs.phux.sh/agents");
   assert.ok(await page.locator("#testflight form").isVisible(), "iPhone signup is preserved");
   await page.locator("#testflight input[name=email]").fill("more@example.com");
   await page.locator("#testflight button[type=submit]").click();
@@ -171,6 +171,10 @@ try {
   const live = page.frameLocator("#home-light iframe");
   const hookLine = live.locator(".install-hook-line code");
   await hookLine.waitFor();
+  const stillness = async () => [await live.locator(".install-hook").evaluate((node) => Math.round(node.getBoundingClientRect().top)), await page.locator("#home-light").evaluate((node) => Math.round(node.getBoundingClientRect().height))];
+  const settled = await stillness();
+  await page.waitForTimeout(1500);
+  assert.deepEqual(await stillness(), settled, "the live hero and its install hook hold still while the session connects");
   assert.equal(await hookLine.innerText(), "curl -fsSL https://phux.sh/install | sh", "the live hero leads with the CLI install");
   await live.locator(".install-hook-copy").click();
   assert.equal(await page.evaluate(() => navigator.clipboard.readText()), "curl -fsSL https://phux.sh/install | sh", "the hook copies from inside the frame");

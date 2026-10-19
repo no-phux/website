@@ -97,8 +97,9 @@ export default function LiveWorkspace({runtime}:{runtime:RuntimeControl}) {
   const [landing,setLanding] = useState(0);
   const advance = (next:HookMoment) => setMoment(current=>advanceMoment(current,next));
   const hook = useRef<HTMLElement>(null), copy = useRef<HTMLButtonElement>(null);
-  // Without hover there is no attention to follow: the topology stays unfolded.
+  // The topology buds once when the session goes live, then stays unfolded: nothing folds away under a reaching pointer.
   const pinned = useRef(false);
+  const stacked = useRef(false);
   const interacted = useRef(false);
   const branched = useRef(false), seeded = useRef(new Set<string>());
   const grow = useRef<ReturnType<typeof setTimeout>|undefined>(undefined);
@@ -118,11 +119,11 @@ export default function LiveWorkspace({runtime}:{runtime:RuntimeControl}) {
   }}),[links,engaged]);
   useEffect(()=>{
     setTouch(matchMedia("(hover: none)").matches);
-    // A stacked layout reserves the daughters' slots; folded, they would leave a hole.
-    const pin=matchMedia("(hover: none), (max-width: 999px)");
-    const sync=()=>{pinned.current=pin.matches;};
-    sync();pin.addEventListener("change",sync);
-    return()=>pin.removeEventListener("change",sync);
+    // Without hover, or stacked, the terminals are the first thing in view: that already counts as attention.
+    const media=matchMedia("(hover: none), (max-width: 999px)");
+    const sync=()=>{stacked.current=media.matches;};
+    sync();media.addEventListener("change",sync);
+    return()=>media.removeEventListener("change",sync);
   },[]);
   useLayoutEffect(()=>{
     const root=stage.current;if(!root)return;
@@ -134,7 +135,11 @@ export default function LiveWorkspace({runtime}:{runtime:RuntimeControl}) {
     const observer=new ResizeObserver(measure);observer.observe(root);if(hook.current)observer.observe(hook.current);
     return()=>observer.disconnect();
   },[state.panes.length,selected]);
-  useEffect(()=>{if(pinned.current&&state.phase==="live"&&state.panes.length>1)advance("engaged");},[state.phase,state.panes.length]);
+  useEffect(()=>{
+    if(state.phase!=="live"||state.panes.length<2)return;
+    pinned.current=true;
+    if(stacked.current)advance("engaged");
+  },[state.phase,state.panes.length]);
   useEffect(()=>{
     clearTimeout(grow.current);grow.current=undefined;
     interacted.current=false; branched.current=false; seeded.current.clear();
@@ -200,7 +205,7 @@ export default function LiveWorkspace({runtime}:{runtime:RuntimeControl}) {
     <WorkspaceLayout workspace={workspace} state={state} open={open} retry={()=>setAttempt(a=>a+1)}>
       <InstallHook moment={moment} live={state.phase==="live"||state.phase==="connecting"} onCopy={()=>advance("copied")} hookRef={hook} copyRef={copy}/>
     </WorkspaceLayout>
-    <p className="live-session-hint">{touch?"Tap a terminal. It’s yours.":seen?"Open a terminal. It’s yours.":"Move through it."}</p>
+    <p className="live-session-hint">{touch?"Tap a terminal. It’s yours.":"Open a terminal. It’s yours."}</p>
     <div className="live-source-home" ref={home}/>
     {selected&&<WorkspaceDialog workspace={workspace} selected={selected} close={finish} pulse={pulse}/>}
   </section>;
