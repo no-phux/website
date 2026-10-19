@@ -168,7 +168,7 @@ const projectLinks = [
   // The dock keeps its fixed width and reserves its stage height, so a swap
   // moves nothing. Only the target underline travels (transform), and the
   // command settles with opacity and a short translate. The Mobile target has
-  // no command: it swaps the command line for the TestFlight request form. No
+  // no command: it swaps the command line for the beta request form. No
   // clip or backdrop animation: both are what made the first pass stutter.
   const install = document.querySelector<HTMLElement>("[data-install]");
   const code = install?.querySelector<HTMLElement>("#install-command");
@@ -266,7 +266,7 @@ const projectLinks = [
   .install-tabs button { position: relative; z-index: 1; flex: 1 1 0; min-width: 76px; min-height: 34px; padding: 0 10px; border: 0; border-radius: 0; background: transparent; color: var(--color-dim); font: inherit; font-size: 12.5px; letter-spacing: 0.01em; cursor: pointer; transition: color 240ms ease; }
   .install-tabs button:hover, .install-tabs button:focus-visible, .install-tabs button[aria-pressed="true"] { color: var(--color-fg); }
   .install-rule { display: block; height: 1px; margin-top: 16px; background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.09) 20%, rgba(255, 255, 255, 0.09) 80%, transparent); }
-  /* Stage: the command line and the TestFlight request share one slot and one
+  /* Stage: the command line, download, and beta request share one slot and one
      reserved height, so switching targets never resizes the dock. */
   .install-stage { display: grid; align-items: center; min-height: 62px; }
   /* Symmetric gutters put the command on the dock's center line with the copy
