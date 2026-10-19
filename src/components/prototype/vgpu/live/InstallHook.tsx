@@ -9,7 +9,7 @@ const canShare = () => typeof navigator!=="undefined" && typeof navigator.share=
 const desktopVersion = release.desktop.tag?.replace(/^desktop-v/,"");
 
 function BetaRequest({phone,onSwitch}:{phone:Phone;onSwitch:()=>void}) {
-  const form=useRef<HTMLFormElement>(null),note=useRef<HTMLParagraphElement>(null);
+  const form=useRef<HTMLFormElement>(null),note=useRef<HTMLSpanElement>(null);
   useEffect(()=>wireBetaRequest(form.current,note.current),[]);
   const copy=phones[phone];
   return <>
