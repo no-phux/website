@@ -37,7 +37,7 @@ export function ParticleLinks({links,signal}:{links:MutableRefObject<LightLink[]
   useEffect(()=>{
     const element=canvas.current!,ctx=element.getContext("2d",{alpha:true});
     if(!ctx)return;
-    let width=0,height=0,visible=true,raf=0,last=0,dirty=true,blank=false;
+    let width=0,height=0,visible=true,raf=0,last=0,dirty=true,blank=false,anchors="";
     const reduced=matchMedia("(prefers-reduced-motion: reduce)");
     const invalidate=()=>{dirty=true;};
     const resize=new ResizeObserver(invalidate);resize.observe(element);
@@ -51,9 +51,12 @@ export function ParticleLinks({links,signal}:{links:MutableRefObject<LightLink[]
     };
     const render=(now:number)=>{
       raf=requestAnimationFrame(render);
-      if(document.hidden||!visible||now-last<1000/30)return;
+      if(document.hidden||!visible)return;
       if(reduced.matches&&!dirty)return;
       const current=links.current;
+      // Dust drifts at 30fps, but follows moving glass every frame so it never trails behind it.
+      const moved=anchors!==(anchors=current.map(([a,,,d])=>`${a.x|0},${a.y|0},${d.x|0},${d.y|0}`).join(" "));
+      if(!moved&&now-last<1000/30)return;
       // Nothing to carry: clear once, then stop touching the canvas.
       if(!dirty&&blank&&current.length===0)return;
       last=now;if(dirty)fit();

@@ -170,8 +170,8 @@ export class LiveWorkspace {
     // A living pane scales visually; its projection keeps a sharp, stable backing store.
     const box = {width:view.canvas.clientWidth,height:view.canvas.clientHeight};
     if (!box.width || !box.height) return;
-    const rows = Math.min(view.rows,Math.max(3,Math.floor(box.height/16)));
-    const crop = paneCrop(this.frame,pane,this.canvas.width,this.canvas.height,rows,Math.max(20,Math.floor(box.width/8)));
+    const rows = Math.min(view.rows,Math.max(3,Math.floor(box.height/18)));
+    const crop = paneCrop(this.frame,pane,this.canvas.width,this.canvas.height,rows,Math.max(22,Math.floor(box.width/9)));
     const dpr = Math.min(2,window.devicePixelRatio || 1);
     const width = Math.ceil(box.width*dpr), height = Math.ceil(box.height*dpr);
     if (view.canvas.width!==width) view.canvas.width=width;

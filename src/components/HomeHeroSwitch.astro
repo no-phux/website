@@ -41,7 +41,14 @@
       history.replaceState(history.state,"",url);
     });
     window.addEventListener("popstate",()=>show(homeHero(location.search,document.documentElement.dataset.nativeAuthResult)));
-    window.addEventListener("resize",()=>frame?.contentWindow?.postMessage({type:"phux:hero-viewport"},location.origin));
+    let width=innerWidth;
+    window.addEventListener("resize",()=>{
+      if(!frame)return;
+      // The frame fills at least its own viewport and only grows, so a new width starts again from the default
+      // height. Height-only resizes (a mobile URL bar) keep it.
+      if(innerWidth!==width){width=innerWidth;light.style.removeProperty("height");void light.offsetHeight;}
+      frame.contentWindow?.postMessage({type:"phux:hero-viewport"},location.origin);
+    });
     window.addEventListener("message",event=>{
       if(!frame||event.origin!==location.origin||event.source!==frame.contentWindow)return;
       if(event.data?.type!=="phux:hero-height"||!Number.isFinite(event.data.height))return;
@@ -56,7 +63,7 @@
 <style>
   .home-light{position:relative;height:max(700px,calc(100svh - 108px));background:#080e14}
   .home-light :global(iframe){display:block;width:100%;height:100%;border:0}
-  .hero-view-options{width:min(calc(100% - 48px),1072px);margin:0 auto;min-height:44px;display:flex;justify-content:flex-end;align-items:center;color:#7e8b94;font-size:10px}
+  .hero-view-options{width:min(calc(100% - 48px),1072px);margin:0 auto;min-height:44px;display:flex;justify-content:flex-end;align-items:center;color:#8d9aa3;font-size:12px}
   .hero-view-options button{min-height:44px;padding:0 6px;border:0;background:none;color:inherit;font:inherit;cursor:pointer}
   .hero-view-options button[hidden]{display:none}
   .hero-view-options button:hover{color:#d3e2e8}
