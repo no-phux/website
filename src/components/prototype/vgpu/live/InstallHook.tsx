@@ -13,8 +13,8 @@ function TestFlightRequest() {
   const form=useRef<HTMLFormElement>(null),note=useRef<HTMLParagraphElement>(null);
   useEffect(()=>wireBetaRequest(form.current,note.current),[]);
   return <>
-    <form ref={form} className="install-hook-request">
-      <input type="email" name="email" required autoComplete="email" placeholder="Apple Account email" aria-label="Email address for the TestFlight invite"/>
+    <form ref={form} className="install-hook-line install-hook-request">
+      <input type="email" name="email" required autoComplete="email" autoCapitalize="none" spellCheck={false} placeholder="Apple Account email" aria-label="Email address for the TestFlight invite"/>
       <input className="install-hook-trap" type="text" name="website" tabIndex={-1} autoComplete="off" aria-hidden="true"/>
       <button type="submit">Request access</button>
     </form>

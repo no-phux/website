@@ -69,6 +69,9 @@ jobs:
       - name: Verify documentation before publication
         run: bun run verify:docs
 
+      - name: Verify responsive live hero before publication
+        run: bun run verify:live-layout
+
       # infra/alchemy.run.ts declares the Worker. CI starts from empty state
       # and Alchemy re-adopts the live Worker by its alchemy:* tags.
       - name: Install infra dependencies

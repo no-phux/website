@@ -1,0 +1,105 @@
+#!/usr/bin/env bun
+/** Responsive hero acceptance; beta writes are always answered locally. */
+import assert from "node:assert/strict";
+import { mkdir } from "node:fs/promises";
+import { extname, resolve } from "node:path";
+import { chromium, type FrameLocator } from "playwright-core";
+
+const root = resolve(import.meta.dir, "../dist");
+const server = Bun.serve({ hostname: "127.0.0.1", port: 0, async fetch(request) {
+  const url = new URL(request.url);
+  let path = resolve(root, `.${url.pathname}`);
+  if (!path.startsWith(`${root}/`) && path !== root) return new Response(null, { status: 403 });
+  if (url.pathname === "/") path = resolve(root, "index.html");
+  if (!extname(path)) path += ".html";
+  const file = Bun.file(path);
+  return await file.exists() ? new Response(file) : new Response(null, { status: 404 });
+} });
+const base = process.env.HERO_URL ?? `http://127.0.0.1:${server.port}`;
+const baseline = process.env.GEOMETRY_BASELINE === "1";
+const artifacts = new URL("../.home-check/", import.meta.url).pathname;
+const browser = await chromium.launch({ channel: "chrome", headless: true });
+async function verifyWorkspaceLayout(hero: FrameLocator, width: number) {
+  const layout = await hero.locator(".live-session-stage").evaluate(async root => {
+    await new Promise(requestAnimationFrame);
+    await new Promise(requestAnimationFrame);
+    const stage = root.getBoundingClientRect();
+    const panes = [...root.querySelectorAll(".live-glass")].map(node => {
+      const box = node.getBoundingClientRect();
+      return { left: box.left, right: box.right, top: box.top, bottom: box.bottom, height: box.height };
+    });
+    const satellites = root.querySelector(".live-satellite-grid")!;
+    return { panes, emptySatellites: satellites.childElementCount === 0, satelliteDisplay: getComputedStyle(satellites).display, stageHeight: stage.height, viewportHeight: innerHeight, viewportWidth: innerWidth };
+  });
+  assert.ok(layout.stageHeight <= layout.viewportHeight + 1, `iframe contains the full workspace at ${width}`);
+  if (layout.emptySatellites) assert.equal(layout.satelliteDisplay, "none", "unallocated terminals do not reserve a blank row");
+  for (const pane of layout.panes) {
+    assert.ok(pane.left >= -1 && pane.right <= layout.viewportWidth + 1, `terminal fits horizontally at ${width}`);
+    assert.ok(pane.top >= -1 && pane.bottom <= layout.stageHeight + 1, `terminal fits vertically at ${width}`);
+    assert.ok(pane.height <= 230, `terminal chrome stays compact at ${width}`);
+  }
+}
+
+try {
+  await mkdir(artifacts, { recursive: true });
+  for (const width of [320, 390, 768, 1440]) {
+    const context = await browser.newContext({ viewport: { width, height: 900 }, isMobile: width < 600, hasTouch: width < 600, reducedMotion: "reduce" });
+    // Serve the local build under the public browser origin, which the real
+    // demo WebSocket requires. This never serves or modifies production assets.
+    await context.route("https://phux.sh/**", async route => {
+      const url = new URL(route.request().url());
+      await route.fulfill({ response: await route.fetch({ url: `${base}${url.pathname}${url.search}` }) });
+    });
+    const page = await context.newPage();
+    let submitted = "";
+    await page.route("**/api/beta", route => {
+      submitted = route.request().postDataJSON().email;
+      return route.fulfill({ json: { ok: true, status: "invited" } });
+    });
+    await page.goto("https://phux.sh/");
+    const hero = page.frameLocator("#home-light iframe");
+    await hero.locator(".install-hook").waitFor();
+    if (process.env.HERO_LIVE === "1") await hero.locator('.live-session-stage[data-phase="live"] .live-secondary canvas[data-renderer]').first().waitFor({ timeout: 45_000 });
+    await verifyWorkspaceLayout(hero, width);
+    await hero.locator(".install-hook").screenshot({ path: `${artifacts}install-${baseline ? "before" : "after"}-${width}.png` });
+    await page.screenshot({ path: `${artifacts}hero-${baseline ? "before" : "after"}-${width}.png`, fullPage: true });
+    await hero.getByRole("button", { name: "iPhone", exact: true }).click();
+    const input = hero.getByRole("textbox", { name: "Email address for the TestFlight invite" });
+    const geometry = await input.evaluate(node => {
+      const box = node.getBoundingClientRect(), style = getComputedStyle(node);
+      const form = node.closest("form")!.getBoundingClientRect();
+      return { height: box.height, width: box.width, font: style.fontSize, appearance: style.appearance, formHeight: form.height, overflow: document.documentElement.scrollWidth > innerWidth };
+    });
+    await page.screenshot({ path: `${artifacts}iphone-${baseline ? "before" : "after"}-${width}.png`, fullPage: true });
+    console.log(JSON.stringify({ viewport: width, ...geometry }));
+    if (!baseline) {
+      assert.equal(geometry.overflow, false, `no frame overflow at ${width}`);
+      assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false, `no page overflow at ${width}`);
+      assert.ok(geometry.height >= 44 && geometry.height <= 52, `compact accessible email height at ${width}`);
+      assert.ok(geometry.formHeight <= 64, `signup uses one compact shared surface at ${width}`);
+      assert.equal(geometry.appearance, "none", "email controls do not use the platform's native inset style");
+      assert.ok(parseFloat(geometry.font) >= 16, "email entry does not trigger iPhone focus zoom");
+      await input.fill("layout@example.com");
+      await hero.getByRole("button", { name: "Request access", exact: true }).click();
+      await hero.getByRole("status").filter({ hasText: "Invite sent" }).waitFor();
+      assert.equal(submitted, "layout@example.com", "signup still posts the entered address");
+      await verifyWorkspaceLayout(hero, width);
+    }
+    if (process.env.HERO_LIVE === "1") {
+      await hero.locator(".live-primary .live-pane-preview").click();
+      const dialog = hero.getByRole("dialog", { name: "Live PHUX workspace" });
+      await dialog.getByRole("button", { name: "Split terminal ＋", exact: true }).click();
+      await dialog.locator(".live-pane-tabs button").nth(2).waitFor();
+      await dialog.getByRole("button", { name: "Split terminal ＋", exact: true }).click();
+      await dialog.locator(".live-pane-tabs button").nth(3).waitFor();
+      await dialog.getByRole("button", { name: "Close terminal view" }).click();
+      await hero.locator(".live-satellite-grid[data-count='3']").waitFor();
+      await verifyWorkspaceLayout(hero, width);
+      await page.screenshot({ path: `${artifacts}four-terminals-${width}.png`, fullPage: true });
+    }
+    await context.close();
+  }
+} finally {
+  await browser.close();
+  server.stop(true);
+}
