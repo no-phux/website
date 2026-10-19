@@ -71,6 +71,7 @@ try {
     assert.ok(await hero.getByRole("region", { name: "Install phux", exact: true }).isVisible(), "install controls keep an accessible name without a heading");
     await hero.getByRole("button", { name: "Desktop", exact: true }).click();
     await hero.getByRole("button", { name: "Copy the Desktop install command", exact: true }).click();
+    await hero.getByRole("status").filter({ hasText: "Copied." }).waitFor();
     assert.equal(await page.evaluate(() => navigator.clipboard.readText()), "curl -fsSL https://phux.sh/install-desktop | sh");
     assert.equal(await hero.locator(".install-hook-status").innerText(), "Copied.", "copy feedback stays concise");
     await hero.getByRole("button", { name: "CLI", exact: true }).click();
