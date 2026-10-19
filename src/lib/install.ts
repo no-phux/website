@@ -21,17 +21,8 @@ export const installTargets: InstallTarget[] = [
   { id: "mobile", label: "Mobile", command: "", note: "Beta: TestFlight on iPhone, Google Play testing on Android." },
 ];
 
-/**
- * The stable Apple-silicon Desktop archive for a `desktop-vX.Y.Z` tag, named
- * the way phux's release model names it; the releases page when the build
- * stamped no Desktop release.
- */
-export function desktopDownload(tag: string | null | undefined): string {
-  const version = /^desktop-v(\d+\.\d+\.\d+)$/.exec(tag ?? "")?.[1];
-  return version
-    ? `${SITE.github}/releases/download/${tag}/phux-desktop-${version}-macos-arm64.zip`
-    : `${SITE.github}/releases`;
-}
+/** The stable Apple-silicon Desktop archive; the site worker resolves it per click (host/download.ts). */
+export const desktopDownload = "/download/desktop";
 
 /** Desktop releases are ad-hoc signed, not notarized, so a browser download meets Gatekeeper once. */
 export const desktopFirstOpen = "First open: System Settings → Privacy & Security → Open Anyway.";

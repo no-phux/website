@@ -105,7 +105,7 @@ try {
   await target("desktop").hover();
   assert.ok(await download.isVisible(), "hover swaps to the desktop download");
   assert.equal(await command.isHidden(), true, "Desktop leads with the download, not a command");
-  assert.match((await download.getAttribute("href")) ?? "", /\/releases\/download\/desktop-v\d+\.\d+\.\d+\/phux-desktop-\d+\.\d+\.\d+-macos-arm64\.zip$/, "the download is the stable Mac archive");
+  assert.equal(await download.getAttribute("href"), "/download/desktop", "the download is the worker's stable Mac archive redirect");
   await target("mobile").click();
   assert.equal(await target("mobile").getAttribute("aria-pressed"), "true", "the clicked target is pressed");
   assert.ok(await request.isVisible(), "Mobile asks for an address instead of printing a command");

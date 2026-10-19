@@ -5,7 +5,8 @@
  * belongs on. See host/routes.ts for the split. It also negotiates markdown
  * for agents (host/markdown.ts), hosts the read-only MCP endpoint
  * (host/mcp.ts), records passive aggregate telemetry (host/telemetry.ts),
- * serves the public telemetry dashboard API at /api/telemetry, and springs
+ * serves the public telemetry dashboard API at /api/telemetry, redirects
+ * /download/desktop to the stable Desktop archive (host/download.ts), and springs
  * tripwire traps on hostile-bait paths (host/tripwire-paths.ts →
  * host/tripwire.ts).
  */
@@ -89,6 +90,14 @@ export default {
       }
     }
 
+    // The Desktop download button: the stable Mac archive, resolved per click.
+    if (url.pathname === "/download/desktop") {
+      const { desktopDownload } = await import("./download");
+      const response = await desktopDownload();
+      recordEvents(env.TELEMETRY, ctx, classifyRequest(request, response));
+      observe(env, ctx, request, response);
+      return response;
+    }
     // Public telemetry aggregates (the /telemetry page reads this).
     if (url.pathname === "/api/telemetry") {
       return telemetryApi(request, env);

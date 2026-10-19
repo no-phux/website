@@ -14,8 +14,6 @@ import release from "../lib/release.json";
 // command, which swaps the command line for the beta request form. Notes stay one line at desktop width; the dock reserves the row heights
 // so a swap never resizes it and never slides a target out from the pointer.
 const installs = installTargets;
-const desktopHref = desktopDownload(release.desktop.tag);
-const desktopVersion = release.desktop.tag?.replace(/^desktop-v/, "");
 // Build-time snapshot; site-deploy.yml rebuilds on every published release.
 const day = new Intl.DateTimeFormat("en", { month: "short", day: "numeric", timeZone: "UTC" });
 type ReleaseSnapshot = { tag: string | null; url: string | null; publishedAt: string | null };
@@ -64,7 +62,7 @@ const projectLinks = [
               <span class="install-prompt" aria-hidden="true">$</span>
               <code id="install-command">{cliInstall}</code>
             </span>
-            <a class="install-download" id="install-download" href={desktopHref} hidden>Download Phux{desktopVersion && ` ${desktopVersion}`} for Mac ↓</a>
+            <a class="install-download" id="install-download" href={desktopDownload} hidden>Download Phux for Mac ↓</a>
             <button type="button" class="install-copy" data-copy={cliInstall} aria-label="Copy install command">Copy</button>
           </div>
           <form class="install-request" id="beta-form" hidden>

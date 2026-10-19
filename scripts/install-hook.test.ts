@@ -1,17 +1,13 @@
 import { expect, test } from "bun:test";
 import { advanceMoment } from "../src/components/prototype/vgpu/live/install-hook";
 import { detectPhone, requestedNote } from "../src/lib/beta";
-import { cliInstall, desktopDownload, desktopInstall, dryRun, installTargets } from "../src/lib/install";
+import { cliInstall, desktopInstall, dryRun, installTargets } from "../src/lib/install";
 
 test("the dry run is the same installer told to install nothing",()=>{
   expect(dryRun(cliInstall)).toBe("curl -fsSL https://phux.sh/install | sh -s -- --dry-run");
   expect(dryRun(desktopInstall)).toBe("curl -fsSL https://phux.sh/install-desktop | sh -s -- --dry-run");
   expect(dryRun("")).toBe("");
   expect(installTargets.map(t=>t.id)).toEqual(["cli","desktop","mobile"]);
-});
-test("the Desktop download is the stable Mac archive phux's release model names",()=>{
-  expect(desktopDownload("desktop-v0.40.0")).toBe("https://github.com/no-phux/phux/releases/download/desktop-v0.40.0/phux-desktop-0.40.0-macos-arm64.zip");
-  for (const tag of [null,undefined,"","v0.108.1","desktop-v1.2"]) expect(desktopDownload(tag)).toBe("https://github.com/no-phux/phux/releases");
 });
 test("the visitor's phone is detected, and a computer has none",()=>{
   expect(detectPhone({userAgent:"Mozilla/5.0 (Linux; Android 15; Pixel 9) AppleWebKit/537.36 Chrome/141 Mobile Safari/537.36"})).toBe("android");

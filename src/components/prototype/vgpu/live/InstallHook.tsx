@@ -1,12 +1,10 @@
 import { useEffect, useRef, useState, type KeyboardEvent, type RefObject } from "react";
-import release from "../../../../lib/release.json";
 import { SITE } from "../../../../lib/site";
 import { desktopDownload, desktopFirstOpen, desktopInstall, installTargets, type InstallTarget } from "../../../../lib/install";
 import { initialPhone, phones, wireBetaRequest, type Phone } from "../../../../lib/beta";
 import type { HookMoment } from "./install-hook";
 
 const canShare = () => typeof navigator!=="undefined" && typeof navigator.share==="function" && matchMedia("(hover: none)").matches;
-const desktopVersion = release.desktop.tag?.replace(/^desktop-v/,"");
 
 function BetaRequest({phone,onSwitch}:{phone:Phone;onSwitch:()=>void}) {
   const form=useRef<HTMLFormElement>(null),note=useRef<HTMLSpanElement>(null);
@@ -61,7 +59,7 @@ export default function InstallHook({moment,onCopy,hookRef,copyRef}:{moment:Hook
   };
   // From a phone, the computer is the real destination: send it the command or the download.
   const share=async()=>{
-    try {await navigator.share(desktop?{title:"Phux for Mac",url:desktopDownload(release.desktop.tag)}:{title:"Install phux",text:command,url:SITE.url});onCopy();}
+    try {await navigator.share(desktop?{title:"Phux for Mac",url:new URL(desktopDownload,SITE.url).href}:{title:"Install phux",text:command,url:SITE.url});onCopy();}
     catch {/* The visitor dismissed the share sheet. */}
   };
   return <section ref={hookRef} className="install-hook" data-moment={moment} aria-label="Install phux">
@@ -71,8 +69,8 @@ export default function InstallHook({moment,onCopy,hookRef,copyRef}:{moment:Hook
     {mobile?<BetaRequest phone={phone} onSwitch={()=>setPhone(phones[phone].other)}/>:desktop?<>
       <div className="install-hook-line install-hook-download">
         <span className="install-hook-prompt" aria-hidden="true">↓</span>
-        <span className="install-hook-what">Phux{desktopVersion&&` ${desktopVersion}`} for Apple-silicon Mac</span>
-        <a className="install-hook-copy" href={desktopDownload(release.desktop.tag)} onClick={onCopy}>Download</a>
+        <span className="install-hook-what">Phux for Apple-silicon Mac</span>
+        <a className="install-hook-copy" href={desktopDownload} onClick={onCopy}>Download</a>
       </div>
       <p className="install-hook-status">
         <span role="status" aria-live="polite">{status||desktopFirstOpen}</span>

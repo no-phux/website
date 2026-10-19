@@ -70,7 +70,7 @@ try {
     await page.screenshot({ path: `${artifacts}hero-${baseline ? "before" : "after"}-${width}.png`, fullPage: true });
     assert.ok(await hero.getByRole("region", { name: "Install phux", exact: true }).isVisible(), "install controls keep an accessible name without a heading");
     await hero.getByRole("button", { name: "Desktop", exact: true }).click();
-    assert.match((await hero.getByRole("link", { name: "Download", exact: true }).getAttribute("href")) ?? "", /phux-desktop-[\d.]+-macos-arm64\.zip$/, "Desktop is a download");
+    assert.equal(await hero.getByRole("link", { name: "Download", exact: true }).getAttribute("href"), "/download/desktop", "Desktop is a download");
     await hero.getByRole("button", { name: "Copy the Desktop install command", exact: true }).click();
     await hero.getByRole("status").filter({ hasText: "Copied." }).waitFor();
     assert.equal(await page.evaluate(() => navigator.clipboard.readText()), "curl -fsSL https://phux.sh/install-desktop | sh");
