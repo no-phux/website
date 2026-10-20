@@ -84,7 +84,15 @@ const SECTION_ROOTS: { dir: string; group: Group; urlPrefix: string }[] = [
 ];
 
 /** Repo-relative paths that must never publish. */
-const DENYLIST = new Set<string>([]);
+const DENYLIST = new Set<string>([
+  // Internal org-ops record synced from phux. Not a public guide.
+  "docs/substrate.md",
+]);
+
+/** True when this repo-relative docs path must stay off the published site. */
+export function isDeniedDocumentation(repoPath: string): boolean {
+  return DENYLIST.has(repoPath);
+}
 
 /** Stability values that mark a doc as internal / unpublishable. */
 const EXCLUDED_STABILITY = new Set(["scratch", "draft"]);
@@ -112,7 +120,7 @@ function docsRepoPath(docsDir: string, abs: string): string {
 
 /** Returns the exclusion reason, or null to keep the candidate. */
 function exclusionReason(repoPath: string, meta: Record<string, string>): string | null {
-  if (DENYLIST.has(repoPath)) return "denylist";
+  if (isDeniedDocumentation(repoPath)) return "denylist";
   if (EXCLUDED_STABILITY.has((meta.stability ?? "").toLowerCase())) {
     return `stability:${meta.stability}`;
   }
