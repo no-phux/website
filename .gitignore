@@ -60,3 +60,6 @@ worker/.dev.vars
 .motion-check/
 .home-check/
 .docs-check/
+
+# seo.ts reports (regenerated; may hold Search Console data)
+.seo/

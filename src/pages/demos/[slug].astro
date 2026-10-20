@@ -3,7 +3,7 @@ import { existsSync } from "node:fs";
 import { render, type CollectionEntry } from "astro:content";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import { getDemos, demoDate, demoDuration } from "../../lib/demos";
-import { SITE } from "../../lib/site";
+import { pageTitle } from "../../lib/site";
 
 interface Props {
   demo: CollectionEntry<"demos">;
@@ -18,7 +18,7 @@ export async function getStaticPaths() {
 
 const { demo } = Astro.props;
 const { Content } = await render(demo);
-const title = `${SITE.name} — ${demo.data.title}`;
+const title = pageTitle(demo.data.title);
 const description = demo.data.summary;
 const cast = `/demos/${demo.id}/session.cast`;
 const hasCast = existsSync(`public${cast}`);

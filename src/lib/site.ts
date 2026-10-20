@@ -23,6 +23,11 @@ export const SITE = {
   demoWsUrl: import.meta.env.PUBLIC_PHUX_DEMO_WS ?? "",
 } as const;
 
+/** Content-page <title>: the topic leads (it is what people search); the brand trails once. */
+export function pageTitle(topic: string): string {
+  return new RegExp(`\\b${SITE.name}\\b`, "i").test(topic) ? topic : `${topic} — ${SITE.name}`;
+}
+
 // Shared by the visible docs landing and its searchable Markdown representation.
 export const OVERVIEW = {
   title: "Get started",
