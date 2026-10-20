@@ -11,6 +11,7 @@
  */
 import { routeRequest } from "./routes";
 import { handleAssociationRequest } from "./pairing";
+import { APP_RELEASE_PATH, handleAppRelease } from "./app-release";
 import type { TestFlightEnv } from "./testflight";
 import { estimateTokens, htmlToMarkdown, wantsMarkdown } from "./markdown";
 import { classifyTrap } from "./tripwire-paths";
@@ -89,6 +90,11 @@ export default {
       }
     }
 
+    // The newest TestFlight builds, for phux-mobile's update prompt
+    // (host/app-release.ts).
+    if (url.pathname === APP_RELEASE_PATH) {
+      return handleAppRelease(request, env);
+    }
     // Public telemetry aggregates (the /telemetry page reads this).
     if (url.pathname === "/api/telemetry") {
       return telemetryApi(request, env);

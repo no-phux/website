@@ -140,6 +140,16 @@ list with source `testflight:<outcome>`; `testflight:failed` and
 `testflight:unconfigured` rows are the manual-invite queue. Without the
 secrets the form still records requests.
 
+### App update check (`/api/ios/release`)
+
+phux-mobile's update prompt on TestFlight builds reads `GET /api/ios/release`
+(`host/app-release.ts`): the app's Apple ID and the newest build internal and
+external testers can each install (`IN_BETA_TESTING`), read from App Store
+Connect with the same secrets. Answers are edge-cached for five minutes,
+keyed without the query string. Without the secrets it answers 503 and the app
+simply offers no TestFlight update; App Store builds use Apple's public lookup
+and never call it.
+
 ### The curl installers
 
 `https://phux.sh/install` and `https://phux.sh/install.sh` serve the repo's
