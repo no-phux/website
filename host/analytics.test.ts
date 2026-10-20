@@ -235,6 +235,37 @@ describe("handleBeta", () => {
     }
   });
 
+  test("queues Android requests for Google Play without asking Apple", async () => {
+    const forwarded: Request[] = [];
+    const env = {
+      ...ENV,
+      ANALYTICS: {
+        fetch: async (request: Request) => {
+          forwarded.push(request);
+          return new Response(null, { status: 204 });
+        },
+      },
+    };
+    let calls = 0;
+    const invite = async () => {
+      calls += 1;
+      return "invited" as const;
+    };
+    const result = await runAnalytics(
+      handleBeta(betaRequest({ email: "a@b.co", platform: "android" }), env, invite),
+    );
+    expect(calls).toBe(0);
+    expect(await result.response.json()).toEqual({ ok: true, status: "requested" });
+    await runAnalytics(result.background!);
+    const { events } = (await forwarded[0]!.json()) as { events: Record<string, unknown>[] };
+    expect(events[0]).toMatchObject({ kind: "signup", source: "play:requested" });
+    const bare = await runAnalytics(
+      handleBeta(betaRequest({ email: "a@b.co", platform: "android" }), { ASSETS: ENV.ASSETS }, invite),
+    );
+    expect(bare.response.status).toBe(503);
+    expect(calls).toBe(0);
+  });
+
   test("errors when the request can be neither invited nor recorded", async () => {
     const bare = { ASSETS: ENV.ASSETS };
     const unconfigured = await runAnalytics(

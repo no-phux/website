@@ -103,6 +103,11 @@
 .install-hook-line[data-copied=true] .install-hook-copy{background:#b5ceaa}
 .install-hook-status{min-height:1.5em;margin:0;font:13px/1.5 var(--lab-mono);color:#91aebd}
 .install-hook-status:empty{position:absolute;width:1px;height:1px;min-height:0;overflow:hidden;clip-path:inset(50%)}
+.install-hook-status:has(.install-hook-alt){display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+.install-hook-alt{flex-shrink:0;min-height:32px;padding:0;font:13px var(--lab-mono);color:#b9d3df;text-decoration:underline;text-underline-offset:3px;text-decoration-color:#b9d3df55}
+.install-hook-alt:hover{color:#eef7fa}
+.install-hook-what{flex:1;min-width:0;font:13px/1.5 var(--lab-mono);color:#eef7fa}
+a.install-hook-copy{display:inline-flex;align-items:center;justify-content:center;text-decoration:none}
 .install-hook-share{justify-self:start;min-height:40px;padding:0 16px;border-radius:999px;box-shadow:inset 0 0 0 1px #c8e6f230;font:14px var(--font-reading);color:#dcecf2}
 .install-hook-request{flex-wrap:nowrap;gap:8px}
 .install-hook-request button{width:44px;min-width:44px;padding:0;font:24px var(--lab-mono)}
@@ -117,7 +122,7 @@
 .live-dialog-caption{align-items:center}
 @media(max-width:560px){
   .install-hook{padding-inline:14px}
-  .install-hook-line code{white-space:normal;overflow-wrap:anywhere;font-size:12px}
+  .install-hook-line code,.install-hook-what{white-space:normal;overflow-wrap:anywhere;font-size:12px}
   .install-hook-share{justify-self:stretch;min-height:46px}
   .live-dialog-caption>span:nth-child(2){display:none}
 }

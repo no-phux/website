@@ -26,8 +26,8 @@ async function walk(dir: string): Promise<string[]> {
 
 /** Does an internal path (no hash/query) exist in dist? */
 function resolves(path: string): boolean {
-  // host/index.ts serves this dynamic read-only endpoint, not a dist file.
-  if (path === "/mcp") return true;
+  // host/index.ts serves these dynamic routes, not dist files.
+  if (path === "/mcp" || path === "/download/desktop") return true;
   if (path === "/") return existsSync(join(DIST, "index.html"));
   const clean = path.replace(/\/+$/, "");
   return (
