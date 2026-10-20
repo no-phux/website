@@ -42,7 +42,7 @@ function render(body: string, entries = [entry]) {
 
 describe("documentation discovery interface", () => {
   test("keeps canonical flat guides and ignores the historical archive", async () => {
-    const guides = ["embedding", "organization", "desktop-capture", "desktop-changes", "desktop-panes"];
+    const guides = ["embedding", "organization", "desktop-capture", "desktop-changes", "desktop-panes", "substrate"];
     for (const guide of guides) await source(`${guide}.md`);
     await source("install.md");
     await source("README.md");
@@ -52,6 +52,7 @@ describe("documentation discovery interface", () => {
     expect(entries.map(({ slug }) => slug).sort()).toEqual(["docs", "installation", ...guides].sort());
     expect(entries.find(({ slug }) => slug === "installation")).toMatchObject({ repoPath: "docs/install.md", group: "start", order: 1 });
     expect(entries.find(({ slug }) => slug === "organization")).toMatchObject({ group: "internals", order: 1 });
+    expect(entries.find(({ slug }) => slug === "substrate")).toMatchObject({ repoPath: "docs/substrate.md", group: "internals", order: 6 });
     expect(excluded).toEqual([]);
     expect(warning).toHaveBeenCalledWith("  skip (missing): docs/clients.md");
   });
@@ -148,16 +149,17 @@ describe("source Markdown rendering interface", () => {
 
 describe("collection output interface", () => {
   test("emits folder indexes, curated navigation and website-owned overview provenance", async () => {
-    for (const file of ["README.md", "install.md", "reference/README.md", "reference/zebra.md", "reference/cli.md", "reference/config.md"]) await source(file);
+    for (const file of ["README.md", "install.md", "substrate.md", "reference/README.md", "reference/zebra.md", "reference/cli.md", "reference/config.md"]) await source(file);
     const { entries } = await discover(docs);
     const out = join(root, "out");
     await mkdir(out);
-    expect(await writeDocumentation(out, entries, revision, versions, siteRevision)).toEqual({ written: 7, failed: [] });
+    expect(await writeDocumentation(out, entries, revision, versions, siteRevision)).toEqual({ written: 8, failed: [] });
+    expect(await readFile(join(out, "substrate.md"), "utf8")).toContain('sourcePath: "docs/substrate.md"');
     expect(await readFile(join(out, "reference/index.md"), "utf8")).toContain('sourcePath: "docs/reference/README.md"');
     expect(await metadata(out, "reference")).toEqual({ title: "Reference", pages: ["index", "cli", "config", "zebra"] });
     expect(await metadata(out)).toEqual({ pages: ["overview", "(start)", "(use)", "reference", "(contribute)"] });
     expect((await metadata(out, "(use)")).pages).toEqual(["../config", "../scripting", "../agents", "../acp", "../remote", "../clients", "../desktop-capture", "../desktop-changes", "../desktop-panes", "../troubleshooting"]);
-    expect((await metadata(out, "(contribute)")).pages).toEqual(["../architecture", "../organization", "../protocol", "../embedding", "../development", "../releasing", "../docs"]);
+    expect((await metadata(out, "(contribute)")).pages).toEqual(["../architecture", "../organization", "../protocol", "../embedding", "../development", "../releasing", "../substrate", "../docs"]);
     const overview = await readFile(join(out, "overview.md"), "utf8");
     expect(overview).toContain(`sourcePath: "src/pages/overview.astro"\nsourceBase: "https://github.com/no-phux/website"\nsourceRevision: "${siteRevision}"`);
     expect(overview).toContain('protocolVersion: "1.2.3"\nprojectVersion: "0.4.5"');

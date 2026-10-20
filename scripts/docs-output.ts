@@ -22,7 +22,7 @@ const TASK_GROUPS = [
   },
   {
     folder: "(contribute)", title: "Work on phux",
-    pages: ["../architecture", "../organization", "../protocol", "../embedding", "../development", "../releasing", "../docs"],
+    pages: ["../architecture", "../organization", "../protocol", "../embedding", "../development", "../releasing", "../substrate", "../docs"],
   },
 ];
 
