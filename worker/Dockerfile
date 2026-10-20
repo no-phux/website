@@ -86,7 +86,7 @@ RUN apt-get update \
       fd-find=8.6.0-3 \
       file=1:5.44-3 \
       git=1:2.39.5-0+deb12u3 \
-      jq=1.6-2.1+deb12u2 \
+      jq=1.6-2.1+deb12u3 \
       less=590-2.1~deb12u2 \
       ncurses-base=6.4-4 \
       nodejs=18.20.4+dfsg-1~deb12u3 \
