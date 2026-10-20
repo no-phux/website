@@ -126,7 +126,7 @@ async function scenario(dpr: number) {
     });
   });
   try {
-    await page.goto("https://phux.sh/");
+    await page.goto("https://phux.sh/?hero=light");
     // Dynamic React hydration can outlive window.load on a cold production page.
     // Wait for the interactive hero, rather than following its no-JS fallback.
     await page.locator("astro-island:not([ssr]) .tour").waitFor();

@@ -44,8 +44,10 @@ try {
       body: JSON.stringify({ ok: true, status: "invited" }),
     });
   });
-  await page.goto(`${base}/?hero=classic`);
+  await page.goto(`${base}/`);
   assert.equal((await page.getByRole("heading", { level: 1 }).innerText()).trim(), "phux");
+  assert.equal(await page.locator("#home-light").isHidden(), true, "the classic terminal is the default hero");
+  assert.equal(await page.locator("[data-classic-home]").isVisible(), true, "the terminal is on screen at first paint");
   assert.equal(await page.locator("#how-it-works").count(), 0, "no homepage explainer");
   assert.equal(await page.locator(".hero-headline, .live-invitation, .features").count(), 0, "the landing carries no slogan block");
   const installBox = await page.locator("#install").boundingBox();
@@ -178,8 +180,8 @@ try {
   assert.equal(await page.getByRole("link", { name: "request access to phux for iPhone" }).getAttribute("href"), "/more#testflight");
   await page.goto(`${base}/telemetry`);
   assert.equal(await page.getByRole("link", { name: "release mailing list" }).getAttribute("href"), "/more#beta");
-  // The default live hero carries its own install hook, whether or not a demo session connects.
-  await page.goto(base);
+  // The opt-in live hero carries its own install hook, whether or not a demo session connects.
+  await page.goto(`${base}/?hero=light`);
   const live = page.frameLocator("#home-light iframe");
   const hookLine = live.locator(".install-hook-line code");
   await hookLine.waitFor();

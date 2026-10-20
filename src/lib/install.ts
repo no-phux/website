@@ -18,7 +18,7 @@ export type InstallTarget = { id: "cli" | "desktop" | "mobile"; label: string; c
 export const installTargets: InstallTarget[] = [
   { id: "cli", label: "CLI", command: cliInstall, note: "macOS and Linux · installs phux and phux-mcp" },
   { id: "desktop", label: "Desktop", command: desktopInstall, note: "Apple-silicon Mac · or install from a terminal on macOS or Linux" },
-  { id: "mobile", label: "Mobile", command: "", note: "Beta: TestFlight on iPhone, Google Play testing on Android." },
+  { id: "mobile", label: "Mobile", command: "", note: "No install: open the demo, press Enter, scan the QR, then drive the shell from your phone. Beta: TestFlight on iPhone, Google Play testing on Android." },
 ];
 
 /** The stable Apple-silicon Desktop archive; the site worker resolves it per click (host/download.ts). */
