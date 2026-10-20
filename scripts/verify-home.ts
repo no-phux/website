@@ -96,15 +96,18 @@ try {
   await page.getByRole("button", { name: "Copy install command" }).click();
   assert.equal(await page.evaluate(() => navigator.clipboard.readText()), "curl -fsSL https://phux.sh/install | sh");
   assert.equal(await page.getByRole("status").innerText(), "Install command copied.");
-  // The hero switcher swaps the command on hover, focus, click, and arrows, and
-  // turns the third target into the TestFlight request.
+  // The hero switcher swaps the command on hover, focus, click, and arrows,
+  // turns Desktop into a download, and the third target into the beta request.
   const command = page.locator("#install-command");
   const line = page.locator("#install .install-line");
   const request = page.locator("#install .install-request");
   const target = (name: string) => page.locator(`#install [data-install-target="${name}"]`);
   assert.deepEqual(await page.locator("#install .install-tabs button").allInnerTexts(), ["CLI", "Desktop", "Mobile"], "three install targets");
+  const download = page.locator("#install-download");
   await target("desktop").hover();
-  assert.equal(await command.innerText(), "curl -fsSL https://phux.sh/install-desktop | sh", "hover swaps to the desktop installer");
+  assert.ok(await download.isVisible(), "hover swaps to the desktop download");
+  assert.equal(await command.isHidden(), true, "Desktop leads with the download, not a command");
+  assert.equal(await download.getAttribute("href"), "/download/desktop", "the download is the worker's stable Mac archive redirect");
   await target("mobile").click();
   assert.equal(await target("mobile").getAttribute("aria-pressed"), "true", "the clicked target is pressed");
   assert.ok(await request.isVisible(), "Mobile asks for an address instead of printing a command");
@@ -112,11 +115,11 @@ try {
   assert.match(await page.locator("#install-note").innerText(), /TestFlight/, "the note describes the mobile target");
   await target("mobile").focus();
   await page.keyboard.press("ArrowLeft");
-  assert.equal(await command.innerText(), "curl -fsSL https://phux.sh/install-desktop | sh", "arrow keys move the target back to Desktop");
+  assert.ok(await download.isVisible(), "arrow keys move the target back to Desktop");
   assert.equal(await request.isHidden(), true, "a command target hides the request form");
   assert.equal(await line.isVisible(), true, "a command target restores the command line");
   await page.getByRole("button", { name: "Copy install command" }).click();
-  assert.equal(await page.evaluate(() => navigator.clipboard.readText()), "curl -fsSL https://phux.sh/install-desktop | sh", "copy follows the keyboard target");
+  assert.equal(await page.evaluate(() => navigator.clipboard.readText()), "curl -fsSL https://phux.sh/install-desktop | sh", "Desktop keeps its installer on the copy button");
   // Regression: a content-sized dock widened with the command and slid the
   // targets out from under the pointer. The dock and its targets are pinned.
   const box = (selector: string) =>
@@ -139,11 +142,20 @@ try {
   assert.match(await page.locator("#beta-note").innerText(), /Invite sent/, "the hero reports the invite");
   assert.equal(beta.payload?.email, "iphone@example.com", "the hero request posts the address");
   assert.equal(beta.payload?.website, "", "the honeypot stays empty");
-  // Leave the longest command up for the overflow pass below.
-  await target("desktop").click();
+  assert.equal(beta.payload?.platform, "ios", "a computer is offered the iPhone beta first");
+  await request.getByRole("button", { name: "Android instead" }).click();
+  assert.equal(await request.locator("input[name=email]").getAttribute("aria-label"), "Email address for the Google Play test", "the switch re-labels the address");
+  await request.locator("input[name=email]").fill("android@example.com");
+  await request.locator("button[type=submit]").click();
+  await page.waitForFunction(() => document.querySelector("#beta-note")?.textContent?.includes("Google Play") ?? false);
+  assert.equal(beta.payload?.platform, "android", "the Android request says so");
+  assert.ok(await request.getByRole("button", { name: "iPhone instead" }).isVisible(), "the switch offers the way back");
   for (const width of [320, 390, 768, 1280]) {
     await page.setViewportSize({ width, height: 1000 });
-    assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `no overflow at ${width}px`);
+    for (const name of ["desktop", "cli"]) {
+      await target(name).click();
+      assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `no overflow with ${name} at ${width}px`);
+    }
     assert.ok(await page.locator("#install code").evaluate((code) => code.scrollWidth <= code.clientWidth), `full install command readable at ${width}px`);
     await page.screenshot({ path: `${artifacts}/home-${width}.png`, fullPage: true });
   }

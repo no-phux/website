@@ -294,11 +294,12 @@ export function handleJoin(
 }
 
 /**
- * POST /api/beta — TestFlight access request for phux-mobile. Apple sends the
- * invite when App Store Connect is configured (host/testflight.ts); the
- * request is also recorded as a member signup whose source carries the
- * outcome, so `testflight:failed` and `testflight:unconfigured` rows are the
- * manual-invite queue.
+ * POST /api/beta — beta access request for phux-mobile. For iPhone, Apple
+ * sends the TestFlight invite when App Store Connect is configured
+ * (host/testflight.ts). The request is also recorded as a member signup whose
+ * source carries the outcome, so `testflight:failed`,
+ * `testflight:unconfigured`, and every `play:requested` (Google Play testers
+ * are added by hand) are the manual-invite queue.
  */
 export function handleBeta(
   request: Request,
@@ -324,8 +325,10 @@ export function handleBeta(
         background,
       };
     }
-    const outcome = yield* Effect.promise(() => invite(env, email));
     const recorded = Boolean(env.MEMBER_KEY) && canForward(env);
+    // Google Play testers are added by hand, so an Android request is only ever queued.
+    const android = input.platform === "android";
+    const outcome = android ? "unconfigured" : yield* Effect.promise(() => invite(env, email));
     if (outcome !== "invited" && !recorded) {
       const unconfigured = outcome === "unconfigured";
       return {
@@ -351,7 +354,7 @@ export function handleBeta(
             env,
             env.MEMBER_KEY!,
             email,
-            `testflight:${outcome}`,
+            android ? "play:requested" : `testflight:${outcome}`,
           )
         : undefined,
     };
@@ -492,6 +495,7 @@ const JoinInput = Schema.Struct({
   email: Schema.String,
   source: Schema.optionalKey(Schema.String),
   website: Schema.optionalKey(Schema.String),
+  platform: Schema.optionalKey(Schema.String),
 });
 
 interface JoinRequest {
@@ -499,6 +503,8 @@ interface JoinRequest {
   readonly source: string;
   /** Honeypot: a field hidden from people, so only bots fill it. */
   readonly website: string;
+  /** The beta request's phone: `android`, or anything else for iPhone. */
+  readonly platform: string;
 }
 
 function decodeJoinRequest(
@@ -515,6 +521,7 @@ function decodeJoinRequest(
       email: decoded.email,
       source: decoded.source ?? "",
       website: decoded.website ?? "",
+      platform: decoded.platform ?? "",
     };
   });
 }
@@ -536,6 +543,7 @@ function parseBody(
       email: params.get("email"),
       source: params.get("source") ?? "",
       website: params.get("website") ?? "",
+      platform: params.get("platform") ?? "",
     });
   }
   return Effect.fail(new BodyReadFailure({ reason: "malformed" }));

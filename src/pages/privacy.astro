@@ -8,8 +8,9 @@
 // release and bump LAST_UPDATED.
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { SITE } from "../lib/site";
+import "../styles/privacy.css";
 
-const LAST_UPDATED = "2026-10-02";
+const LAST_UPDATED = "2026-10-19";
 const CONTACT = "privacy@phall.io";
 const title = `${SITE.name} — Privacy policy`;
 const description =
@@ -271,9 +272,12 @@ const description =
         <a href="/more#testflight">request access to phux for iPhone</a>, we send
         your email address to Apple through App Store Connect, which adds you
         as a TestFlight tester and emails you the invite. Apple keeps tester
-        records under its own privacy policy. We also keep the request on the
-        beta list described above. To leave the beta, tap Stop Testing in
-        TestFlight, or email us and we remove you as a tester.
+        records under its own privacy policy. If you ask for the Android beta
+        instead, we add the address to the app's Google Play testing list by
+        hand, and Google handles it under its own privacy policy. We also keep
+        either request on the beta list described above. To leave the beta,
+        tap Stop Testing in TestFlight, leave the test in Google Play, or email
+        us and we remove you as a tester.
       </p>
       <p>
         <strong>The hosted shell.</strong> The live terminal on the landing
@@ -420,105 +424,3 @@ const description =
     </section>
   </article>
 </BaseLayout>
-
-<style>
-  .policy {
-    max-width: calc(var(--reading-width) + 2 * var(--page-gutter));
-    padding-block: clamp(32px, 6vw, 72px) 96px;
-  }
-  .policy-head {
-    border-bottom: 1px solid var(--color-rule);
-    padding-bottom: 24px;
-    margin-bottom: 8px;
-  }
-  h1 {
-    font-size: clamp(28px, 4vw, 40px);
-    letter-spacing: -0.02em;
-    margin: 0 0 8px;
-  }
-  .updated {
-    font-family: var(--font-code);
-    font-size: 13px;
-    color: var(--color-muted);
-    margin: 0 0 16px;
-  }
-  .lede {
-    color: var(--color-muted);
-    margin: 0;
-  }
-  section {
-    border-bottom: 1px solid var(--color-rule);
-    padding-block: 24px;
-  }
-  section:last-child {
-    border-bottom: 0;
-  }
-  h2 {
-    font-size: 20px;
-    letter-spacing: -0.01em;
-    margin: 0 0 12px;
-  }
-  p,
-  ul {
-    margin: 0 0 12px;
-  }
-  ul {
-    padding-left: 1.25em;
-  }
-  li + li {
-    margin-top: 6px;
-  }
-  .summary {
-    border: 1px solid var(--color-rule);
-    border-left: 3px solid var(--color-accent);
-    background: var(--color-surface);
-    padding: 20px;
-    margin-block: 24px;
-  }
-  .summary ul {
-    margin: 0;
-  }
-  a {
-    color: var(--color-accent);
-    text-decoration: underline;
-    text-decoration-thickness: 1px;
-    text-underline-offset: 3px;
-  }
-  a:hover,
-  a:focus-visible {
-    text-decoration-thickness: 2px;
-  }
-  code {
-    font-size: 0.9em;
-  }
-  .table-region {
-    max-width: 100%;
-    overflow-x: auto;
-    border: 1px solid var(--color-rule);
-    background: var(--color-surface);
-    margin: 0 0 12px;
-  }
-  .table-region:focus-visible {
-    outline: 2px solid var(--color-accent);
-    outline-offset: 2px;
-  }
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 14px;
-  }
-  th,
-  td {
-    text-align: left;
-    vertical-align: top;
-    padding: 10px 12px;
-    border-bottom: 1px solid var(--color-rule);
-  }
-  tbody tr:last-child td {
-    border-bottom: 0;
-  }
-  th {
-    background: var(--color-surface-raised);
-    font-weight: 600;
-  }
-</style>

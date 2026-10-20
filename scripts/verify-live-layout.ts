@@ -52,9 +52,9 @@ try {
       await route.fulfill({ response: await route.fetch({ url: `${base}${url.pathname}${url.search}` }) });
     });
     const page = await context.newPage();
-    let submitted = "";
+    let submitted = "", platform = "";
     await page.route("**/api/beta", route => {
-      submitted = route.request().postDataJSON().email;
+      ({ email: submitted, platform } = route.request().postDataJSON());
       return route.fulfill({ json: { ok: true, status: "invited" } });
     });
     await page.goto("https://phux.sh/?hero=light");
@@ -70,10 +70,11 @@ try {
     await page.screenshot({ path: `${artifacts}hero-${baseline ? "before" : "after"}-${width}.png`, fullPage: true });
     assert.ok(await hero.getByRole("region", { name: "Install phux", exact: true }).isVisible(), "install controls keep an accessible name without a heading");
     await hero.getByRole("button", { name: "Desktop", exact: true }).click();
+    assert.equal(await hero.getByRole("link", { name: "Download", exact: true }).getAttribute("href"), "/download/desktop", "Desktop is a download");
     await hero.getByRole("button", { name: "Copy the Desktop install command", exact: true }).click();
     await hero.getByRole("status").filter({ hasText: "Copied." }).waitFor();
     assert.equal(await page.evaluate(() => navigator.clipboard.readText()), "curl -fsSL https://phux.sh/install-desktop | sh");
-    assert.equal(await hero.locator(".install-hook-status").innerText(), "Copied.", "copy feedback stays concise");
+    assert.equal(await hero.locator(".install-hook").getByRole("status").innerText(), "Copied.", "copy feedback stays concise");
     await hero.getByRole("button", { name: "CLI", exact: true }).click();
     assert.equal(await hero.locator(".install-hook-line code").innerText(), "curl -fsSL https://phux.sh/install | sh");
     await hero.getByRole("button", { name: "iPhone", exact: true }).click();
@@ -96,8 +97,16 @@ try {
       await hero.getByRole("button", { name: "Request access", exact: true }).click();
       await hero.getByRole("status").filter({ hasText: "Invite sent" }).waitFor();
       assert.equal(submitted, "layout@example.com", "signup still posts the entered address");
+      assert.equal(platform, "ios", "a computer is offered the iPhone beta first");
       assert.ok(await input.evaluate(node => Boolean(node.closest(".live-primary"))), "email entry is inside the terminal");
       assert.equal(await hero.locator(".live-terminal-dialog[open]").count(), 0, "copy/signup do not open or type into the terminal");
+      await verifyWorkspaceLayout(hero, width);
+      await hero.getByRole("button", { name: "Android instead", exact: true }).click();
+      assert.equal(await hero.getByRole("button", { name: "Android", exact: true }).getAttribute("aria-pressed"), "true", "the mobile target follows the chosen phone");
+      await hero.getByRole("textbox", { name: "Email address for the Google Play test" }).fill("android@example.com");
+      await hero.getByRole("button", { name: "Request access", exact: true }).click();
+      await hero.getByRole("status").filter({ hasText: "Google Play" }).waitFor();
+      assert.equal(platform, "android", "the Android request says so");
       await verifyWorkspaceLayout(hero, width);
     }
     if (process.env.HERO_LIVE === "1") {

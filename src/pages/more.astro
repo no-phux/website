@@ -76,8 +76,8 @@ const FEATURES = [
 
   <section class="wrap join">
     <div id="testflight">
-      <h2>phux for iPhone</h2>
-      <p>Drive the same terminals from your phone. Now in TestFlight beta.</p>
+      <h2>phux for your phone</h2>
+      <p>Drive the same terminals from your phone. In beta on TestFlight and Google Play.</p>
       <form class="join-form" id="beta-form">
         <input
           type="email"
@@ -97,8 +97,9 @@ const FEATURES = [
         />
         <button type="submit">Request access</button>
         <p class="join-note" id="beta-note" aria-live="polite">
-          Apple emails the invite to this address.
+          The invite goes to this address.
         </p>
+        <button type="button" class="join-phone" id="beta-phone">Android instead</button>
       </form>
     </div>
     <div id="beta">
@@ -169,6 +170,16 @@ const FEATURES = [
     color: var(--color-muted);
     margin: 0;
     min-height: 1.5em;
+  }
+  .join-form .join-phone {
+    grid-column: 1 / -1;
+    justify-self: start;
+    padding: 0;
+    background: none;
+    color: var(--color-muted);
+    font-size: 12px;
+    font-weight: 400;
+    text-decoration: underline;
   }
   .join-note a {
     color: inherit;
@@ -259,6 +270,7 @@ const FEATURES = [
   wireBetaRequest(
     document.getElementById("beta-form") as HTMLFormElement | null,
     document.getElementById("beta-note"),
+    document.getElementById("beta-phone") as HTMLButtonElement | null,
   );
 </script>
 
