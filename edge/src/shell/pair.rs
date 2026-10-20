@@ -90,10 +90,10 @@ fn pair_qr(link: &str) -> Result<String, String> {
         .map_or(0, |line| line.chars().count());
     let blank = " ".repeat(width + 4);
     let mut out = String::new();
-    out.push_str(&format!("  \x1b[47m{blank}\x1b[0m\r\n"));
+    out.push_str(&format!("\x1b[47m{blank}\x1b[0m\r\n"));
     for line in rendered.lines() {
-        out.push_str(&format!("  \x1b[47m\x1b[30m  {line}  \x1b[0m\r\n"));
+        out.push_str(&format!("\x1b[47m\x1b[30m  {line}  \x1b[0m\r\n"));
     }
-    out.push_str(&format!("  \x1b[47m{blank}\x1b[0m\r\n"));
+    out.push_str(&format!("\x1b[47m{blank}\x1b[0m\r\n"));
     Ok(out)
 }
