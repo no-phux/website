@@ -55,6 +55,7 @@ const ORIENTATION: { file: string; slug: string; group: Group; order: number }[]
   { file: "install.md", slug: "installation", group: "start", order: 1 },
   { file: "getting-started.md", slug: "getting-started", group: "start", order: 2 },
   { file: "concepts.md", slug: "concepts", group: "start", order: 3 },
+  { file: "compare.md", slug: "compare", group: "start", order: 4 },
   { file: "config.md", slug: "config", group: "use", order: 0 },
   { file: "scripting.md", slug: "scripting", group: "use", order: 1 },
   { file: "agents.md", slug: "agents", group: "use", order: 2 },
