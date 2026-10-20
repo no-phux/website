@@ -19,6 +19,7 @@
     "verify:docs": "bun run scripts/verify-docs.ts",
     "demo:add": "bun run scripts/add-demo.ts",
     "sync-docs": "bun run scripts/sync-docs.ts",
+    "seo": "bun run scripts/seo.ts",
     "fetch-release": "bun run scripts/fetch-release.ts",
     "build:client": "bash scripts/build-client.sh",
     "build:edge": "bash scripts/build-edge.sh",

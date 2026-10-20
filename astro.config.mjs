@@ -3,6 +3,7 @@ import react from "@astrojs/react";
 import sitemap from "@astrojs/sitemap";
 import tailwindcss from "@tailwindcss/vite";
 import mdx from "@astrojs/mdx";
+import { existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { unified } from "@astrojs/markdown-remark";
 import {
@@ -17,6 +18,12 @@ import { wgslVitePlugin } from "@vgpu/wgsl/loader-vite";
 
 // The docs pages render with the Fumadocs markdown pipeline: anchored headings
 // (for the TOC), npm-install tabs, and Shiki-highlighted code.
+// sync-docs runs first; old comparison URLs land on /compare once the phux
+// checkout publishes it, and on the nearest live page until then.
+const compare = existsSync(fileURLToPath(new URL("./src/content/docs/_synced/compare.md", import.meta.url)))
+  ? "/compare"
+  : null;
+
 const remarkPlugins = [remarkHeading, remarkCodeTab, remarkNpm];
 const rehypePlugins = [rehypeCode];
 
@@ -76,10 +83,10 @@ export default defineConfig({
     "/quickstart": "/getting-started",
     "/quickstart/install": "/installation",
     "/quickstart/config": "/config",
-    "/concepts/when-to-use": "/concepts",
+    "/concepts/when-to-use": compare ?? "/concepts",
     "/concepts/coming-from": "/getting-started",
     "/concepts/vision": "/architecture",
-    "/performance": "/development",
+    "/performance": compare ?? "/development",
     "/remote-access": "/remote",
     "/consumers": "/clients",
     "/wire": "/protocol",

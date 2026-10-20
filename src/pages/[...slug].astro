@@ -9,7 +9,7 @@ import type { TOCItemType } from "fumadocs-core/toc";
 import { Docs } from "../components/docs/Docs";
 import Layout from "../components/docs/layout.astro";
 import { source } from "../lib/source";
-import { SITE } from "../lib/site";
+import { SITE, pageTitle } from "../lib/site";
 
 interface Props {
   page: CollectionEntry<"docs">;
@@ -37,7 +37,7 @@ const toc: TOCItemType[] = headings.filter((heading) => heading.depth >= 2 && he
 }));
 
 const sourceUrl = `${page.data.sourceBase ?? SITE.github}/blob/${page.data.sourceRevision}/${page.data.sourcePath}`;
-const title = `${SITE.name} — ${page.data.title}`;
+const title = pageTitle(page.data.title);
 const description = page.data.description || SITE.description;
 // Static `format: file` builds render this route as `/wire.html`; the public
 // route and Fumadocs page tree use extensionless canonical paths.
