@@ -115,3 +115,6 @@ line here.
 
 - 2026-10-19: docs and demo title tags lead with the topic, not the brand.
   The home page keeps the brand first.
+- 2026-10-19: the alternatives category starts with docs.phux.sh/compare
+  (phux vs tmux, Herdr, and cmux), sourced in no-phux/phux `docs/compare.md`.
+  Re-check its external facts against each project's docs before editing it.

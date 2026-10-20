@@ -17,6 +17,7 @@ export const DOCS_PREFIXES = [
   "/installation",
   "/getting-started",
   "/concepts",
+  "/compare",
   "/config",
   "/scripting",
   "/agents",

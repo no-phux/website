@@ -14,7 +14,7 @@ const FOLDER_TITLES: Record<string, string> = {
 const TASK_GROUPS = [
   {
     folder: "(start)", title: "Start here", defaultOpen: true,
-    pages: ["../installation", "../getting-started", "../concepts"],
+    pages: ["../installation", "../getting-started", "../concepts", "../compare"],
   },
   {
     folder: "(use)", title: `Use ${SITE.name}`,
