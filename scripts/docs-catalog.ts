@@ -72,6 +72,7 @@ const ORIENTATION: { file: string; slug: string; group: Group; order: number }[]
   { file: "embedding.md", slug: "embedding", group: "internals", order: 3 },
   { file: "development.md", slug: "development", group: "internals", order: 4 },
   { file: "releasing.md", slug: "releasing", group: "internals", order: 5 },
+  { file: "substrate.md", slug: "substrate", group: "internals", order: 6 },
 ];
 
 /**

@@ -35,6 +35,7 @@ export const DOCS_PREFIXES = [
   "/protocol",
   "/development",
   "/releasing",
+  "/substrate",
   // Pre-2026-10 docs URLs; Astro redirects them to the pages above.
   "/quickstart",
   "/consumers",

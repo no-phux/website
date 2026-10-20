@@ -98,6 +98,7 @@ async function verifyPublishedContent() {
   assert.ok(pages.every(({ url }) => !/^\/(?:adr|decisions)(?:\/|$)/.test(url)), "historical ADRs are not live search pages");
   const clients = await readFile(resolve(root, "clients.md"), "utf8");
   assert.ok(pages.some(({ url }) => url === "/organization"), "organization: published and MCP-indexed");
+  assert.ok(pages.some(({ url }) => url === "/substrate"), "substrate: published and MCP-indexed");
   assert.ok(pages.some(({ url }) => url === "/acp"), "ACP: published and MCP-indexed");
   for (const slug of ["embedding", "desktop-capture", "desktop-changes", "desktop-panes"]) {
     assert.ok(pages.some(({ url }) => url === `/${slug}`), `${slug}: published and MCP-indexed`);
