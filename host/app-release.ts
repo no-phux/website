@@ -14,6 +14,7 @@
 import {
   ascClient,
   ascConfigured,
+  BUNDLE_ID,
   resolveAppId,
   type Fetch,
   type Resource,
@@ -96,7 +97,7 @@ export async function latestRelease(env: TestFlightEnv, fetchImpl: Fetch): Promi
     return null;
   };
   return {
-    bundleId: "dev.phux.mobile",
+    bundleId: BUNDLE_ID,
     appId,
     testflight: { internal: newest("internalBuildState"), external: newest("externalBuildState") },
   };

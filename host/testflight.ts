@@ -26,7 +26,7 @@ export type InviteOutcome = "invited" | "unconfigured" | "failed";
 export type Fetch = (input: Request) => Promise<Response>;
 
 const API = "https://api.appstoreconnect.apple.com/v1";
-const BUNDLE_ID = "dev.phux.mobile";
+export const BUNDLE_ID = "dev.phux.mobile";
 const TOKEN_TTL_SECONDS = 15 * 60;
 const REQUEST_TIMEOUT_MS = 8_000;
 
