@@ -16,7 +16,7 @@
 import { SessionDO } from "./session";
 import { GlobalCapDO } from "./global-cap";
 import { RateLimitDO, rateLimitName } from "./rate-limit";
-import { mintToken, verifyToken } from "./token";
+import { mintToken, newSessionId, verifyToken } from "./token";
 import { loadPortfolioSnapshot } from "./portfolio";
 import { PhuxSessionContainer } from "./native-session";
 import type { CircuitConfig } from "./native-admission";
@@ -120,6 +120,15 @@ function corsHeaders(request: Request, env: Env): Record<string, string> {
     vary: "Origin",
     ...(allowed ? { "access-control-allow-origin": origin } : {}),
   };
+}
+
+/**
+ * The page a printed pairing QR should open. It is the site, not this Worker's
+ * host: the shell runs on shell.phux.sh, while /phone is served by phux.sh.
+ */
+function pairPage(env: Env): string {
+  const origin = (allowedOrigins(env)[0] ?? "https://phux.sh").replace(/\/+$/, "");
+  return `${origin}/phone`;
 }
 
 /**
@@ -305,7 +314,7 @@ export default {
     }
 
     // ── (3) reserve a global concurrency slot ────────────────────────────────
-    const sid = crypto.randomUUID();
+    const sid = newSessionId();
     const sessionTtlMs = parseInt(env.SESSION_TTL_MS, 10) || 30000;
     const edgeHardMaxMs = positiveInt(env.HARD_MAX_MS, 600_000);
     const edgeTtlMs = sessionReservationTtlMs(edgeHardMaxMs);
@@ -420,6 +429,7 @@ export default {
         mode === "native" ? "native-fallback" : mode,
         snapshot,
         fallbackReason ? publicFallbackReason(fallbackReason) : undefined,
+        pairPage(env),
       );
       const response = await session.fetch(fwd);
       if (response.status === 101) {

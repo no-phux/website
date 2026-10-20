@@ -57,7 +57,7 @@ try {
       submitted = route.request().postDataJSON().email;
       return route.fulfill({ json: { ok: true, status: "invited" } });
     });
-    await page.goto("https://phux.sh/");
+    await page.goto("https://phux.sh/?hero=light");
     const hero = page.frameLocator("#home-light iframe");
     await hero.locator(".install-hook").waitFor();
     assert.equal(await hero.locator(".install-hook-lede, .install-hook-proof, .live-session-hint").count(), 0, "no marketing prose around the controls");

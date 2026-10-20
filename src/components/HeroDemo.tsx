@@ -306,7 +306,7 @@ export default function HeroDemo({ wsUrl = "" }: { wsUrl?: string }) {
               wsUrl={wsUrl}
               mode={mode}
               cols={110}
-              rows={24}
+              rows={32}
               autoStart
               focusOnStart
               headerActions={<HeroTerminalActions mode={mode} changeMode={changeMode} close={() => setOpen(false)} />}

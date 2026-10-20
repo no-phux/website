@@ -3,8 +3,18 @@
 //! so it runs anywhere (a Durable Object, the browser, a test). The browser's
 //! libghostty-vt engine renders whatever bytes this emits.
 
+mod pair;
+mod portfolio;
+mod showcase;
+#[cfg(test)]
+mod tests;
+
 use phux_protocol::input::key::{KeyAction, KeyEvent, ModSet, PhysicalKey};
 use serde::{Deserialize, Serialize};
+
+use pair::{PAIR_PREFILL, PairContext, from_context as pair_context};
+use portfolio::PortfolioShell;
+use showcase::{glass_workspace, run};
 
 const MAX_INPUT_LINE_BYTES: usize = 4096;
 
@@ -22,15 +32,27 @@ pub struct Shell {
     line: String,
     glass: bool,
     portfolio: Option<PortfolioShell>,
+    pair: Option<PairContext>,
+    /// The line is the untouched `phux pair` suggestion: the first real
+    /// keystroke replaces it instead of appending to it.
+    prefilled: bool,
 }
 
 impl Shell {
     pub fn new(mode: &str, snapshot_json: &str) -> Self {
+        let pair = pair_context(mode, snapshot_json);
+        let prefilled = pair.is_some();
         Self {
-            line: String::new(),
+            line: if prefilled {
+                PAIR_PREFILL.to_owned()
+            } else {
+                String::new()
+            },
             glass: false,
             portfolio: (mode == "portfolio" || mode == "native-fallback")
                 .then(|| PortfolioShell::new(snapshot_json, mode == "native-fallback")),
+            pair,
+            prefilled,
         }
     }
 
@@ -58,6 +80,11 @@ impl Shell {
         let mut o = String::new();
         o.push_str("\x1b[2J\x1b[H"); // clear + home
         o.push_str(&format!("  {VIOLET}{BOLD}Welcome to phux.{RESET}\r\n"));
+        if self.pair.is_some() {
+            o.push_str(&format!(
+                "  Press {BOLD}Enter{RESET} to print a QR and open this shell on your phone.\r\n"
+            ));
+        }
         o.push_str(&format!(
             "  Type {BOLD}help{RESET} to explore, then split a pane.\r\n\r\n"
         ));
@@ -79,6 +106,7 @@ impl Shell {
         // Ctrl-C: abandon the line.
         if ev.mods.contains(ModSet::CTRL) && ev.key == PhysicalKey::C {
             self.line.clear();
+            self.prefilled = false;
             return format!("^C\r\n{}", self.prompt()).into_bytes();
         }
         // Ctrl-L: clear screen, keep the line.
@@ -89,6 +117,13 @@ impl Shell {
         match ev.key {
             PhysicalKey::Enter | PhysicalKey::NumpadEnter => self.submit_line(),
             PhysicalKey::Backspace | PhysicalKey::NumpadBackspace => {
+                if self.prefilled {
+                    // The suggestion is not a half-typed command: the first
+                    // edit starts from an empty prompt.
+                    self.prefilled = false;
+                    self.line.clear();
+                    return format!("\r\x1b[2K{}", self.prompt()).into_bytes();
+                }
                 if self.line.pop().is_some() {
                     b"\x08 \x08".to_vec() // erase one cell
                 } else {
@@ -102,8 +137,15 @@ impl Shell {
                     && !t.is_empty()
                     && !ev.mods.contains(ModSet::CTRL)
                     && !ev.mods.contains(ModSet::SUPER)
-                    && self.line.len().saturating_add(t.len()) <= MAX_INPUT_LINE_BYTES
+                    && (if self.prefilled { 0 } else { self.line.len() }).saturating_add(t.len())
+                        <= MAX_INPUT_LINE_BYTES
                 {
+                    if self.prefilled {
+                        self.prefilled = false;
+                        self.line.clear();
+                        self.line.push_str(t);
+                        return format!("\r\x1b[2K{}{}", self.prompt(), t).into_bytes();
+                    }
                     self.line.push_str(t);
                     return t.as_bytes().to_vec();
                 }
@@ -113,6 +155,7 @@ impl Shell {
     }
 
     fn submit_line(&mut self) -> Vec<u8> {
+        self.prefilled = false;
         let line = std::mem::take(&mut self.line);
         let output = self.execute(line.trim());
         format!("\r\n{output}{}", self.prompt()).into_bytes()
@@ -134,6 +177,7 @@ impl Shell {
                 "\x1b[2J\x1b[H".to_owned()
             }
             ["theme", ..] => "theme: choose glass or default\r\n".to_owned(),
+            ["phux", "pair", args @ ..] => self.pair_command(args),
             _ => run(line),
         }
     }
@@ -154,7 +198,9 @@ impl Shell {
         if text.chars().any(char::is_control) {
             return Err("input must be printable text".to_owned());
         }
-        if self.line.len().saturating_add(text.len()) > MAX_INPUT_LINE_BYTES {
+        // A prefilled suggestion is replaced, not extended, by the first edit.
+        let base = if self.prefilled { 0 } else { self.line.len() };
+        if base.saturating_add(text.len()) > MAX_INPUT_LINE_BYTES {
             return Err("input line exceeds 4096 bytes".to_owned());
         }
         Ok(())
@@ -183,6 +229,11 @@ impl Shell {
             }
         }
         let mut output = Vec::new();
+        if self.prefilled {
+            self.prefilled = false;
+            self.line.clear();
+            output.extend_from_slice(format!("\r\x1b[2K{}", self.prompt()).as_bytes());
+        }
         for segment in text.split_inclusive('\n') {
             let line = segment.strip_suffix('\n').unwrap_or(segment);
             self.line.push_str(line);
@@ -213,12 +264,13 @@ impl Shell {
                 if line.len() > MAX_INPUT_LINE_BYTES || line.chars().any(char::is_control) {
                     return Err("checkpoint input line is invalid".to_owned());
                 }
+                self.prefilled = self.pair.is_some() && line == PAIR_PREFILL;
                 self.line = line;
                 self.glass = glass;
                 Ok(())
             }
             (ShellCheckpoint::Portfolio { selected, detail }, Some(portfolio)) => {
-                let count = portfolio.snapshot.repos.len();
+                let count = portfolio.repo_count();
                 if (count == 0 && selected != 0) || (count > 0 && selected >= count) {
                     return Err("portfolio selection is out of range".to_owned());
                 }
@@ -250,516 +302,4 @@ pub enum ShellCheckpoint {
 
 fn is_false(value: &bool) -> bool {
     !*value
-}
-
-#[derive(Deserialize, Default)]
-struct PortfolioSnapshot {
-    #[serde(default)]
-    fetched_at: String,
-    #[serde(default)]
-    repos: Vec<PortfolioRepo>,
-    error: Option<String>,
-}
-
-#[derive(Deserialize)]
-struct PortfolioRepo {
-    name: String,
-    description: Option<String>,
-    url: String,
-    homepage: Option<String>,
-    language: Option<String>,
-    stars: u64,
-    forks: u64,
-    open_issues: u64,
-    pushed_at: String,
-    latest_run: Option<PortfolioRun>,
-}
-
-#[derive(Deserialize)]
-struct PortfolioRun {
-    workflow: String,
-    branch: String,
-    status: String,
-    conclusion: Option<String>,
-    url: String,
-    updated_at: String,
-}
-
-struct PortfolioShell {
-    snapshot: PortfolioSnapshot,
-    selected: usize,
-    detail: bool,
-    native_fallback: bool,
-}
-
-impl PortfolioShell {
-    fn new(snapshot_json: &str, native_fallback: bool) -> Self {
-        let snapshot = serde_json::from_str(snapshot_json).unwrap_or_else(|_| PortfolioSnapshot {
-            error: Some("live portfolio data unavailable".to_owned()),
-            ..PortfolioSnapshot::default()
-        });
-        Self {
-            snapshot,
-            selected: 0,
-            detail: false,
-            native_fallback,
-        }
-    }
-
-    fn input(&mut self, ev: &KeyEvent) -> String {
-        let count = self.snapshot.repos.len();
-        match ev.key {
-            PhysicalKey::ArrowDown | PhysicalKey::J if count > 0 => {
-                self.selected = (self.selected + 1) % count;
-            }
-            PhysicalKey::ArrowUp | PhysicalKey::K if count > 0 => {
-                self.selected = (self.selected + count - 1) % count;
-            }
-            PhysicalKey::Home if count > 0 => self.selected = 0,
-            PhysicalKey::End if count > 0 => self.selected = count - 1,
-            PhysicalKey::Enter | PhysicalKey::NumpadEnter | PhysicalKey::ArrowRight
-                if count > 0 =>
-            {
-                self.detail = true
-            }
-            PhysicalKey::Escape | PhysicalKey::Backspace | PhysicalKey::ArrowLeft
-                if self.detail =>
-            {
-                self.detail = false
-            }
-            _ => return String::new(),
-        }
-        self.render()
-    }
-
-    fn render(&self) -> String {
-        let mut out = String::from("\x1b[2J\x1b[H");
-        out.push_str(&format!(
-            "  {VIOLET}{BOLD}phall.io{RESET}  {DIM}live systems console{RESET}\r\n"
-        ));
-        if self.native_fallback {
-            out.push_str(&format!(
-                "  {BOLD}Native shells are busy or unavailable.{RESET} This is the instant edge tour.\r\n"
-            ));
-        }
-        out.push_str(&format!(
-            "  {DIM}VISITOR · READ ONLY · powered by phux · refreshed {}{RESET}\r\n",
-            short_date(&self.snapshot.fetched_at)
-        ));
-        out.push_str("\r\n");
-
-        if let Some(error) = &self.snapshot.error {
-            out.push_str(&format!("  {DIM}{error}{RESET}\r\n"));
-            return out;
-        }
-        if self.snapshot.repos.is_empty() {
-            out.push_str(&format!(
-                "  {DIM}no public showcase repositories found{RESET}\r\n"
-            ));
-            return out;
-        }
-
-        if self.detail {
-            out.push_str(&self.render_detail());
-        } else {
-            out.push_str(&self.render_list());
-        }
-        out
-    }
-
-    fn render_list(&self) -> String {
-        let mut out = String::new();
-        out.push_str(&format!("  {DIM}PROJECT              STACK          LATEST AUTOMATION                 UPDATED{RESET}\r\n"));
-        out.push_str(&format!("  {DIM}──────────────────────────────────────────────────────────────────────────────────────────{RESET}\r\n"));
-        for (index, repo) in self.snapshot.repos.iter().enumerate() {
-            let selected = index == self.selected;
-            let marker = if selected { "▸" } else { " " };
-            let run = repo
-                .latest_run
-                .as_ref()
-                .map_or_else(|| "· no workflow run".to_owned(), run_label);
-            let row = format!(
-                "{marker} {:<20} {:<14} {:<33} {:<10}",
-                truncate(&repo.name, 20),
-                truncate(repo.language.as_deref().unwrap_or("—"), 14),
-                truncate(&run, 33),
-                short_date(&repo.pushed_at),
-            );
-            if selected {
-                out.push_str(&format!("\x1b[7m  {row:<94}\x1b[27m\r\n"));
-            } else {
-                out.push_str(&format!("  {row}\r\n"));
-            }
-        }
-        out.push_str("\r\n");
-        out.push_str(&format!("  {DIM}↑↓ / j k navigate   enter inspect   home/end jump   sessions expire automatically{RESET}\r\n"));
-        out
-    }
-
-    fn render_detail(&self) -> String {
-        let repo = &self.snapshot.repos[self.selected];
-        let mut out = String::new();
-        out.push_str(&format!(
-            "  {BOLD}{}{RESET}\r\n",
-            osc8(&repo.url, &repo.name)
-        ));
-        out.push_str(&format!(
-            "  {}\r\n\r\n",
-            repo.description.as_deref().unwrap_or("No description.")
-        ));
-        out.push_str(&format!(
-            "  language     {}\r\n",
-            repo.language.as_deref().unwrap_or("—")
-        ));
-        out.push_str(&format!("  stars        {}\r\n", repo.stars));
-        out.push_str(&format!("  forks        {}\r\n", repo.forks));
-        out.push_str(&format!("  open issues  {}\r\n", repo.open_issues));
-        out.push_str(&format!(
-            "  pushed       {}\r\n",
-            short_date(&repo.pushed_at)
-        ));
-        if let Some(homepage) = &repo.homepage {
-            out.push_str(&format!("  homepage     {}\r\n", osc8(homepage, homepage)));
-        }
-        if let Some(run) = &repo.latest_run {
-            out.push_str("\r\n");
-            out.push_str(&format!("  {DIM}LATEST AUTOMATION{RESET}\r\n"));
-            out.push_str(&format!(
-                "  {}  {}  {}  {}\r\n",
-                run_glyph(run),
-                run.workflow,
-                run.branch,
-                run_state(run)
-            ));
-            if !run.url.is_empty() {
-                out.push_str(&format!("  {}\r\n", osc8(&run.url, "open workflow run ↗")));
-            }
-            out.push_str(&format!("  updated {}\r\n", short_date(&run.updated_at)));
-        }
-        out.push_str("\r\n");
-        out.push_str(&format!("  {DIM}esc / ← back   links are clickable   GitHub access is structurally read-only{RESET}\r\n"));
-        out
-    }
-}
-
-fn run_glyph(run: &PortfolioRun) -> &'static str {
-    if run.status != "completed" {
-        "●"
-    } else if run.conclusion.as_deref() == Some("success") {
-        "✓"
-    } else {
-        "✗"
-    }
-}
-
-fn run_state(run: &PortfolioRun) -> String {
-    if run.status == "completed" {
-        run.conclusion
-            .clone()
-            .unwrap_or_else(|| "completed".to_owned())
-    } else {
-        run.status.replace('_', " ")
-    }
-}
-
-fn run_label(run: &PortfolioRun) -> String {
-    format!("{} {} · {}", run_glyph(run), run.workflow, run_state(run))
-}
-
-fn truncate(value: &str, width: usize) -> String {
-    if value.chars().count() <= width {
-        return value.to_owned();
-    }
-    value
-        .chars()
-        .take(width.saturating_sub(1))
-        .collect::<String>()
-        + "…"
-}
-
-fn short_date(value: &str) -> &str {
-    value.get(..10).unwrap_or(value)
-}
-
-fn osc8(url: &str, text: &str) -> String {
-    format!("\x1b]8;;{url}\x1b\\\x1b[4m{text}\x1b[24m\x1b]8;;\x1b\\")
-}
-
-/// Run a command line; return its VT output (commands end their own lines).
-fn run(line: &str) -> String {
-    if line.is_empty() {
-        return String::new();
-    }
-    let mut parts = line.split_whitespace();
-    let cmd = parts.next().unwrap_or("");
-    let args: Vec<&str> = parts.collect();
-
-    match cmd {
-        "help" => help(),
-        "ls" => fs_list(),
-        "cat" => cat(&args),
-        "pwd" => "/home/guest/phux\r\n".to_owned(),
-        "echo" => format!("{}\r\n", args.join(" ")),
-        "whoami" => "guest\r\n".to_owned(),
-        "uname" => "phux-edge (wasm) · Cloudflare Durable Object\r\n".to_owned(),
-        "clear" => "\x1b[2J\x1b[H".to_owned(),
-        "date" => "a fine day on the wire\r\n".to_owned(),
-        "demo" => demo(&args),
-        "" => String::new(),
-        other => format!("phux: {other}: command not found\r\n"),
-    }
-}
-
-fn help() -> String {
-    format!(
-        "{BOLD}phux demo shell{RESET} — a curated, OS-less terminal on the edge.\r\n\
-         \r\n\
-         {BOLD}demo{RESET}        the showcase: logo, truecolor, hyperlinks\r\n\
-         {BOLD}demo links{RESET}  OSC 8 hyperlinks + 24-bit truecolor\r\n\
-         {BOLD}demo glass{RESET}  a compact workspace + minimal prompt\r\n\
-         {BOLD}theme glass / default{RESET}  choose the prompt\r\n\
-         {BOLD}ls / cat{RESET}    poke around a tiny in-memory filesystem\r\n\
-         {BOLD}echo / pwd / whoami / uname / clear{RESET}\r\n\
-         \r\n\
-         {DIM}every byte here crosses the real phux wire — the browser renders\r\n\
-         it with the same libghostty engine native phux uses.{RESET}\r\n"
-    )
-}
-
-// ── a tiny in-memory filesystem ──────────────────────────────────────────────
-const FILES: &[(&str, &str)] = &[
-    (
-        "README",
-        "phux — a terminal is an object you spawn, observe, and drive over a wire.\r\n\
-         This demo runs that wire end-to-end, with the server living in a\r\n\
-         Cloudflare Durable Object (WASM) instead of a container.\r\n",
-    ),
-    (
-        "the-wire.txt",
-        "The same libghostty-vt engine runs on both ends, so Kitty graphics,\r\n\
-         OSC 8 hyperlinks, sixel, and 24-bit color pass through untouched.\r\n",
-    ),
-];
-
-fn fs_list() -> String {
-    let mut names: Vec<&str> = FILES.iter().map(|(n, _)| *n).collect();
-    names.sort_unstable();
-    format!("{}\r\n", names.join("   "))
-}
-
-fn cat(args: &[&str]) -> String {
-    let Some(name) = args.first() else {
-        return "cat: missing file operand\r\n".to_owned();
-    };
-    FILES.iter().find(|(n, _)| n == name).map_or_else(
-        || format!("cat: {name}: No such file\r\n"),
-        |(_, c)| (*c).to_owned(),
-    )
-}
-
-/// Intentional server output for an opt-in live glass workspace. This describes
-/// the real edge multiplexer/view contract, without claiming native processes.
-fn glass_workspace() -> String {
-    format!(
-        "\x1b[2J\x1b[H{ICE}phux / workspace{RESET}\r\n\
-        one session\r\n\
-        independent panes\r\n\
-        {QUIET_ICE}echo hello · ls · help{RESET}\r\n"
-    )
-}
-
-// ── the showcase ─────────────────────────────────────────────────────────────
-fn logo() -> String {
-    format!("  {VIOLET}{BOLD}▟█▙  phux{RESET}  {DIM}terminal control plane{RESET}\r\n")
-}
-
-fn demo(args: &[&str]) -> String {
-    match args.first().copied() {
-        Some("links") => links(),
-        Some("colors") => format!("{}\r\n", truecolor_bar()),
-        Some("logo") => format!("{}\r\n", logo()),
-        _ => {
-            // `demo` / `demo all`
-            let mut o = String::new();
-            o.push_str(&logo());
-            o.push_str("\r\n");
-            o.push_str(&links());
-            o
-        }
-    }
-}
-
-fn truecolor_bar() -> String {
-    let mut s = String::from("  truecolor: ");
-    for i in 0..40u32 {
-        let r = 40 + i * 5;
-        let g = 20 + i * 3;
-        let b = (90 + i * 4).min(255);
-        s.push_str(&format!("\x1b[48;2;{r};{g};{b}m \x1b[0m"));
-    }
-    s
-}
-
-fn links() -> String {
-    let osc8 =
-        |url: &str, text: &str| format!("\x1b]8;;{url}\x1b\\\x1b[4m{text}\x1b[24m\x1b]8;;\x1b\\");
-    format!(
-        "  {BOLD}OSC 8 hyperlinks + truecolor — passed through, not re-implemented:{RESET}\r\n\
-         \r\n\
-         {CYAN}  {}{RESET}\r\n\
-         {CYAN}  {}{RESET}\r\n\
-         {}\r\n",
-        osc8("https://phux.sh", "phux.sh"),
-        osc8("https://github.com/no-phux/phux", "github.com/no-phux/phux"),
-        truecolor_bar(),
-    )
-}
-
-#[cfg(test)]
-mod tests {
-    use super::{PortfolioShell, Shell};
-
-    #[test]
-    fn welcome_is_concise_and_keeps_real_ansi_output() {
-        let greeting = String::from_utf8(Shell::new("demo", "").greeting()).unwrap();
-        assert!(greeting.starts_with("\x1b[2J\x1b[H"));
-        assert!(greeting.contains("Welcome to phux."));
-        assert!(greeting.contains("to explore, then split a pane."));
-        assert!(!greeting.contains("served from the edge"));
-        assert!(!greeting.contains("try:"));
-        assert!(greeting.ends_with(" $ "));
-    }
-
-    #[test]
-    fn invalid_portfolio_data_fails_closed() {
-        let shell = PortfolioShell::new("not json", false);
-        assert!(shell.render().contains("live portfolio data unavailable"));
-    }
-
-    #[test]
-    fn portfolio_renders_only_supplied_repositories() {
-        let shell = PortfolioShell::new(
-            r#"{"schema":1,"owner":"phall1","fetched_at":"2026-07-11T00:00:00Z","repos":[{"name":"phui","description":"GitHub TUI","url":"https://github.com/phall1/phui","homepage":"https://phall.io","language":"TypeScript","stars":1,"forks":2,"open_issues":3,"pushed_at":"2026-07-11T00:00:00Z","latest_run":null}]}"#,
-            false,
-        );
-        let rendered = shell.render();
-        assert!(rendered.contains("phui"));
-        assert!(!rendered.contains("private-repo"));
-    }
-
-    #[test]
-    fn native_fallback_is_honest() {
-        let shell = PortfolioShell::new(
-            r#"{"schema":1,"owner":"phall1","fetched_at":"2026-07-11T00:00:00Z","repos":[]}"#,
-            true,
-        );
-        let rendered = shell.render();
-        assert!(rendered.contains("Native shells are busy or unavailable"));
-        assert!(rendered.contains("instant edge tour"));
-    }
-
-    #[test]
-    fn glass_workspace_is_opt_in_compact_real_output_without_color_bars() {
-        let mut shell = Shell::new("demo", "");
-        let output = String::from_utf8(shell.paste("demo glass\n").unwrap()).unwrap();
-        let screen = output.split("\x1b[2J\x1b[H").last().unwrap();
-        assert!(screen.contains("phux / workspace"));
-        assert!(screen.contains("one session"));
-        assert!(screen.contains("independent panes"));
-        assert!(screen.ends_with("›\x1b[0m "));
-        assert_eq!(screen.matches("\r\n").count(), 4);
-        // Strip SGR fields before measuring these deliberately narrow lines.
-        let mut visible = String::new();
-        let mut escape = false;
-        for ch in screen.chars() {
-            if ch == '\x1b' {
-                escape = true;
-                continue;
-            }
-            if escape {
-                if ch == 'm' {
-                    escape = false;
-                }
-                continue;
-            }
-            visible.push(ch);
-        }
-        assert!(visible.lines().all(|line| line.chars().count() <= 24));
-        for unwanted in [" $ ", "truecolor", "48;", "Linux", "CPU", "connected", "──"] {
-            assert!(
-                !screen.contains(unwanted),
-                "unexpected claim or decoration: {unwanted}"
-            );
-        }
-        assert!(
-            Shell::new("demo", "").prompt().ends_with(" $ "),
-            "other embeds keep their prompt"
-        );
-    }
-
-    #[test]
-    fn glass_theme_changes_prompt_only_and_preserves_real_commands() {
-        let mut shell = Shell::new("demo", "");
-        let output =
-            String::from_utf8(shell.paste("theme glass\necho hello\nls\n").unwrap()).unwrap();
-        assert!(output.contains("\x1b[2J\x1b[H"));
-        assert!(output.contains("hello\r\n"));
-        assert!(output.contains("README"));
-        assert!(
-            !output.contains("phux / workspace"),
-            "prompt-only theme stays quiet"
-        );
-        let restored = String::from_utf8(shell.paste("theme default\n").unwrap()).unwrap();
-        assert!(restored.ends_with(" $ "));
-    }
-
-    #[test]
-    fn glass_theme_survives_checkpoint_and_legacy_state_keeps_default() {
-        let mut shell = Shell::new("demo", "");
-        shell.paste("theme glass\necho pending").unwrap();
-        let saved = serde_json::to_string(&shell.checkpoint()).unwrap();
-        let mut restored = Shell::new("demo", "");
-        restored
-            .restore(serde_json::from_str(&saved).unwrap())
-            .unwrap();
-        assert!(restored.glass);
-        assert_eq!(restored.line, "echo pending");
-        assert!(
-            String::from_utf8(restored.greeting())
-                .unwrap()
-                .ends_with("›\x1b[0m echo pending")
-        );
-        let legacy = serde_json::from_str(r#"{"kind":"demo","line":"echo old"}"#).unwrap();
-        restored.restore(legacy).unwrap();
-        assert!(!restored.glass);
-        assert_eq!(
-            serde_json::to_string(&Shell::new("demo", "").checkpoint()).unwrap(),
-            r#"{"kind":"demo","line":""}"#
-        );
-    }
-
-    #[test]
-    fn theme_refusals_do_not_mutate_presentation_or_portfolio_modes() {
-        let mut shell = Shell::new("demo", "");
-        let output = String::from_utf8(shell.paste("theme neon\n").unwrap()).unwrap();
-        assert!(output.contains("theme: choose glass or default"));
-        assert!(!shell.glass);
-        shell.paste("theme glass\ntheme default extra\n").unwrap();
-        assert!(shell.glass);
-        assert!(
-            Shell::new("portfolio", "{}")
-                .paste("theme glass\n")
-                .is_err()
-        );
-    }
-
-    #[test]
-    fn explicit_color_demo_is_still_available_after_glass_opt_in() {
-        let mut shell = Shell::new("demo", "");
-        let output =
-            String::from_utf8(shell.paste("demo workspace\ndemo colors\n").unwrap()).unwrap();
-        assert!(shell.glass);
-        assert!(output.contains("truecolor:"));
-        assert!(output.contains("\x1b[48;2;"));
-    }
 }

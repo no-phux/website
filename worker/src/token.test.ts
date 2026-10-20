@@ -1,9 +1,21 @@
 import { describe, expect, test } from "bun:test";
-import { mintToken, verifyToken } from "./token";
+import { mintToken, newSessionId, verifyToken } from "./token";
 
 const secret = "test-session-token-secret";
 
 describe("session token scopes", () => {
+  test("an attach code stays short enough for the terminal QR", async () => {
+    const sid = newSessionId();
+    expect(sid).toMatch(/^[A-Za-z0-9_-]{16}$/);
+    const code = await mintToken(secret, {
+      sid,
+      exp: Date.now() + 60_000,
+      scope: "attach",
+    });
+    expect(code.length).toBeLessThan(60);
+    expect(await verifyToken(secret, code, "attach")).toMatchObject({ sid });
+  });
+
   test("a session token opens a session and nothing else", async () => {
     const token = await mintToken(secret, {
       sid: "session-1",

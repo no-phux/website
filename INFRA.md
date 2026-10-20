@@ -117,8 +117,11 @@ purely anti-abuse:
 
 A curated, OS-less interpreter (`edge/src/shell.rs`): line editing + a small
 command set (`help`, `ls`/`cat` over an in-memory FS, `echo`, `pwd`, `clear`,
-`demo` / `demo links`) that emits VT bytes — truecolor, OSC 8 hyperlinks, the
-phux logo. Not arbitrary execution (no `/bin/sh`), which is also why it's safe:
+`demo` / `demo links`, `phux pair`) that emits VT bytes — truecolor, OSC 8
+hyperlinks, the phux logo. `phux pair` renders the session's single-use pairing
+link as a QR in the terminal (the Worker passes the link in the session
+context); the demo opens with that command already at the prompt. Not arbitrary
+execution (no `/bin/sh`), which is also why it's safe:
 there's no process to break out of.
 
 Each pane is a separate terminal resource on the original WebSocket and session

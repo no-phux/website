@@ -52,7 +52,9 @@
 .mux-secure a { color: var(--terminal-muted); text-decoration: underline; text-underline-offset: 3px; }
 .mux-secure a:hover { color: var(--terminal-fg); }
 .mux-dialog .pterm { width: 100%; max-width: 100%; border-inline: 0; border-radius: 22px; }
-.mux-dialog .pterm-screen { margin-inline: 16px; border: 0; border-radius: 16px; background: transparent; }
+/* The demo's first command prints a QR, so the shell gets a taller viewport
+   than the landing poster. The geometry still caps at the 32-row prop. */
+.mux-dialog .pterm-screen { min-height: clamp(320px, 58svh, 512px); margin-inline: 16px; border: 0; border-radius: 16px; background: transparent; }
 .mux-dialog .pterm-head .mux-mode-row button,
 .mux-dialog .pterm-head .mux-close { border: 0; background: transparent; box-shadow: none; }
 .mux-dialog .pterm-head .mux-mode-row button[aria-pressed="true"] { color: var(--terminal-fg); background: transparent; box-shadow: none; }

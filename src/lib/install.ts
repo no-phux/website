@@ -15,7 +15,7 @@ export type InstallTarget = { id: "cli" | "desktop" | "mobile"; label: string; c
 export const installTargets: InstallTarget[] = [
   { id: "cli", label: "CLI", command: cliInstall, note: "macOS and Linux · installs phux and phux-mcp" },
   { id: "desktop", label: "Desktop", command: desktopInstall, note: "Apple-silicon macOS · installs the CLI too, then opens Phux.app" },
-  { id: "mobile", label: "Mobile", command: "", note: "No install: open the demo, scan its code, drive the shell from your phone. App in TestFlight." },
+  { id: "mobile", label: "Mobile", command: "", note: "No install: open the demo, press Enter, scan the QR. Drive the shell from your phone. App in TestFlight." },
 ];
 
 /** The same installer, told to print its plan and install nothing. */

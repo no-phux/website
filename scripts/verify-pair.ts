@@ -75,16 +75,21 @@ async function liveTerminal(page: Page) {
 }
 
 /**
- * Open the hosted shell from the landing page. The dialog is opened by a
- * hydrated island's document listener, so the click has to come after hydration:
- * before that the link falls through to its href (/embed, sign-in mode).
+ * Open the hosted shell from the classic landing page. The dialog is opened by
+ * a hydrated island's document listener, so the click has to come after
+ * hydration: before that the link falls through to its href (/embed).
  */
 async function openHostedShell(page: Page) {
   await page.goto(BASE);
-  await page.locator("astro-island:not([ssr])").first().waitFor({ timeout: 20_000 });
-  await page.getByRole("link", { name: /Try it in your browser/ }).click();
+  await page.locator("astro-island:not([ssr]) .tour-entry").waitFor({ timeout: 20_000 });
+  await page.locator(".tour-entry").click();
   await page.locator("dialog[open]").waitFor({ timeout: 10_000 });
   await liveTerminal(page);
+}
+
+/** The pairing link the shell printed, with ANSI styling stripped by the regex. */
+function printedLink(output: string): string | null {
+  return output.match(/https?:\/\/[^\s\u001b]+\/phone#[A-Za-z0-9._~-]+/)?.[0] ?? null;
 }
 
 async function useLocalAssets(context: BrowserContext) {
@@ -106,27 +111,40 @@ try {
   await openHostedShell(wide);
   report("desktop: hosted shell is live", true);
 
-  // The pairing line appears with the session envelope, before anyone asks.
-  await wide.getByRole("button", { name: /Pair your phone/ }).click();
+  // The shell opens with the real command already at the prompt. Pressing
+  // Enter is the whole first step.
+  report(
+    "desktop: the demo opens with `phux pair` ready",
+    await waitFor(() => desktopText().includes("phux pair"), "the prepped command"),
+  );
+  const canvas = wide.locator("canvas[data-phux-pane-count]").first();
+  await canvas.click();
+  await wide.keyboard.press("Enter");
+  report(
+    "desktop: Enter prints a pairing QR in the terminal",
+    await waitFor(
+      () => desktopText().includes("\u001b[47m\u001b[30m") && printedLink(desktopText()) !== null,
+      "the QR and its link",
+    ),
+  );
+  const link = printedLink(desktopText())!;
+  const expectedPrefix = `${BASE}/phone#`;
+  report("desktop: the printed link points at the phone page", link.startsWith(expectedPrefix));
+  if (!link.startsWith(expectedPrefix)) throw new Error("no usable pairing link");
+  report("desktop: the code rides in the fragment, never the query", !link.includes("?"));
+
+  // The panel remains the copy/status surface, and must agree with the shell.
+  await wide.getByRole("button", { name: /Pair phone/ }).click();
   const qr = wide.locator(".mux-pair-code svg");
   await qr.waitFor({ timeout: 10_000 });
-  report("desktop: the pairing panel renders a code", await qr.isVisible());
+  report("desktop: the pairing panel renders the same code", await qr.isVisible());
   report(
     "desktop: the panel waits for the phone",
     /Waiting for your phone/.test(await wide.locator(".mux-pair-state").innerText()),
   );
-
   await wide.getByRole("button", { name: /Copy link/ }).click();
-  const link = await wide.evaluate(() => navigator.clipboard.readText());
-  const expectedPrefix = `${BASE}/phone#`;
-  report("desktop: the pairing link points at the phone page", link.startsWith(expectedPrefix));
-  if (!link.startsWith(expectedPrefix)) throw new Error("no usable pairing link");
-  report("desktop: the code rides in the fragment, never the query", !link.includes("?"));
-  const originalQr = await qr.innerHTML();
-  await wide.locator(".mux-mode-row").getByRole("button", { name: "Demo", exact: true }).click();
-  report("desktop: reselecting the active runtime preserves pairing",
-    await wide.locator(".mux-pair-toggle").getAttribute("aria-expanded") === "true" &&
-    await qr.innerHTML() === originalQr);
+  const panelLink = await wide.evaluate(() => navigator.clipboard.readText());
+  report("desktop: the panel copies the shell's link", panelLink === link);
 
   // The phone: a coarse pointer, a small viewport, no install and no sign-in.
   const phone = await browser.newContext({
@@ -141,12 +159,17 @@ try {
   await liveTerminal(handset);
   report("phone: the paired shell renders", await handset.locator(".pterm").first().isVisible());
   report(
+    "phone: the app is one tap away",
+    await handset.locator(".phone-app").isVisible() &&
+      (await handset.locator(".phone-app").getAttribute("href")) === "/more#testflight",
+  );
+  report(
     "phone: the code leaves the address bar after it is spent",
     !handset.url().includes("#"),
   );
   report(
     "phone: no pairing panel on the paired view",
-    (await handset.getByRole("button", { name: /Pair your phone/ }).count()) === 0,
+    (await handset.getByRole("button", { name: /Pair phone/ }).count()) === 0,
   );
 
   report(
@@ -178,8 +201,8 @@ try {
   await wide.getByRole("button", { name: "Launch edge WASM shell", exact: true }).click();
   await liveTerminal(wide);
   report("desktop: a new session starts with a collapsed, fresh pairing panel",
-    await wide.getByRole("button", { name: /Pair your phone/ }).getAttribute("aria-expanded") === "false");
-  await wide.getByRole("button", { name: /Pair your phone/ }).click();
+    await wide.getByRole("button", { name: /Pair phone/ }).getAttribute("aria-expanded") === "false");
+  await wide.getByRole("button", { name: /Pair phone/ }).click();
   await wide.getByRole("button", { name: /Copy link/ }).click();
   const freshLink = await wide.evaluate(() => navigator.clipboard.readText());
   report("desktop: the replacement session cannot reuse the spent link", freshLink.startsWith(expectedPrefix) && freshLink !== link);

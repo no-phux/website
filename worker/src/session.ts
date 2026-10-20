@@ -53,6 +53,11 @@ interface BootRecord {
    * session, handed only to the view that opened it, spent on first use.
    */
   pair?: PairRecord;
+  /**
+   * The site page the pairing QR opens (`https://phux.sh/phone`). The edge
+   * shell prints `<page>#<code>` when the visitor runs `phux pair`.
+   */
+  pairPage?: string;
 }
 
 interface SocketAttachment {
@@ -80,6 +85,38 @@ function ensureWasm(): Promise<void> {
 function positiveInt(value: string, fallback: number): number {
   const parsed = Number.parseInt(value, 10);
   return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
+}
+
+/** A configured page must be an absolute http(s) URL; never echo anything else. */
+function validPairPage(value: string | undefined): string | undefined {
+  if (!value) return undefined;
+  try {
+    const url = new URL(value);
+    if (url.protocol !== "https:" && url.protocol !== "http:") return undefined;
+    if (url.search || url.hash) return undefined;
+    return url.toString().replace(/\/+$/, "");
+  } catch {
+    return undefined;
+  }
+}
+
+/**
+ * The edge shell's session context. The portfolio modes already pass their
+ * snapshot; the demo gains the pairing link, which the curated `phux pair`
+ * command renders as a QR on demand. A spent or expired code is not offered
+ * again on a restore.
+ */
+function sessionContext(boot: BootRecord): string {
+  const context: Record<string, unknown> = boot.snapshot ? { ...boot.snapshot } : {};
+  if (
+    boot.pair &&
+    boot.pairPage &&
+    boot.pair.claimedAt === undefined &&
+    boot.pair.expiresAt > Date.now()
+  ) {
+    context.pair = { link: `${boot.pairPage}#${boot.pair.code}` };
+  }
+  return Object.keys(context).length > 0 ? JSON.stringify(context) : "";
 }
 
 function attachment(ws: WebSocket): SocketAttachment | null {
@@ -111,6 +148,7 @@ export class SessionDO extends DurableObject<Env> {
     mode: DemoMode,
     snapshot?: PortfolioSnapshot,
     fallbackReason?: PublicFallbackReason,
+    pairPage?: string,
   ): Promise<void> {
     if (await this.ctx.storage.get<BootRecord>(BOOT_KEY)) {
       throw new Error("session was already prepared");
@@ -142,6 +180,7 @@ export class SessionDO extends DurableObject<Env> {
         }),
         expiresAt: pairExpiresAt,
       },
+      pairPage: validPairPage(pairPage),
     };
     await this.ctx.storage.put(BOOT_KEY, boot);
   }
@@ -391,11 +430,11 @@ export class SessionDO extends DurableObject<Env> {
   private async edgeSession(boot: BootRecord): Promise<EdgeSession> {
     if (this.session) return this.session;
     await ensureWasm();
-    const snapshot = boot.snapshot ? JSON.stringify(boot.snapshot) : "";
+    const context = sessionContext(boot);
     const checkpoint = await this.ctx.storage.get<string>(CHECKPOINT_KEY);
     this.session = checkpoint
-      ? EdgeSession.restore(checkpoint, boot.mode, snapshot)
-      : new EdgeSession(100, 24, boot.mode, snapshot);
+      ? EdgeSession.restore(checkpoint, boot.mode, context)
+      : new EdgeSession(100, 24, boot.mode, context);
     return this.session;
   }
 
