@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, spyOn, test } from "bun:test";
-import { mkdtemp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
+import { mkdtemp, mkdir, readdir, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { discover, type Entry } from "./docs-catalog";
@@ -78,6 +78,33 @@ describe("documentation discovery interface", () => {
   test("fails visibly for an uncatalogued authored flat page", async () => {
     await source("future-guide.md");
     await expect(discover(docs)).rejects.toThrow("uncatalogued documentation: docs/future-guide.md; add it to ORIENTATION and navigation");
+  });
+
+  test("a denylisted flat page does not excuse another uncatalogued page", async () => {
+    await source("substrate.md");
+    await source("future-guide.md");
+    await expect(discover(docs)).rejects.toThrow("uncatalogued documentation: docs/future-guide.md; add it to ORIENTATION and navigation");
+  });
+
+  test("excludes the internal substrate doc and emits no page or link to it", async () => {
+    await source("substrate.md", "# Internal\n\nKeep off the site.\n");
+    await source(
+      "architecture.md",
+      "# Architecture\n\nA public summary.\n\n## Detail\n\nSee the [record](./substrate.md#cut) and [remote](./remote.md).\n\n[hidden]: ./substrate.md\n",
+    );
+    await source("remote.md");
+    const { entries, excluded } = await discover(docs);
+    expect(entries.map(({ repoPath }) => repoPath)).not.toContain("docs/substrate.md");
+    expect(entries.map(({ slug }) => slug)).not.toContain("substrate");
+    expect(excluded).toContain("docs/substrate.md (denylist)");
+    const out = join(root, "out");
+    await mkdir(out);
+    expect(await writeDocumentation(out, entries, revision, versions, siteRevision)).toEqual({ written: 3, failed: [] });
+    const architecture = await readFile(join(out, "architecture.md"), "utf8");
+    expect(architecture).toContain("See the record and [remote](/remote).");
+    expect(architecture).not.toMatch(/substrate\.md|\/substrate/);
+    expect(await readdir(out)).not.toContain("substrate.md");
+    expect(JSON.stringify(await metadata(out, "(contribute)"))).not.toContain("substrate");
   });
 
   test("still excludes draft/scratch flat pages, including unknown work in progress", async () => {

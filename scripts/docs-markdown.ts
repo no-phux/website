@@ -1,6 +1,6 @@
 /** Source-page presentation and immutable, catalog-aware Markdown links. */
 import { dirname, join } from "node:path";
-import { GROUPS, parseFrontmatter, type Entry } from "./docs-catalog";
+import { GROUPS, isDeniedDocumentation, parseFrontmatter, type Entry } from "./docs-catalog";
 
 export interface Versions { protocolVersion: string; projectVersion: string }
 
@@ -86,6 +86,25 @@ function unhostedFile(path: string, resolved: string, anchor: string, blob: stri
   return null;
 }
 
+function isDeniedHref(href: string, fromDir: string): boolean {
+  if (/^(https?:\/\/|#|mailto:)/.test(href)) return false;
+  const { path } = splitHref(href);
+  if (!path) return false;
+  return isDeniedDocumentation(normalizeRepoPath(join(fromDir, path)));
+}
+
+/** Drop links to denylisted sources. The label stays; the target does not. */
+function stripDeniedLinks(body: string, fromDir: string): string {
+  const inline = body.replace(/(!?)\[([^\]]*)\]\(([^)\s]+)\)/g, (whole, bang, label, href) => {
+    if (!isDeniedHref(href, fromDir)) return whole;
+    return bang ? "" : label;
+  });
+  return inline.replace(/^[ \t]*\[[^\]]+\]:[ \t]*\S+[^\n]*(?:\n|$)/gm, (line) => {
+    const href = line.match(/\]:[ \t]*(\S+)/)?.[1];
+    return href && isDeniedHref(href, fromDir) ? "" : line;
+  });
+}
+
 /** A rewriter owns its route tables; concurrent producers cannot overwrite them. */
 function createLinkRewriter(entries: Entry[], revision: string) {
   const byPath = new Map<string, string>();
@@ -116,7 +135,8 @@ function createLinkRewriter(entries: Entry[], revision: string) {
     const fromDir = dirname(repoPath);
     // Keep the existing inline/reference-definition passes byte-for-byte in
     // scope: this is not a Markdown parser or a renderer behavior change.
-    let out = body.replace(/(\]\()([^)\s]+)(\))/g, (whole, open, href, close) => {
+    let out = stripDeniedLinks(body, fromDir);
+    out = out.replace(/(\]\()([^)\s]+)(\))/g, (whole, open, href, close) => {
       const next = resolveHref(href, fromDir);
       return next === null ? whole : `${open}${next}${close}`;
     });
