@@ -30,7 +30,7 @@ export function pageTitle(topic: string): string {
 
 // Shared by the visible docs landing and its searchable Markdown representation.
 export const OVERVIEW = {
-  title: "Get started",
+  title: "Overview",
   summary: "Detach without stopping your shell. Return to it, or let an agent inspect it.",
   pitch: {
     headline: "Leave the view. Keep the shell.",

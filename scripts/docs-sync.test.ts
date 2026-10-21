@@ -34,7 +34,7 @@ async function metadata(out: string, folder = "") {
   return JSON.parse(await readFile(join(out, folder, "meta.json"), "utf8"));
 }
 
-const entry: Entry = { repoPath: "docs/clients.md", abs: "/unused", slug: "clients", group: "use", order: 4 };
+const entry: Entry = { repoPath: "docs/clients.md", abs: "/unused", slug: "clients", group: "connect", order: 1 };
 
 function render(body: string, entries = [entry]) {
   return createPageRenderer(entries, revision, versions)(body, entry);
@@ -50,8 +50,8 @@ describe("documentation discovery interface", () => {
     await source("adr/old-decision.md");
     const { entries, excluded } = await discover(docs);
     expect(entries.map(({ slug }) => slug).sort()).toEqual(["docs", "installation", ...guides].sort());
-    expect(entries.find(({ slug }) => slug === "installation")).toMatchObject({ repoPath: "docs/install.md", group: "start", order: 1 });
-    expect(entries.find(({ slug }) => slug === "organization")).toMatchObject({ group: "internals", order: 1 });
+    expect(entries.find(({ slug }) => slug === "installation")).toMatchObject({ repoPath: "docs/install.md", group: "start", order: 2 });
+    expect(entries.find(({ slug }) => slug === "organization")).toMatchObject({ group: "internals", order: 2 });
     expect(excluded).toEqual([]);
     expect(warning).toHaveBeenCalledWith("  skip (missing): docs/clients.md");
   });
@@ -183,9 +183,9 @@ describe("collection output interface", () => {
     expect(await readFile(join(out, "config.md"), "utf8")).toContain('sourcePath: "docs/config.md"');
     expect(await readFile(join(out, "reference/index.md"), "utf8")).toContain('sourcePath: "docs/reference/README.md"');
     expect(await metadata(out, "reference")).toEqual({ title: "Reference", pages: ["index", "cli", "config", "zebra"] });
-    // One flat list from the catalog: the docs index leads its group, not the last one.
+    // One flat list from the catalog: the overview leads, the all-docs map closes Get started.
     expect(await metadata(out)).toEqual({
-      pages: ["---Get started---", "overview", "docs", "installation", "---Use phux---", "config", "---Reference---", "...reference"],
+      pages: ["---Get started---", "overview", "installation", "docs", "---Customize---", "config", "---Reference---", "...reference"],
     });
     const overview = await readFile(join(out, "overview.md"), "utf8");
     expect(overview).toContain(`sourcePath: "src/pages/overview.astro"\nsourceBase: "https://github.com/no-phux/website"\nsourceRevision: "${siteRevision}"`);

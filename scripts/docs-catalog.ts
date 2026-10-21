@@ -5,7 +5,10 @@ import { basename, dirname, join, relative } from "node:path";
 /** Nav groups, in sidebar render order. */
 export const GROUPS = {
   start: "Get started",
-  use: "Use phux",
+  customize: "Customize",
+  automate: "Automate",
+  connect: "Machines and clients",
+  help: "Help",
   reference: "Reference",
   internals: "Work on phux",
 } as const;
@@ -51,28 +54,42 @@ export function parseFrontmatter(raw: string): SourceFm {
  * The hand-written pages, in nav order. Path is relative to DOCS_DIR.
  */
 const ORIENTATION: { file: string; slug: string; group: Group; order: number }[] = [
-  { file: "README.md", slug: "docs", group: "start", order: 0 },
-  { file: "install.md", slug: "installation", group: "start", order: 1 },
-  { file: "getting-started.md", slug: "getting-started", group: "start", order: 2 },
-  { file: "concepts.md", slug: "concepts", group: "start", order: 3 },
-  { file: "compare.md", slug: "compare", group: "start", order: 4 },
-  { file: "config.md", slug: "config", group: "use", order: 0 },
-  { file: "scripting.md", slug: "scripting", group: "use", order: 1 },
-  { file: "agents.md", slug: "agents", group: "use", order: 2 },
-  { file: "acp.md", slug: "acp", group: "use", order: 3 },
-  { file: "remote.md", slug: "remote", group: "use", order: 4 },
-  { file: "clients.md", slug: "clients", group: "use", order: 5 },
-  { file: "desktop-capture.md", slug: "desktop-capture", group: "use", order: 6 },
-  { file: "desktop-changes.md", slug: "desktop-changes", group: "use", order: 7 },
-  { file: "desktop-panes.md", slug: "desktop-panes", group: "use", order: 8 },
-  { file: "troubleshooting.md", slug: "troubleshooting", group: "use", order: 9 },
+  { file: "README.md", slug: "docs", group: "start", order: 9 },
+  { file: "install.md", slug: "installation", group: "start", order: 2 },
+  { file: "getting-started.md", slug: "getting-started", group: "start", order: 3 },
+  { file: "concepts.md", slug: "concepts", group: "start", order: 4 },
+  { file: "compare.md", slug: "compare", group: "start", order: 5 },
+  { file: "config.md", slug: "config", group: "customize", order: 0 },
+  { file: "keys.md", slug: "keys", group: "customize", order: 1 },
+  { file: "themes.md", slug: "themes", group: "customize", order: 2 },
+  { file: "status-bar.md", slug: "status-bar", group: "customize", order: 3 },
+  { file: "hooks.md", slug: "hooks", group: "customize", order: 4 },
+  { file: "plugins.md", slug: "plugins", group: "customize", order: 5 },
+  { file: "projects.md", slug: "projects", group: "customize", order: 6 },
+  { file: "scripting.md", slug: "scripting", group: "automate", order: 0 },
+  { file: "agents.md", slug: "agents", group: "automate", order: 1 },
+  { file: "acp.md", slug: "acp", group: "automate", order: 2 },
+  { file: "remote.md", slug: "remote", group: "connect", order: 0 },
+  { file: "clients.md", slug: "clients", group: "connect", order: 1 },
+  { file: "desktop-capture.md", slug: "desktop-capture", group: "connect", order: 2 },
+  { file: "desktop-changes.md", slug: "desktop-changes", group: "connect", order: 3 },
+  { file: "desktop-panes.md", slug: "desktop-panes", group: "connect", order: 4 },
+  { file: "troubleshooting.md", slug: "troubleshooting", group: "help", order: 0 },
   { file: "architecture.md", slug: "architecture", group: "internals", order: 0 },
-  { file: "organization.md", slug: "organization", group: "internals", order: 1 },
-  { file: "protocol.md", slug: "protocol", group: "internals", order: 2 },
-  { file: "embedding.md", slug: "embedding", group: "internals", order: 3 },
-  { file: "development.md", slug: "development", group: "internals", order: 4 },
-  { file: "releasing.md", slug: "releasing", group: "internals", order: 5 },
-  { file: "substrate.md", slug: "substrate", group: "internals", order: 6 },
+  { file: "decisions.md", slug: "decisions", group: "internals", order: 1 },
+  { file: "organization.md", slug: "organization", group: "internals", order: 2 },
+  { file: "protocol.md", slug: "protocol", group: "internals", order: 3 },
+  { file: "compatibility.md", slug: "compatibility", group: "internals", order: 4 },
+  { file: "embedding.md", slug: "embedding", group: "internals", order: 5 },
+  { file: "development.md", slug: "development", group: "internals", order: 6 },
+  { file: "releasing.md", slug: "releasing", group: "internals", order: 7 },
+  { file: "substrate.md", slug: "substrate", group: "internals", order: 8 },
+];
+
+/** Reading order of the generated reference pages; unlisted ones follow alphabetically. */
+const REFERENCE_ORDER = [
+  "cli.md", "config.md", "keys.md", "actions.md", "widgets.md", "hooks.md",
+  "environment.md", "exit-codes.md", "files.md", "kinds.md", "parity.md", "deprecations.md",
 ];
 
 /**
@@ -184,10 +201,19 @@ async function discoverOrientation(docsDir: string, excluded: string[]): Promise
   return entries;
 }
 
+/** Position in REFERENCE_ORDER; unlisted files sort after the listed ones. */
+function referenceRank(abs: string): number {
+  const rank = REFERENCE_ORDER.indexOf(basename(abs));
+  return rank === -1 ? REFERENCE_ORDER.length : rank;
+}
+
 function compareNavOrder(a: Candidate, b: Candidate): number {
   const na = navOrder(a.meta);
   const nb = navOrder(b.meta);
   if (na !== nb) return na < nb ? -1 : 1;
+  const ra = referenceRank(a.abs);
+  const rb = referenceRank(b.abs);
+  if (ra !== rb) return ra - rb;
   return basename(a.abs).localeCompare(basename(b.abs));
 }
 

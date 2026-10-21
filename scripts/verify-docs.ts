@@ -89,11 +89,12 @@ async function verifyReaderShell(page: Page, base: string) {
   await page.setViewportSize({ width: 1280, height: 900 });
   await page.goto(`${base}/config`);
   const sidebar = page.locator(".reader-sidebar");
-  assert.equal(await sidebar.locator('a[aria-current="page"]').textContent(), "Configuration");
+  assert.equal(await sidebar.locator('a[aria-current="page"]').textContent(), (await page.locator("h1").first().textContent())?.trim());
   const firstGroup = await sidebar.locator(".reader-nav-group").first().locator(".reader-nav-link").evaluateAll(
     (links) => links.map((link) => link.getAttribute("href")),
   );
-  assert.deepEqual(firstGroup.slice(0, 2), ["/overview", "/docs"], "the docs index leads Get started, after the overview");
+  assert.deepEqual(firstGroup.slice(0, 2), ["/overview", "/installation"], "the overview leads Get started, then install");
+  assert.equal(firstGroup.at(-1), "/docs", "the all-docs map closes Get started");
   assert.ok(await sidebar.getByRole("list", { name: "On this page" }).locator("a").count() > 2, "active page shows its outline");
   await page.keyboard.press("/");
   await page.getByRole("dialog").locator("input").waitFor();
