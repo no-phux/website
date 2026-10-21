@@ -1,0 +1,101 @@
+<section aria-labelledby="tailscale">
+  <h2 id="tailscale">optional Tailscale setup (iOS)</h2>
+  <p>
+    If you choose Tailscale setup to find your computers, the iOS app
+    starts an embedded Tailscale node and asks you to sign in to your
+    Tailscale account. This is separate from an optional phux account.
+    The node contacts Tailscale's control service to read your tailnet's
+    device list. It runs while the device picker is open, not as the
+    transport for your terminal sessions; those use your phone's own
+    network connection or Tailscale tunnel.
+  </p>
+  <p>
+    Tailscale receives the node's name (host name), public keys, IP
+    addresses, and network and operating-system metadata, associated with
+    your Tailscale account. This is a persistent node, not an ephemeral
+    one. Its identity and authentication state are saved locally outside
+    device backups so you do not have to sign in each time. The app
+    disables Tailscale log uploads, but that does not prevent the identity
+    and metadata exchange needed to join your tailnet.
+  </p>
+  <p>
+    Signing out of Tailscale setup attempts to reset authentication on a
+    running node, then removes its local state. Closing the picker only
+    stops the node; it does not erase that state. Neither action guarantees
+    deletion of the node record or other data held by Tailscale. Manage the
+    node in your Tailscale admin console; Tailscale's handling and retention
+    of its records are governed by its
+    <a href="https://tailscale.com/privacy-policy" target="_blank" rel="noopener">privacy policy</a>.
+  </p>
+</section>
+
+<section aria-labelledby="device">
+  <h2 id="device">what stays on your device</h2>
+  <p>
+    Saved servers, preferences, and app settings are stored locally. The
+    apps include no analytics or crash-reporting SDK. Specific device
+    features are used only when you invoke them:
+  </p>
+  <ul>
+    <li>
+      <strong>Camera</strong>: to scan a pairing QR code. On Android,
+      scanning uses the Google Play services code scanner, and the app
+      receives only the decoded link.
+    </li>
+    <li>
+      <strong>Microphone and speech recognition</strong> (iOS): to dictate
+      a message. Transcription runs on your device.
+    </li>
+    <li>
+      <strong>Face ID</strong> (iOS): to unlock the app when you turn on
+      the optional app lock.
+    </li>
+    <li>
+      <strong>Local network</strong>: to reach your phux server.
+    </li>
+  </ul>
+  <p>
+    Notifications that a session needs your attention can be generated
+    locally on your device. In iOS builds configured for account-backed
+    push, remote notifications use Apple's Push Notification service
+    (APNs). Registration requires both a signed-in phux account and active
+    Pro access. Where enabled, the app sends its APNs device token and a
+    push grant to the account backend to route notifications to that
+    device. The free iOS release has no account or subscription backend,
+    so this push path is inactive; builds using the no-op registry send
+    no registration to an account backend.
+  </p>
+  <p>
+    On iOS, the app keeps Apple's MetricKit performance and hang reports
+    in its own storage, capped at the 60 most recent files and excluded
+    from backups. They contain timing and system diagnostics, not terminal
+    content, and are not uploaded. The app's support report is sent only
+    if you share it yourself. You can read it before you share it, and it
+    excludes server names, tokens, account data, and terminal content.
+  </p>
+  <p>
+    On Android, if you have turned on device backup, Android may include
+    the app's local data in your Google account backup. That backup is
+    between you and Google.
+  </p>
+</section>
+
+<section aria-labelledby="updates">
+  <h2 id="updates">iOS update checks</h2>
+  <p>
+    The iOS app checks for newer versions through the channel it was
+    installed from. App Store builds query Apple's public lookup service
+    at <code>itunes.apple.com</code>, sending the app's bundle ID and,
+    when available, a country code. TestFlight builds request
+    <code>https://phux.sh/api/ios/release</code>, which returns available
+    beta versions. Development builds do not make these update checks.
+  </p>
+  <p>
+    The receiving service sees your IP address and ordinary HTTP request
+    metadata. Requests to <code>phux.sh</code> are subject to the
+    <a href="#website">website processing</a> described below. These
+    checks do not send terminal content, pairing tokens, or your phux
+    account identity. Updates themselves are installed through the App
+    Store or TestFlight.
+  </p>
+</section>

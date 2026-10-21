@@ -7,10 +7,11 @@
 // When any of those change what is collected, change this page in the same
 // release and bump LAST_UPDATED.
 import BaseLayout from "../layouts/BaseLayout.astro";
+import MobileDevicePrivacy from "../components/privacy/MobileDevicePrivacy.astro";
 import { SITE } from "../lib/site";
 import "../styles/privacy.css";
 
-const LAST_UPDATED = "2026-10-19";
+const LAST_UPDATED = "2026-10-21";
 const CONTACT = "privacy@phall.io";
 const title = `${SITE.name} — Privacy policy`;
 const description =
@@ -84,49 +85,7 @@ const description =
       </p>
     </section>
 
-    <section aria-labelledby="device">
-      <h2 id="device">what stays on your device</h2>
-      <p>
-        Saved servers, preferences, and app settings are stored locally. The
-        apps include no analytics or crash-reporting SDK. Specific device
-        features are used only when you invoke them:
-      </p>
-      <ul>
-        <li>
-          <strong>Camera</strong>: to scan a pairing QR code. On Android,
-          scanning uses the Google Play services code scanner, and the app
-          receives only the decoded link.
-        </li>
-        <li>
-          <strong>Microphone and speech recognition</strong> (iOS): to dictate
-          a message. Transcription runs on your device.
-        </li>
-        <li>
-          <strong>Face ID</strong> (iOS): to unlock the app when you turn on
-          the optional app lock.
-        </li>
-        <li>
-          <strong>Local network</strong>: to reach your phux server.
-        </li>
-      </ul>
-      <p>
-        Notifications that a session needs your attention are generated on
-        your device. The apps are not set up to receive push notifications.
-      </p>
-      <p>
-        On iOS, the app keeps Apple's MetricKit performance and hang reports
-        in its own storage, capped at the 60 most recent files and excluded
-        from backups. They contain timing and system diagnostics, not terminal
-        content, and are not uploaded. The app's support report is sent only
-        if you share it yourself. You can read it before you share it, and it
-        excludes server names, tokens, account data, and terminal content.
-      </p>
-      <p>
-        On Android, if you have turned on device backup, Android may include
-        the app's local data in your Google account backup. That backup is
-        between you and Google.
-      </p>
-    </section>
+    <MobileDevicePrivacy />
 
     <section aria-labelledby="account">
       <h2 id="account">optional account</h2>
@@ -327,9 +286,10 @@ const description =
             <tr><th scope="col">Provider</th><th scope="col">What it does</th></tr>
           </thead>
           <tbody>
-            <tr><td>Apple, Google</td><td>App distribution, TestFlight beta invites, in-app purchases, Sign in with Apple, Google sign-in for the hosted shell</td></tr>
+            <tr><td>Apple, Google</td><td>App distribution, TestFlight beta invites, in-app purchases, Sign in with Apple, Google sign-in for the hosted shell; Apple also provides iOS push delivery where enabled and App Store update lookups</td></tr>
             <tr><td>RevenueCat</td><td>Subscription status</td></tr>
-            <tr><td>Supabase</td><td>Optional account and settings sync</td></tr>
+            <tr><td>Supabase</td><td>Optional account, settings sync, and push registration where enabled</td></tr>
+            <tr><td><a href="https://tailscale.com/privacy-policy" target="_blank" rel="noopener">Tailscale</a></td><td>Optional iOS tailnet discovery; node identity and network metadata associated with your Tailscale account</td></tr>
             <tr><td>Paddle</td><td>Web purchases, where offered</td></tr>
             <tr><td>Cloudflare</td><td>Website hosting, hosted shell, website analytics storage</td></tr>
             <tr><td>GitHub</td><td>Sign-in for the hosted shell, software downloads</td></tr>
