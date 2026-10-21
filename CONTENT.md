@@ -44,8 +44,9 @@ decisions a prerequisite for starting a terminal.
 
 `/overview` is the primary documentation home. `/docs` remains the complete
 addressable documentation index, not a competing start button. Navigation
-metadata is generated in `scripts/sync-docs.ts`. Task folders reference the
-existing documents, preserving public URLs and their canonical sources.
+is derived from the catalog (`GROUPS` and `ORIENTATION` in
+`scripts/docs-catalog.ts`) by `scripts/docs-output.ts`: one labelled section per
+group, pages by `order`, public URLs and canonical sources unchanged.
 
 - **Start here:** supported installation, first terminal, essential concepts,
   and the translation from tmux.

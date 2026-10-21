@@ -9,24 +9,8 @@ const FOLDER_TITLES: Record<string, string> = {
   reference: "Reference",
 };
 
-// Fumadocs supports references to pages outside a folder. These virtual
-// folders give each page one navigational home while preserving its URL.
-const TASK_GROUPS = [
-  {
-    folder: "(start)", title: "Start here", defaultOpen: true,
-    pages: ["../installation", "../getting-started", "../concepts", "../compare"],
-  },
-  {
-    folder: "(use)", title: `Use ${SITE.name}`,
-    pages: ["../config", "../scripting", "../agents", "../acp", "../remote", "../clients", "../desktop-capture", "../desktop-changes", "../desktop-panes", "../troubleshooting"],
-  },
-  {
-    folder: "(contribute)", title: "Work on phux",
-    pages: ["../architecture", "../organization", "../protocol", "../embedding", "../development", "../releasing", "../substrate", "../docs"],
-  },
-];
-
-const ROOT_PAGES = ["overview", "(start)", "(use)", "reference", "(contribute)"];
+/** The website-owned overview leads the catalog's first group. */
+const OVERVIEW_ITEM = { name: "overview", group: "start", order: -1 } as const;
 
 const REFERENCE_PAGES = [
   "index",
@@ -88,16 +72,44 @@ function folderPages(entries: Entry[], prefix: string): string[] {
   ];
 }
 
+type NavItem = { name: string; group: Entry["group"]; order: number };
+
+/** Flat pages as themselves; a top-level folder once, as `...folder`, at its first entry. */
+function navItems(entries: Entry[], prefixes: Set<string>): NavItem[] {
+  const items: NavItem[] = [OVERVIEW_ITEM];
+  const folders = new Set<string>();
+  for (const { slug, group, order } of entries) {
+    const top = slug.split("/")[0]!;
+    if (!prefixes.has(top)) {
+      items.push({ name: slug, group, order });
+    } else if (!folders.has(top)) {
+      folders.add(top);
+      items.push({ name: `...${top}`, group, order });
+    }
+  }
+  return items;
+}
+
+/**
+ * The root navigation is one flat list derived from the catalog: a
+ * `---Label---` separator per GROUPS entry, in GROUPS order, then that group's
+ * pages by `order`. Top-level folders are extracted in place, so every page
+ * keeps its URL and the sidebar has no collapsible folders.
+ */
+export function rootNavigation(entries: Entry[], prefixes: Set<string>): string[] {
+  const items = navItems(entries, prefixes);
+  return (Object.keys(GROUPS) as Entry["group"][]).flatMap((group) => {
+    const pages = items.filter((item) => item.group === group).sort((a, b) => a.order - b.order);
+    return pages.length ? [`---${GROUPS[group]}---`, ...pages.map(({ name }) => name)] : [];
+  });
+}
+
 async function writeNavigation(outDir: string, entries: Entry[], prefixes: Set<string>): Promise<void> {
   for (const prefix of [...prefixes].sort()) {
     const meta = { title: FOLDER_TITLES[prefix] ?? prefix, pages: folderPages(entries, prefix) };
     await writeFile(join(outDir, prefix, "meta.json"), `${JSON.stringify(meta, null, 2)}\n`);
   }
-  for (const { folder, ...meta } of TASK_GROUPS) {
-    await mkdir(join(outDir, folder), { recursive: true });
-    await writeFile(join(outDir, folder, "meta.json"), `${JSON.stringify(meta, null, 2)}\n`);
-  }
-  await writeFile(join(outDir, "meta.json"), `${JSON.stringify({ pages: ROOT_PAGES }, null, 2)}\n`);
+  await writeFile(join(outDir, "meta.json"), `${JSON.stringify({ pages: rootNavigation(entries, prefixes) }, null, 2)}\n`);
 }
 
 async function writeSourcePages(outDir: string, entries: Entry[], prefixes: Set<string>, render: ReturnType<typeof createPageRenderer>) {
