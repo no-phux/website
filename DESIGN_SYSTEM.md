@@ -1,26 +1,29 @@
 ---
 audience: contributors
 stability: stable
-last-reviewed: 2026-10-14
+last-reviewed: 2026-10-21
 ---
 # phux site design system
 
 **TL;DR.** The landing pairs a quiet product tour with an on-demand shell.
-Documentation uses system sans and monospace, warm neutral palettes, compact
-corners, and Light/Dark/System preferences. Fumadocs supplies the page tree,
-search, TOC, and navigation; native controls handle theme selection and modal focus.
+Documentation is a calm single reading column on quiet paper: one left sidebar
+whose active page unfolds into its own scroll-spied outline, no right rail, no
+breadcrumbs. System sans and monospace, one warm accent, Light/Dark/System.
+Fumadocs supplies the page tree, search index and dialog, and the heading
+observer; the reader chrome around them is ours.
 
 ## Two surfaces, shared identity
 
 The marketing shell uses `SITE.designMode` (`terminal`) from `src/lib/site.ts`.
-The documentation shell uses `data-design="reader"`. Reader tokens in
-`src/styles/global.css` must not change the marketing or live-terminal palette.
-Keep each reader rule in the single documentation section rather than appending
-a second theme override.
+The documentation shell uses `data-design="reader"`. Every reader rule lives in
+`src/styles/reader/*.css` (imported in order by `src/styles/reader.css`),
+scoped to `html[data-design="reader"]`, so it cannot change the marketing or
+live-terminal palette. Keep reader rules there rather than appending a second
+theme override to `global.css`.
 
 - Reader prose and navigation use `-apple-system, BlinkMacSystemFont, "Inter",
-  "Helvetica Neue", sans-serif`. Code uses `"SFMono-Regular", Consolas,
-  "Liberation Mono", Menlo, monospace`. Inter is a local fallback, not a download.
+  "Helvetica Neue", sans-serif`. Code uses `ui-monospace, "SFMono-Regular",
+  "SF Mono", Menlo, Consolas, monospace`. Inter is a local fallback, not a download.
 - Reader `--font-sans` and `--font-mono` aliases include portalled search UI.
   The shared head no longer fetches IBM fonts. Paper Mono remains outside the reader.
 - The wordmark is lowercase `phux`; navigation uses sentence case.
@@ -30,37 +33,37 @@ a second theme override.
 
 ## Reader tokens and typography
 
-The reader uses off-white in light mode and warm graphite in dark mode, with
-muted earth-tone accents. Tokens map to Fumadocs' `--color-fd-*` palette,
-including portalled search UI. Head theme colors match the two canvas colors.
+The reader is neutral paper and ink with one warm accent: off-white paper in
+light mode, near-black in dark, and white (or a lifted graphite) panels for code
+and tables. Tokens map to Fumadocs' `--color-fd-*` palette, including the
+portalled search dialog. Head theme colors match the two paper colors.
 
-| Token (`--color-`) | Light | Dark |
-|---|---|---|
-| `bg` | `#faf9f6` | `#111110` |
-| `bg-soft` | `#f1f0ec` | `#191918` |
-| `fg` | `#242320` | `#e9e6df` |
-| `dim`, `muted` | `#65615a` | `#aaa69e` |
-| `subtle` | `#69645c` | `#969188` |
-| `rule` | `#dedbd4` | `#33312d` |
-| `surface` | `#f6f5f1` | `#151514` |
-| `surface-raised` | `#eae7e0` | `#24231f` |
-| `accent` (also `cyan`) | `#705b3f` | `#c6b69d` |
-| `accent-soft` | `#c8bda9` | `#595044` |
+| Token (`--color-`) | Light | Dark | Use |
+|---|---|---|---|
+| `bg` | `#f5f5f3` | `#121311` | paper |
+| `fg` | `#1b1c19` | `#ebebe7` | ink: body, titles, active position |
+| `nav` | `#3a3b36` | `#cfd0ca` | sidebar links |
+| `muted` (also `dim`) | `#55564f` | `#b0b1aa` | lead, table cells, secondary text |
+| `subtle` | `#686963` | `#92938c` | group labels, outline, meta, icons |
+| `faint` | `#c9c9c5` | `#3b3c38` | outline branch lines (non-text) |
+| `rule` | ink at 12% | ink at 13% | panel borders, header rules |
+| `rule-faint` | ink at 7% | ink at 7% | table row separators |
+| `wash` | ink at 5% | ink at 7% | inline code, hover |
+| `surface` | `#ffffff` | `#1a1b19` | code, tables, `kbd`, search dialog |
+| `accent` | `#7d5f38` | `#d2b98f` | link underlines, focus, current section tick |
 
-The native Theme selector supports Light, Dark, and System; System is the default.
-next-themes owns persistence and system updates. A head script applies the saved
-preference before paint and Astro document swaps.
+Every text token meets WCAG AA (4.5:1) on paper and on `surface` in both themes.
+The native Theme selector (sidebar foot) supports System, Light, and Dark; System
+is the default. next-themes owns persistence and system updates. A head script
+applies the saved preference before paint and Astro document swaps.
 
-- `--color-bg`: page canvas; `--color-bg-soft`: code and supporting surfaces.
-- `--color-fg`: primary text; `--color-muted`: supporting and navigational text.
-- `--color-rule`: quiet borders; `--color-accent`: links, focus, current position.
-- `--reading-width`: 72 characters for prose, without narrowing technical tables.
-- Body text is 16px with 1.8 line height. The article lead is 17px; H2 is 24px.
-  The page title scales from roughly 30px to 42px.
-- Utilities stay at least 13px. Commands may be 13px but remain zoomable and
+- Body is 15px with 1.6 line height in a 38rem column (`--reading-width`).
+- The title is 28px, weight 500, -0.022em. H2 is 18px/500; H3 is 15px/600.
+  There is no oversized lead: the summary is a normal paragraph in `muted`.
+- Utilities stay at least 13px. Commands are 13px but remain zoomable and
   horizontally scrollable. Do not shrink text to make long commands fit.
-- Reader radii `sm`/`md`/`lg` are 3/5/6px; `xl`/`2xl` are 8/10px for framework
-  surfaces. Overview cards, code blocks, and tables use the compact surface tokens.
+- Panels (code, tables, overview cards) share one recipe: `surface` fill, 1px
+  `rule` border, 10px radius, a hairline shadow in light mode.
 
 ## Landing and live shell
 
@@ -104,66 +107,99 @@ program output and reader themes are not recolored.
 
 ## Article structure
 
-An article has one tree-derived breadcrumb, one title, and one useful full summary.
-Do not repeat the source TL;DR in the body, hide the summary behind a disclosure,
-or inject another section primer ahead of the author's content. Stability and
-exact-source provenance belong in a quiet footer, not a warning before every guide.
-Source links remain pinned to the synchronized revision. Heading IDs and deep links
-must survive presentation changes.
+An article is a title, one useful full summary, and the author's content — in a
+single 38rem column. No breadcrumb, no section eyebrow, no right-hand rail. Do not
+repeat the source TL;DR in the body, hide the summary behind a disclosure, or
+inject another section primer ahead of the author's content.
 
-Prose links are underlined in the reader accent; headings remain ordinary text with
-discoverable anchor links. Headings have generous separation without a rule above
-every section.
-Use callouts for warnings or meaningful constraints, not decorative emphasis.
+Page actions are a quiet icon row at the right of the title line: copy the page
+as Markdown, view the `.md` twin, and view the exact source on GitHub (pinned to
+the synchronized revision). Each icon has an accessible name and a tooltip; copy
+outcomes are announced in a polite live region. The links work without
+JavaScript.
+
+The article ends with quiet previous/next links from the page tree, then a meta
+line (non-stable status, wire version on protocol pages, Privacy, Support).
+Heading IDs and deep links must survive presentation changes.
+
+Prose links are ink with an accent underline; headings remain ordinary text with
+discoverable anchor links. Headings have generous separation without a rule
+above every section. Callouts are bold lead-ins or a plain quoted aside, not
+coloured boxes; reserve them for warnings or meaningful constraints.
 
 ## Static technical content
 
 Fenced code stays in the original Shiki-highlighted HTML. No second React root,
 shadow DOM, line-selection model, or client-side syntax renderer replaces it.
-A lightweight enhancement adds a visible Copy code control and polite copy status;
-clipboard failure explains how to copy manually. Code remains selectable,
-searchable with browser Find, and keyboard-scrollable. Without JavaScript, the
-static code remains readable and selectable.
+A lightweight enhancement adds a small copy icon inside the panel's top-right
+corner (accessible name "Copy code") and a polite status; clipboard failure
+shows how to copy manually. Code remains selectable, searchable with browser
+Find, and keyboard-scrollable. Without JavaScript, the static code remains
+readable and selectable.
 
-Tables retain native table semantics inside a labelled, focusable scrolling region.
-Code and table overflow stays local to its surface rather than widening the page.
-Never wrap byte diagrams or clip commands to fit a viewport.
+Inline code is a small tinted pill. Keys are raw `<kbd>` in the Markdown
+(`<kbd>C-a</kbd> <kbd>d</kbd>`) and render as small raised keycaps in prose,
+lists, and tables alike.
+
+Tables are light and compact: muted header text over one rule, faint row
+separators, no zebra fill, on the shared panel. They retain native table
+semantics inside a labelled, focusable scrolling region. Code and table overflow
+stays local to its panel rather than widening the page. Never wrap byte
+diagrams or clip commands to fit a viewport.
 
 ## Navigation and overview
 
-`/overview` is the sole primary docs home. Its task cards and first-run steps
-connect the reader's goal to a working path. The model figure shows a server,
-sessions, a terminal resource, and client views. Quickstart and performance evidence
-are primary destinations. `/docs` remains the addressable complete index.
+`/overview` is the primary docs home. Its first-run steps, model figure, and
+guide cards connect the reader's goal to a working path. `/docs` remains the
+addressable complete index and leads the first group after the overview.
 
-The task tree groups Start here, Use phux, Run coding agents, Connect machines,
-Performance & comparisons, Troubleshoot & maintain, Reference, and Contribute.
-Keep existing public URLs when regrouping nodes. Breadcrumbs come from that tree,
-including virtual folders, rather than guessed URL segments or hardcoded prefixes.
-Long normative and generated pages retain their TOC and source fidelity.
+The sidebar is the only navigation: the fox mark and wordmark, a pill search
+button with its shortcut, then one flat list. `scripts/docs-output.ts` derives
+it from the catalog (`scripts/docs-catalog.ts`): a quiet, always-open label per
+`GROUPS` entry in `GROUPS` order, then that group's pages by `order`. Top-level
+folders such as `reference/` are extracted in place, so every page keeps its
+URL. Do not hand-maintain a second page list.
 
-Search remains a static advanced index with section hits. Exact and prefix title
-matches move whole page groups forward, leaving each heading/text hit with its
-parent. Failed index loading gets an announced error, a genuine retry, and an
-all-documentation escape path; an error must not masquerade as zero matches.
+The active page expands to show its outline: H2s, plus H3s while the outline
+stays at 24 entries or fewer, on thin branch lines. The section in view is inked
+and its branch tick takes the accent; the outline keeps it scrolled into view.
+The sidebar foot holds the Theme selector and `llms.txt`, GitHub, and site links.
+
+Search is a minimal dialog: a 22px field, an `esc` hint, and grouped results from
+the static advanced index. ⌘K / Ctrl-K and `/` (when not typing) open it.
+Exact, prefix, and word-prefix title matches move whole page groups forward,
+leaving each heading/text hit with its parent. Failed index loading gets an
+announced error, a genuine retry, and an all-documentation escape path; an error
+must not masquerade as zero matches.
+
+## Agent surfaces
+
+Every page has a Markdown twin at its URL plus `.md` (also served for
+`Accept: text/markdown`), advertised with `<link rel="alternate"
+type="text/markdown">`. `/llms-full.txt` concatenates every page's Markdown in
+sidebar order, each headed by its URL and exact source; `/llms.txt` is the
+curated index and links to it. Each page has its own 1200×630 social card at
+`/og/<slug>.png`, drawn with sharp in the reader's paper and ink.
 
 ## Responsive and interaction rules
 
-- Use Fumadocs' actual 768px drawer breakpoint. Do not hide its desktop sidebar at
-  a different CSS breakpoint while leaving the framework in desktop mode.
-- Tablet uses a compact sidebar and collapsible controls; the main reading area
-  and TOC remain framework-managed. Cards collapse to one column when needed.
-- The mobile sidebar retains the framework's tree and triggers inside a native
-  modal dialog. Escape closes it, focus starts on Close, Tab stays inside, and
-  closing returns focus to the opening control. Opening search closes the drawer.
-- Mobile navigation targets are at least 44px tall. Theme and copy controls have
-  visible labels; decorative arrows do not enter the accessible name.
+- Above 860px the sidebar is a sticky column. At 860px and below it becomes a
+  drawer behind a sticky top bar (menu, wordmark, search).
+- The drawer is a native modal dialog holding the same tree and outline. Escape
+  or a backdrop click closes it, focus starts on Close, Tab stays inside, and
+  closing returns focus to the opening control. Opening search, or following a
+  link, closes the drawer.
+- Mobile navigation targets are at least 44px tall. Icon controls have accessible
+  names; decorative icons and arrows do not enter the accessible name.
+- No horizontal page scroll at 320px or wider; only code and table panels scroll.
 - Keep visible two-pixel focus outlines and a working skip-to-documentation link.
 - Reduced-motion preference disables reader animation and smooth scrolling.
 - Do not persist the entire document body between Astro routes: article, active
-  navigation, TOC, copy controls, and metadata must update together.
+  navigation, outline, copy controls, and metadata must update together.
 
 Before landing UI changes, inspect overview, an article, and code/table-heavy
 reference pages at 320px, tablet, and desktop widths in both themes. Exercise
 Escape, Tab, skip navigation, copy success/failure, theme persistence, search
 failure/retry, deep links, and route/back navigation on the built site.
+`bun run verify:docs` automates the copy, discovery, ordering, outline, search
+key, and drawer checks.

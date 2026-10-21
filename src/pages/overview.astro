@@ -12,7 +12,7 @@ const title = `${OVERVIEW.title} with ${SITE.name}`;
 const description = OVERVIEW.summary;
 ---
 
-<Layout title={title} description={description} origin={SITE.docsUrl}>
+<Layout title={title} description={description} origin={SITE.docsUrl} markdown="/overview.md" image="/og/overview.png">
   <Docs
     tree={source.getPageTree()}
     pathname="/overview"

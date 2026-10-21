@@ -68,6 +68,54 @@ async function verifyOverview() {
   assert.ok(negotiated.includes("[All documentation](/docs)"), "negotiated Markdown retains reference links");
 }
 
+/** llms-full.txt carries every page in sidebar order; each page advertises its Markdown and card. */
+async function verifyAgentSurfaces(pages: { url: string }[]) {
+  const full = await readFile(resolve(root, "llms-full.txt"), "utf8");
+  assert.match(full, /^# phux documentation\n/);
+  for (const { url } of pages) {
+    assert.ok(full.includes(`\nURL: https://${DOCS_HOST}${url}\n`), `llms-full.txt carries ${url}`);
+  }
+  const order = ["/overview", "/docs", "/installation"].map((url) => full.indexOf(`URL: https://${DOCS_HOST}${url}\n`));
+  assert.deepEqual([...order].sort((a, b) => a - b), order, "llms-full.txt follows the sidebar order");
+  assert.ok((await readFile(resolve(root, "llms.txt"), "utf8")).includes("https://docs.phux.sh/llms-full.txt"), "llms.txt points at llms-full.txt");
+  const html = await readFile(resolve(root, "config.html"), "utf8");
+  assert.ok(html.includes('<link rel="alternate" type="text/markdown" href="/config.md"'), "page advertises its Markdown");
+  assert.ok(html.includes(`content="https://${DOCS_HOST}/og/config.png"`), "page has its own social card");
+  assert.ok((await readFile(resolve(root, "og/config.png"))).subarray(1, 4).toString() === "PNG", "social card is a PNG");
+}
+
+/** The reader shell: catalog-ordered sidebar, outline, search keys, and the narrow drawer. */
+async function verifyReaderShell(page: Page, base: string) {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await page.goto(`${base}/config`);
+  const sidebar = page.locator(".reader-sidebar");
+  assert.equal(await sidebar.locator('a[aria-current="page"]').textContent(), "Configuration");
+  const firstGroup = await sidebar.locator(".reader-nav-group").first().locator(".reader-nav-link").evaluateAll(
+    (links) => links.map((link) => link.getAttribute("href")),
+  );
+  assert.deepEqual(firstGroup.slice(0, 2), ["/overview", "/docs"], "the docs index leads Get started, after the overview");
+  assert.ok(await sidebar.getByRole("list", { name: "On this page" }).locator("a").count() > 2, "active page shows its outline");
+  await page.keyboard.press("/");
+  await page.getByRole("dialog").locator("input").waitFor();
+  await page.keyboard.press("Escape");
+  await page.getByRole("dialog").waitFor({ state: "detached" });
+  await page.keyboard.press(process.platform === "darwin" ? "Meta+k" : "Control+k");
+  await page.getByRole("dialog").locator("input").waitFor();
+  await page.keyboard.press("Escape");
+  await page.getByRole("dialog").waitFor({ state: "detached" });
+
+  await page.setViewportSize({ width: 390, height: 844 });
+  const opener = page.getByRole("button", { name: "Open navigation" });
+  await opener.click();
+  const drawer = page.getByRole("dialog", { name: "Documentation navigation" });
+  await drawer.waitFor();
+  assert.ok(await drawer.getByRole("button", { name: "Close navigation" }).evaluate((el) => el === document.activeElement), "drawer focuses Close");
+  await page.keyboard.press("Escape");
+  await drawer.waitFor({ state: "hidden" });
+  assert.ok(await opener.evaluate((el) => el === document.activeElement), "closing the drawer returns focus");
+  assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), "no overflow at 390px");
+}
+
 async function verifyDiscovery() {
   const skills = JSON.parse(await readFile(resolve(root, ".well-known/agent-skills/index.json"), "utf8"));
   assert.deepEqual(skills.skills.map((skill: { name: string }) => skill.name), ["using-phux", "using-phux-mcp", "using-phux-tools"]);
@@ -98,7 +146,7 @@ async function verifyPublishedContent() {
   assert.ok(pages.every(({ url }) => !/^\/(?:adr|decisions)(?:\/|$)/.test(url)), "historical ADRs are not live search pages");
   const clients = await readFile(resolve(root, "clients.md"), "utf8");
   assert.ok(pages.some(({ url }) => url === "/organization"), "organization: published and MCP-indexed");
-  assert.ok(pages.some(({ url }) => url === "/substrate"), "substrate: published and MCP-indexed");
+  assert.ok(!pages.some(({ url }) => url === "/substrate"), "substrate: internal record stays unpublished");
   assert.ok(pages.some(({ url }) => url === "/acp"), "ACP: published and MCP-indexed");
   for (const slug of ["embedding", "desktop-capture", "desktop-changes", "desktop-panes"]) {
     assert.ok(pages.some(({ url }) => url === `/${slug}`), `${slug}: published and MCP-indexed`);
@@ -106,14 +154,15 @@ async function verifyPublishedContent() {
   }
   await verifyOverview();
   await verifyDiscovery();
+  await verifyAgentSurfaces(pages);
   return pages.length;
 }
 
 async function verifyPageCopy(page: Page, base: string, path: string) {
   await page.goto(`${base}${path}`);
   const actions = page.locator("[data-page-actions]");
-  assert.equal(await actions.getByRole("link", { name: "Open Markdown" }).getAttribute("href"), `${path}.md`);
-  await actions.getByRole("button", { name: "Copy page for agent" }).click();
+  assert.equal(await actions.getByRole("link", { name: "View as Markdown" }).getAttribute("href"), `${path}.md`);
+  await actions.getByRole("button", { name: "Copy page as Markdown" }).click();
   await actions.getByRole("status").filter({ hasText: "Page copied as Markdown." }).waitFor();
   assert.equal(await readClipboard(page), await readFile(resolve(root, `.${path}.md`), "utf8"));
 }
@@ -193,9 +242,10 @@ try {
   await verifyPageCopy(page, base, "/agents");
   await verifyPageCopy(page, base, "/protocol");
   await page.route("**/protocol.md", (route) => route.fulfill({ status: 503, body: "unavailable" }));
-  await page.getByRole("button", { name: "Copy page for agent" }).click();
-  await page.locator("[data-page-actions] [role=status]").filter({ hasText: "Open Markdown" }).waitFor();
-  assert.ok(await page.getByRole("button", { name: "Copy page for agent" }).isEnabled(), "failure allows retry");
+  await page.getByRole("button", { name: "Copy page as Markdown" }).click();
+  await page.locator("[data-page-actions] [role=status]").filter({ hasText: "View the Markdown" }).waitFor();
+  assert.ok(await page.getByRole("button", { name: "Copy page as Markdown" }).isEnabled(), "failure allows retry");
+  await verifyReaderShell(page, base);
   assert.deepEqual(errors, [], "no browser exceptions");
   await context.close();
 
@@ -204,17 +254,17 @@ try {
   await staticPage.goto(`${base}/overview`);
   assert.ok(await staticPage.getByRole("heading", { name: "Try it", exact: true }).isVisible());
   assert.ok(await staticPage.locator(".agent-prompt pre").isVisible());
-  assert.equal(await staticPage.getByRole("link", { name: "Open Markdown" }).getAttribute("href"), "/overview.md");
+  assert.equal(await staticPage.getByRole("link", { name: "View as Markdown" }).getAttribute("href"), "/overview.md");
   const markdown = await staticContext.request.get(`${base}/overview.md`);
   assert.ok(markdown.headers()["content-type"]?.includes("text/markdown"));
   assert.ok((await markdown.text()).includes(AGENT_START.prompt));
-  await staticPage.getByRole("link", { name: "Open Markdown" }).click();
+  await staticPage.getByRole("link", { name: "View as Markdown" }).click();
   await staticPage.waitForURL(`${base}/overview.md`, { timeout: 5000 });
   await staticPage.goto(`${base}/embedding`);
   assert.ok(await staticPage.getByRole("heading", { level: 1 }).isVisible(), "embedding is readable without JavaScript");
-  assert.equal(await staticPage.getByRole("link", { name: "Open Markdown" }).getAttribute("href"), "/embedding.md");
+  assert.equal(await staticPage.getByRole("link", { name: "View as Markdown" }).getAttribute("href"), "/embedding.md");
   await staticContext.close();
-  console.log(`PASS docs (${useWebKit ? "WebKit, no pre-granted clipboard permissions" : "Chrome"}): ${count} Markdown pages, discovery links/digests, page and prompt copy, failure recovery, light/dark, 320/390/768/1280px, no-JS. Screenshots: ${artifacts}`);
+  console.log(`PASS docs (${useWebKit ? "WebKit, no pre-granted clipboard permissions" : "Chrome"}): ${count} Markdown pages, discovery links/digests, page and prompt copy, failure recovery, llms-full.txt, reader shell (nav order, outline, search keys, drawer focus), light/dark, 320/390/768/1280px, no-JS. Screenshots: ${artifacts}`);
 } finally {
   await browser.close();
   server.stop(true);

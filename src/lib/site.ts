@@ -79,10 +79,4 @@ export const MARKETING_NAV = [
   { href: SITE.github, label: "GitHub", external: true },
 ] as const;
 
-export const DOCS_NAV = [
-  { href: "/llms.txt", label: "Agent guide" },
-  { href: SITE.url, label: "Site" },
-  { href: SITE.github, label: "GitHub", external: true },
-] as const;
-
 export const NAV = MARKETING_NAV;

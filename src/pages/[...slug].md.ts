@@ -1,6 +1,6 @@
 import { getCollection, type CollectionEntry } from "astro:content";
 import type { APIRoute } from "astro";
-import { SITE } from "../lib/site";
+import { pageMarkdown } from "../lib/page-markdown";
 
 // Publish the same collection as HTML, without converting rendered UI chrome.
 export async function getStaticPaths() {
@@ -11,20 +11,7 @@ export async function getStaticPaths() {
 }
 
 export const GET: APIRoute = ({ props }) => {
-  const page = props.page as CollectionEntry<"docs">;
-  const { title, summary, sourcePath, sourceBase, sourceRevision, projectVersion, protocolVersion, stability } = page.data;
-  const metadata = {
-    title,
-    url: `${SITE.docsUrl}/${page.id}`,
-    source: `${sourceBase ?? SITE.github}/blob/${sourceRevision}/${sourcePath}`,
-    projectVersion,
-    protocolVersion,
-    stability,
-  };
-  const frontmatter = Object.entries(metadata).map(([key, value]) => `${key}: ${JSON.stringify(value)}`).join("\n");
-  // The custom overview's source already includes its title and summary.
-  const body = page.id === "overview" ? page.body : `# ${title}\n\n${summary}\n\n${page.body}`;
-  return new Response(`---\n${frontmatter}\n---\n\n${body}`, {
+  return new Response(pageMarkdown(props.page as CollectionEntry<"docs">), {
     headers: { "content-type": "text/markdown; charset=utf-8" },
   });
 };
