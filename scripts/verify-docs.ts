@@ -75,7 +75,7 @@ async function verifyAgentSurfaces(pages: { url: string }[]) {
   for (const { url } of pages) {
     assert.ok(full.includes(`\nURL: https://${DOCS_HOST}${url}\n`), `llms-full.txt carries ${url}`);
   }
-  const order = ["/overview", "/docs", "/installation"].map((url) => full.indexOf(`URL: https://${DOCS_HOST}${url}\n`));
+  const order = ["/overview", "/installation", "/docs"].map((url) => full.indexOf(`URL: https://${DOCS_HOST}${url}\n`));
   assert.deepEqual([...order].sort((a, b) => a - b), order, "llms-full.txt follows the sidebar order");
   assert.ok((await readFile(resolve(root, "llms.txt"), "utf8")).includes("https://docs.phux.sh/llms-full.txt"), "llms.txt points at llms-full.txt");
   const html = await readFile(resolve(root, "config.html"), "utf8");
@@ -144,7 +144,8 @@ async function verifyPublishedContent() {
   const pages = index.pages as { url: string }[];
   const sitemap = await readFile(resolve(root, "sitemap-0.xml"), "utf8");
   for (const { url } of pages) await verifyPublishedPage(url, sitemap);
-  assert.ok(pages.every(({ url }) => !/^\/(?:adr|decisions)(?:\/|$)/.test(url)), "historical ADRs are not live search pages");
+  // /decisions is the live constraints page; only the historical ADR archive stays out.
+  assert.ok(pages.every(({ url }) => !/^\/(?:adr(?:\/|$)|decisions\/)/.test(url)), "historical ADRs are not live search pages");
   const clients = await readFile(resolve(root, "clients.md"), "utf8");
   assert.ok(pages.some(({ url }) => url === "/organization"), "organization: published and MCP-indexed");
   assert.ok(!pages.some(({ url }) => url === "/substrate"), "substrate: internal record stays unpublished");
