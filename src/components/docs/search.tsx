@@ -22,9 +22,12 @@ function normalizedTitle(value: string) {
   return value.replace(/<\/?mark>/g, "").toLocaleLowerCase().trim();
 }
 
+/** Exact title, then title prefix ("config" → Configuration), then a word in the title. */
 function titleMatch(title: string, query: string) {
-  if (title === query) return 2;
-  if (title.startsWith(`${query} `)) return 1;
+  if (!query) return 0;
+  if (title === query) return 3;
+  if (title.startsWith(query)) return 2;
+  if (title.split(/[\s/-]+/).some((word) => word.startsWith(query))) return 1;
   return 0;
 }
 
@@ -59,8 +62,9 @@ export default function SearchDialogComponent(props: SharedProps) {
 
   return (
     <SearchDialog search={search} onSearchChange={setSearch} isLoading={query.isLoading} {...props}>
-      <SearchDialogOverlay />
+      <SearchDialogOverlay className="reader-search-overlay" />
       <SearchDialogContent
+        className="reader-search"
         onOpenAutoFocus={() => {
           returnFocus.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
         }}
@@ -77,10 +81,10 @@ export default function SearchDialogComponent(props: SharedProps) {
           }
         }}
       >
-        <SearchDialogHeader>
+        <SearchDialogHeader className="reader-search-head">
           <SearchDialogIcon aria-hidden="true" />
           <SearchDialogInput />
-          <SearchDialogClose />
+          <SearchDialogClose className="reader-search-close" aria-label="Close search">esc</SearchDialogClose>
         </SearchDialogHeader>
         {query.error && !query.isLoading ? (
           <div className="docs-search-error">

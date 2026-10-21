@@ -8,6 +8,8 @@ Start with the task guide below, not the complete architecture or decision archi
 Every documentation page has a direct .md URL, for example
 https://docs.phux.sh/agents.md. You can also request any
 page with `Accept: text/markdown`. Browsers get HTML by default.
+[Every page in one file](https://docs.phux.sh/llms-full.txt): the whole
+documentation as Markdown, in sidebar order, each page headed by its URL.
 
 ## Operating safely
 

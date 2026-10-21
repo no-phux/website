@@ -44,12 +44,12 @@ const description = page.data.description || SITE.description;
 const pathname = Astro.url.pathname.replace(/\.html$/, "");
 ---
 
-<Layout title={title} description={description} origin={SITE.docsUrl}>
+<Layout title={title} description={description} origin={SITE.docsUrl} markdown={`/${page.id}.md`} image={`/og/${page.id}.png`}>
   <Docs
     tree={source.getPageTree()}
     pathname={pathname}
     params={Astro.params}
-    page={{ toc }}
+    toc={toc}
     sourceUrl={sourceUrl}
     title={page.data.title}
     summary={page.data.summary}

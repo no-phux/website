@@ -90,7 +90,6 @@ export default defineConfig({
     "/remote-access": "/remote",
     "/consumers": "/clients",
     "/wire": "/protocol",
-    "/decisions": "/architecture",
     "/consumers/agents/cli": "/scripting",
     "/consumers/agents/targeting": "/scripting",
     "/consumers/agents/json": "/scripting",

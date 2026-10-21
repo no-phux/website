@@ -10,9 +10,11 @@ interface Props {
   type?: "website" | "article";
   /** Canonical origin. Docs pages pass docs.phux.sh; marketing stays on phux.sh. */
   origin?: string;
+  /** Site-relative social card for this page; defaults to the product card. */
+  image?: string;
 }
 
-const { title, description, type = "website", origin = SITE.url } = Astro.props;
+const { title, description, type = "website", origin = SITE.url, image } = Astro.props;
 
 // build.format "file" leaves ".html" on build-time pathnames; the served
 // routes are extensionless (trailingSlash "never"), so canonicals must be too.
@@ -23,8 +25,8 @@ const canonical = new URL(path, origin).href;
 const previewIdentity = encodeURIComponent(
   `${SITE.name}|${SITE.category}|${SITE.tagline}|${SITE.previewArtwork}`,
 );
-const ogImage = new URL(`/og.png?v=${previewIdentity}`, SITE.url).href;
-const ogAlt = `${SITE.name}: ${SITE.tagline}`;
+const ogImage = image ? new URL(image, origin).href : new URL(`/og.png?v=${previewIdentity}`, SITE.url).href;
+const ogAlt = image ? title : `${SITE.name}: ${SITE.tagline}`;
 ---
 
 <meta charset="utf-8" />
@@ -51,8 +53,8 @@ const ogAlt = `${SITE.name}: ${SITE.tagline}`;
 <meta property="og:image:alt" content={ogAlt} />
 {origin === SITE.docsUrl ? (
   <>
-    <meta name="theme-color" content="#faf9f6" media="(prefers-color-scheme: light)" />
-    <meta name="theme-color" content="#111110" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#f5f5f3" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#121311" media="(prefers-color-scheme: dark)" />
   </>
 ) : <meta name="theme-color" content="#07080b" />}
 <link rel="icon" href="/favicon.svg" type="image/svg+xml" />

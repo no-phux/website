@@ -30,7 +30,7 @@ export function pageTitle(topic: string): string {
 
 // Shared by the visible docs landing and its searchable Markdown representation.
 export const OVERVIEW = {
-  title: "Get started",
+  title: "Overview",
   summary: "Detach without stopping your shell. Return to it, or let an agent inspect it.",
   pitch: {
     headline: "Leave the view. Keep the shell.",
@@ -76,12 +76,6 @@ export const MARKETING_NAV = [
   { href: "/demos", label: "Demos" },
   { href: docsHref("/clients"), label: "Apps" },
   { href: docsHref("/agents"), label: "Agents" },
-  { href: SITE.github, label: "GitHub", external: true },
-] as const;
-
-export const DOCS_NAV = [
-  { href: "/llms.txt", label: "Agent guide" },
-  { href: SITE.url, label: "Site" },
   { href: SITE.github, label: "GitHub", external: true },
 ] as const;
 

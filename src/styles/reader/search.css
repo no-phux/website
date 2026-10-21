@@ -1,0 +1,82 @@
+/* ── Search dialog ──────────────────────────────────────────────────────── */
+
+[data-design="reader"] .reader-search-overlay {
+  backdrop-filter: blur(2px);
+}
+[data-design="reader"] .reader-search {
+  top: 12vh;
+  width: calc(100% - 2rem);
+  max-width: 38rem;
+  border: 0;
+  border-radius: var(--radius-2xl);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-dialog);
+  font-family: var(--font-reading);
+}
+[data-design="reader"] .reader-search-head {
+  gap: 0.75rem;
+  padding: 1rem 1rem 1rem 1.25rem;
+}
+[data-design="reader"] .reader-search-head input {
+  font-size: 1.375rem;
+  letter-spacing: -0.015em;
+  color: var(--color-fg);
+}
+[data-design="reader"] .reader-search-head input::placeholder {
+  color: var(--color-subtle);
+}
+/* The dialog itself frames the field; a second ring around it is noise. */
+[data-design="reader"] .reader-search-head input:focus-visible {
+  outline: none;
+}
+/* Match highlights: ink on an accent tint, not a link-coloured underline. */
+[data-design="reader"] .reader-search .text-fd-primary.underline {
+  color: var(--color-fg);
+  text-decoration: none;
+  background: color-mix(in srgb, var(--color-accent) 18%, transparent);
+  border-radius: 3px;
+}
+[data-design="reader"] .reader-search-close {
+  height: auto;
+  padding: 0.125rem 0.4375rem;
+  border: 1px solid var(--color-rule);
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--color-subtle);
+  font-family: var(--font-code);
+  font-size: 0.75rem;
+}
+[data-design="reader"] .reader-search [role="option"],
+[data-design="reader"] .reader-search button[aria-selected] {
+  border-radius: var(--radius-lg);
+  font-size: 0.875rem;
+}
+[data-design="reader"] .reader-search mark {
+  background: color-mix(in srgb, var(--color-accent) 22%, transparent);
+  color: var(--color-fg);
+  border-radius: 3px;
+}
+.docs-search-error {
+  padding: 1.25rem;
+  color: var(--color-fg);
+  font-size: 0.9375rem;
+}
+.docs-search-error p {
+  margin: 0 0 0.75rem;
+}
+.docs-search-error button {
+  min-height: 2.25rem;
+  padding: 0.25rem 0.75rem;
+  border: 1px solid var(--color-rule);
+  border-radius: var(--radius-md);
+  background: var(--color-bg);
+  color: var(--color-fg);
+  font: inherit;
+  cursor: pointer;
+}
+.docs-search-error a {
+  margin-left: 1rem;
+  color: var(--color-fg);
+  text-decoration: underline;
+  text-decoration-color: var(--color-accent);
+}

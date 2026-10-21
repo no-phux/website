@@ -1,0 +1,9 @@
+/* The documentation reader, scoped to html[data-design="reader"].
+   Order matters: narrow-screen overrides follow the shell and prose they adjust.
+   Specs: DESIGN_SYSTEM.md, "Reader tokens and typography" onward. */
+@import "./reader/tokens.css";
+@import "./reader/shell.css";
+@import "./reader/prose.css";
+@import "./reader/search.css";
+@import "./reader/narrow.css";
+@import "./reader/overview.css";

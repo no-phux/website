@@ -1,0 +1,117 @@
+/* ── Documentation reader ───────────────────────────────────────────────────
+   A calm single reading column: quiet paper, one ink, one warm accent. Every
+   rule is scoped to html[data-design="reader"], so the landing and the live
+   terminal keep their own palettes. Tokens also reach portalled search UI.
+   Specs: DESIGN_SYSTEM.md, "Documentation reader".
+   ────────────────────────────────────────────────────────────────────────── */
+
+html[data-design="reader"] {
+  color-scheme: light;
+  --font-reading: -apple-system, BlinkMacSystemFont, "Inter", "Helvetica Neue", "Segoe UI", sans-serif;
+  --font-code: ui-monospace, "SFMono-Regular", "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  --font-sans: var(--font-reading);
+  --font-mono: var(--font-code);
+
+  --color-bg: #f5f5f3; /* paper */
+  --color-fg: #1b1c19; /* ink */
+  --color-nav: #3a3b36; /* sidebar links */
+  --color-muted: #55564f; /* secondary text */
+  --color-dim: var(--color-muted);
+  --color-subtle: #686963; /* labels, meta */
+  --color-faint: #c9c9c5; /* outline branches */
+  --color-rule: rgb(27 28 25 / 12%);
+  --color-rule-faint: rgb(27 28 25 / 7%);
+  --color-wash: rgb(27 28 25 / 5%);
+  --color-bg-soft: #ebebe8;
+  --color-surface: #ffffff; /* code, tables, dialogs */
+  --color-surface-raised: #ecece9;
+  --color-accent: #7d5f38;
+  --color-accent-soft: #d8c8b0;
+  --color-cyan: var(--color-accent);
+  --shadow-surface: 0 1px 2px rgb(27 28 25 / 4%);
+  --shadow-dialog: 0 24px 64px -16px rgb(27 28 25 / 28%), 0 0 0 1px rgb(27 28 25 / 6%);
+
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 10px;
+  --radius-xl: 12px;
+  --radius-2xl: 16px;
+  --reading-width: 38rem;
+  --sidebar-width: 16.5rem;
+
+  --color-fd-background: var(--color-bg);
+  --color-fd-foreground: var(--color-fg);
+  --color-fd-muted: var(--color-bg-soft);
+  --color-fd-muted-foreground: var(--color-subtle);
+  --color-fd-popover: var(--color-surface);
+  --color-fd-popover-foreground: var(--color-fg);
+  --color-fd-card: var(--color-surface);
+  --color-fd-card-foreground: var(--color-fg);
+  --color-fd-border: var(--color-rule);
+  --color-fd-input: var(--color-rule);
+  --color-fd-primary: var(--color-accent);
+  --color-fd-primary-foreground: var(--color-bg);
+  --color-fd-accent: var(--color-wash);
+  --color-fd-accent-foreground: var(--color-fg);
+  --color-fd-secondary: var(--color-bg-soft);
+  --color-fd-secondary-foreground: var(--color-fg);
+  --color-fd-ring: var(--color-accent);
+  --color-fd-overlay: rgb(27 28 25 / 22%);
+}
+html[data-design="reader"].dark {
+  color-scheme: dark;
+  --color-bg: #121311;
+  --color-fg: #ebebe7;
+  --color-nav: #cfd0ca;
+  --color-muted: #b0b1aa;
+  --color-subtle: #92938c;
+  --color-faint: #3b3c38;
+  --color-rule: rgb(235 235 231 / 13%);
+  --color-rule-faint: rgb(235 235 231 / 7%);
+  --color-wash: rgb(235 235 231 / 7%);
+  --color-bg-soft: #1f201e;
+  --color-surface: #1a1b19;
+  --color-surface-raised: #232421;
+  --color-accent: #d2b98f;
+  --color-accent-soft: #5c5040;
+  --shadow-surface: none;
+  --shadow-dialog: 0 24px 64px -16px rgb(0 0 0 / 70%), 0 0 0 1px rgb(235 235 231 / 10%);
+  --color-fd-overlay: rgb(0 0 0 / 50%);
+}
+
+html[data-design="reader"] body {
+  background: var(--color-bg);
+  color: var(--color-fg);
+  font-family: var(--font-reading);
+  font-size: 15px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+[data-design="reader"] ::selection {
+  background: color-mix(in srgb, var(--color-accent) 28%, transparent);
+  color: inherit;
+}
+[data-design="reader"] :focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+[data-design="reader"] .skip {
+  position: fixed;
+  z-index: 100;
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  border-color: var(--color-rule);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-design="reader"] *,
+  [data-design="reader"] *::before,
+  [data-design="reader"] *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
