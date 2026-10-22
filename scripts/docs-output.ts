@@ -12,21 +12,6 @@ const FOLDER_TITLES: Record<string, string> = {
 /** The website-owned overview leads the catalog's first group. */
 const OVERVIEW_ITEM = { name: "overview", group: "start", order: -1 } as const;
 
-const REFERENCE_PAGES = [
-  "index",
-  "cli",
-  "config",
-  "actions",
-  "widgets",
-  "hooks",
-  "environment",
-  "exit-codes",
-  "files",
-  "deprecations",
-  "kinds",
-  "parity",
-];
-
 function folderPrefixes(entries: Entry[]): Set<string> {
   const prefixes = new Set<string>();
   for (const { slug } of entries) {
@@ -57,19 +42,15 @@ function immediateChildren(entries: Entry[], prefix: string): Entry[] {
   }).sort((a, b) => {
     if (a.slug === prefix) return -1;
     if (b.slug === prefix) return 1;
-    return 0;
+    return a.order - b.order;
   });
 }
 
 function folderPages(entries: Entry[], prefix: string): string[] {
   const pages = immediateChildren(entries, prefix).map(({ slug }) =>
     slug === prefix ? "index" : slug.slice(prefix.length + 1));
-  if (prefix !== "reference") return pages;
-  const available = new Set(pages);
-  return [
-    ...REFERENCE_PAGES.filter((page) => available.delete(page)),
-    ...pages.filter((page) => available.has(page)),
-  ];
+  // Discovery already ordered section pages (the catalog's REFERENCE_ORDER).
+  return pages;
 }
 
 type NavItem = { name: string; group: Entry["group"]; order: number };
