@@ -12,8 +12,9 @@ import {
   searchTerms,
   snippet,
   type Section,
+  type SectionRecord,
 } from "./search";
-import { pageSections } from "../scripts/build-search.mjs";
+import { linkListLabels, pageSections } from "../scripts/build-search.mjs";
 
 function section(page: string, heading: string, text: string, anchor = heading.toLowerCase()): Section {
   const route = `/${page.toLowerCase().replace(/\s+/g, "-")}`;
@@ -34,7 +35,7 @@ const SECTIONS: Section[] = [
   section("Keys", "Prefix", "The prefix key starts every binding; nothing else does."),
 ];
 
-function envOf(sections: Section[] = SECTIONS) {
+function envOf(sections: SectionRecord[] = SECTIONS) {
   const requested: string[] = [];
   return {
     requested,
@@ -152,6 +153,17 @@ describe("GET /search.json", () => {
     }
   });
 
+  test("ranking hints in the index are not part of the answer", async () => {
+    const hinted = SECTIONS.map((entry) => ({ ...entry, linkShare: 0.5 }));
+    for (const path of ["/search.json", "/search.json?q=detach"]) {
+      resetSearchIndex();
+      const response = await handleSearchRequest(new Request(`https://docs.phux.sh${path}`), envOf(hinted));
+      for (const result of (await response.json()) as Section[]) {
+        expect(Object.keys(result).sort()).toEqual(["heading", "markdown", "page", "text", "url"]);
+      }
+    }
+  });
+
   test("an over-long q is refused", async () => {
     const q = "a".repeat(MAX_QUERY_LENGTH + 1);
     const response = await handleSearchRequest(
@@ -231,6 +243,7 @@ describe("build-time sections", () => {
         page: "Concepts",
         heading: "Concepts",
         text: "Intro with a link. More intro.",
+        linkShare: 0,
       },
       {
         url: "https://docs.phux.sh/concepts#server",
@@ -238,6 +251,7 @@ describe("build-time sections", () => {
         page: "Concepts",
         heading: "The server",
         text: "Owns every terminal. Press C-a d.",
+        linkShare: 0,
       },
       {
         url: "https://docs.phux.sh/concepts#empty",
@@ -245,7 +259,44 @@ describe("build-time sections", () => {
         page: "Concepts",
         heading: "Empty",
         text: "",
+        linkShare: 0,
       },
+    ]);
+  });
+
+  test("linkShare is the fraction of a section's paragraphs that are link-list items", () => {
+    const markdown = [
+      "## More",
+      "",
+      "- [Key bindings](/keys): change the prefix.",
+      "- [`Themes`](/themes): pick colour themes.",
+      "1. [Hooks](/hooks): run a command.",
+      "",
+      "See [Key bindings](/keys) in prose: not a list item.",
+    ].join("\n");
+    const labels = linkListLabels(markdown);
+    expect(labels).toEqual(["Key bindings", "Themes", "Hooks"]);
+    const records = pageSections(
+      "Configuration file",
+      "/config",
+      {
+        headings: [
+          { id: "more", content: "More" },
+          { id: "mixed", content: "Mixed" },
+        ],
+        contents: [
+          { heading: "more", content: "Key bindings: change the prefix." },
+          { heading: "more", content: "`Themes`: pick colour themes." },
+          { heading: "mixed", content: "Hooks: run a command." },
+          { heading: "mixed", content: "Set a key to none to remove its binding." },
+          { heading: "mixed", content: "Keys bind actions." },
+        ],
+      },
+      labels,
+    );
+    expect(records.map((record) => [record.heading, record.linkShare])).toEqual([
+      ["More", 1],
+      ["Mixed", 0.33],
     ]);
   });
 });

@@ -133,7 +133,9 @@ change).
 - `/llms-full.txt` — every page in sidebar order (`src/pages/llms-full.txt.ts`).
 - `/search.json?q=` — the ten best-matching sections as JSON, or every section
   without `q`. The build hook writes `api/sections.json` from the same
-  structured data as the Fumadocs index; `host/search.ts` ranks it.
+  structured data as the Fumadocs index, with each section's `linkShare` (how
+  much of it is a list of links to other pages); `host/search.ts` ranks it and
+  puts link lists below the pages they point at.
 - `/og/<slug>.png` — per-page social cards drawn with sharp
   (`src/pages/og/[...slug].png.ts`); the landing keeps `/og.png`.
 
