@@ -69,7 +69,9 @@ export async function buildSearchIndex(distDir) {
           structuredData,
         },
       });
-      sections.push(...pageSections(meta.title ?? rel, mcpUrl(rel), structuredData));
+      sections.push(
+        ...pageSections(meta.title ?? rel, mcpUrl(rel), structuredData, linkListLabels(body)),
+      );
       mcpPages.push({
         title: meta.title ?? rel,
         url: mcpUrl(rel),
@@ -113,8 +115,14 @@ const DOCS_ORIGIN = "https://docs.phux.sh";
  * One record per heading (plus the untitled intro), in page order, from the
  * same structured data the Fumadocs index uses. Heading ids are the rendered
  * anchors, so `url` deep-links into the page.
+ *
+ * `linkShare` is the fraction of the section's paragraphs that are link-list
+ * items (they open with one of `linkLabels`): a "More" or index section is
+ * all pointers to other pages, and host/search.ts ranks it below the pages it
+ * points at. Structured data has already dropped the link targets, so the
+ * labels come from the raw Markdown (see linkListLabels).
  */
-export function pageSections(page, route, structuredData) {
+export function pageSections(page, route, structuredData, linkLabels = []) {
   // A heading that repeats the page title (a body `# Title`) is the page itself.
   const headings = structuredData.headings.filter((h) => inlineText(h.content) !== page);
   const titles = new Map(headings.map((h) => [h.id, h.content]));
@@ -136,9 +144,27 @@ export function pageSections(page, route, structuredData) {
       page,
       heading: id ? inlineText(titles.get(id)) : page,
       text,
+      linkShare: linkShare(parts, linkLabels),
     });
   }
   return out;
+}
+
+/** The labels of list items that open with a link (`- [Key bindings](/keys): …`). */
+export function linkListLabels(markdown) {
+  const items = markdown.matchAll(/^\s*(?:[-*+]|\d+\.)\s+\[([^\]]+)\]\(/gm);
+  return [...new Set([...items].map((match) => inlineText(match[1])).filter(Boolean))];
+}
+
+/** Fraction of `parts` that open with a link-list label, to two decimals. */
+function linkShare(parts, labels) {
+  if (parts.length === 0 || labels.length === 0) return 0;
+  const isLinkItem = (part) => {
+    const text = inlineText(part);
+    return labels.some((label) => text.startsWith(label));
+  };
+  const linked = parts.filter(isLinkItem).length;
+  return Math.round((linked / parts.length) * 100) / 100;
 }
 
 /** Strip inline markdown from one structured-data paragraph. */

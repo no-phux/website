@@ -29,6 +29,15 @@ export interface Section {
   text: string;
 }
 
+/**
+ * A record of the build's section index: a Section plus ranking hints that
+ * are never served. `linkShare` (0–1) is the fraction of its paragraphs that
+ * are link-list items; an older index without it ranks as plain content.
+ */
+export interface SectionRecord extends Section {
+  linkShare?: number;
+}
+
 export interface SearchEnv {
   ASSETS: { fetch(input: Request): Promise<Response> };
 }
@@ -38,6 +47,10 @@ interface IndexedSection {
   heading: string[];
   page: string[];
   text: string[];
+  /** `heading` and `text` without stopwords, for phrase matching. */
+  headingContent: string[];
+  textContent: string[];
+  linkShare: number;
 }
 
 const WEIGHTS = { heading: 6, page: 3, text: 1 } as const;
@@ -62,13 +75,34 @@ export function searchTerms(query: string): string[] {
   return (meaningful.length > 0 ? meaningful : all).slice(0, MAX_TERMS);
 }
 
-export function indexSections(sections: Section[]): IndexedSection[] {
-  return sections.map((section) => ({
-    section,
-    heading: words(section.heading),
-    page: words(section.page),
-    text: words(section.text),
-  }));
+/** The served fields of a record, without ranking hints. */
+function publicSection({ url, markdown, page, heading, text }: SectionRecord): Section {
+  return { url, markdown, page, heading, text };
+}
+
+export function indexSections(records: SectionRecord[]): IndexedSection[] {
+  return records.map((record) => {
+    const heading = words(record.heading);
+    const text = words(record.text);
+    return {
+      section: publicSection(record),
+      heading,
+      page: words(record.page),
+      text,
+      headingContent: withoutStopwords(heading),
+      textContent: withoutStopwords(text),
+      linkShare: clampShare(record.linkShare),
+    };
+  });
+}
+
+function withoutStopwords(field: string[]): string[] {
+  return field.filter((word) => !STOPWORDS.has(word));
+}
+
+function clampShare(value: unknown): number {
+  if (typeof value !== "number" || !Number.isFinite(value)) return 0;
+  return Math.min(1, Math.max(0, value));
 }
 
 /** Short terms ("ls", "d") match whole words only; longer ones match prefixes too. */
@@ -112,15 +146,41 @@ function scoreSection(entry: IndexedSection, terms: string[]): Score {
     if (heading + page + text > 0) matched++;
     weight += WEIGHTS.heading * Math.min(heading, 1) + WEIGHTS.page * Math.min(page, 1) + WEIGHTS.text * text;
   }
-  if (containsPhrase(entry.heading, terms)) weight += 10;
-  else if (containsPhrase(entry.text, terms)) weight += 4;
-  return { matched, weight };
+  weight += phraseBonus(entry, terms);
+  return { matched, weight: weight * linkListFactor(entry) };
+}
+
+/**
+ * Extra weight for the query's terms in order. The terms are stopword-free,
+ * so the fields drop stopwords too: "unbind key" is the phrase in "Unbinding
+ * a key". A stopword-only query keeps them on both sides.
+ */
+function phraseBonus(entry: IndexedSection, terms: string[]): number {
+  const keepsStopwords = terms.some((term) => STOPWORDS.has(term));
+  const heading = keepsStopwords ? entry.heading : entry.headingContent;
+  const text = keepsStopwords ? entry.text : entry.textContent;
+  if (containsPhrase(heading, terms)) return 10;
+  if (containsPhrase(text, terms)) return 4;
+  return 0;
+}
+
+/**
+ * The share of its weight a section that is all links gives up. A "More" or
+ * index section summarises other pages in their own words, so it matches as
+ * well as they do; the page it points at is the answer.
+ */
+const LINK_LIST_DISCOUNT = 0.75;
+
+/** The fraction of its weight a section keeps, given its link share. */
+function linkListFactor(entry: IndexedSection): number {
+  return 1 - LINK_LIST_DISCOUNT * entry.linkShare;
 }
 
 /**
  * The best `limit` sections for `query`: sections matching more distinct
- * terms first, then by weight (heading over page title over body text), then
- * index order. Sections matching no term are dropped.
+ * terms first, then by weight (heading over page title over body text, with
+ * link lists discounted), then index order. Sections matching no term are
+ * dropped.
  */
 export function rankSections(
   index: IndexedSection[],
