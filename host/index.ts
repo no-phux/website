@@ -4,7 +4,8 @@
  * Static assets stay in dist/; this worker only decides which host a path
  * belongs on. See host/routes.ts for the split. It also negotiates markdown
  * for agents (host/markdown.ts), hosts the read-only MCP endpoint
- * (host/mcp.ts), records passive aggregate telemetry (host/telemetry.ts),
+ * (host/mcp.ts), answers agent docs search at /search.json (host/search.ts),
+ * records passive aggregate telemetry (host/telemetry.ts),
  * serves the public telemetry dashboard API at /api/telemetry, redirects
  * /download/desktop to the stable Desktop archive (host/download.ts), and springs
  * tripwire traps on hostile-bait paths (host/tripwire-paths.ts →
@@ -89,6 +90,19 @@ export default {
         observe(env, ctx, request, mcp);
         return mcp;
       }
+    }
+
+    // Agent docs search over the build's section index (host/search.ts).
+    // A .json path, so telemetry keeps only the aggregate search signal.
+    if (url.pathname === "/search.json") {
+      const { handleSearchRequest } = await import("./search");
+      const response = await handleSearchRequest(request, env);
+      recordEvents(
+        env.TELEMETRY,
+        ctx,
+        classifyRequest(request, response, [{ dim: "signal", key: "search" }]),
+      );
+      return response;
     }
 
     // The Desktop download button: the stable Mac archive, resolved per click.

@@ -12,8 +12,8 @@ export function AgentStart() {
     }
   }
   return (
-    <section className="overview-agent" aria-labelledby="overview-agent-title">
-      <h2 id="overview-agent-title">Use an agent</h2>
+    <section className="overview-agent" aria-labelledby="use-an-agent">
+      <h2 id="use-an-agent">Use an agent</h2>
       <div className="agent-prompt">
         <pre>{AGENT_START.prompt}</pre>
         <button type="button" onClick={copyPrompt}>Copy agent prompt</button>
@@ -22,6 +22,9 @@ export function AgentStart() {
       <p className="agent-links">
         <a href="/consumers/getting-started">Agent integrations →</a>
         <a href="/consumers/getting-started#let-your-agent-read-the-docs">Docs MCP (read-only) →</a>
+      </p>
+      <p className="agent-search">
+        {AGENT_START.search.text} <a href={AGENT_START.search.example}><code>{AGENT_START.search.example}</code></a>
       </p>
     </section>
   );

@@ -53,6 +53,8 @@ export const DOCS_PREFIXES = [
   "/decisions",
   "/api/search",
   "/api/search.json",
+  "/api/sections.json",
+  "/search.json",
 ] as const;
 
 export type HostRoute =

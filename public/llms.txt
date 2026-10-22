@@ -11,6 +11,13 @@ page with `Accept: text/markdown`. Browsers get HTML by default.
 [Every page in one file](https://docs.phux.sh/llms-full.txt): the whole
 documentation as Markdown, in sidebar order, each page headed by its URL.
 
+To find a topic, search the docs at
+https://docs.phux.sh/search.json?q=your+query, which answers with the ten
+best-matching sections as JSON, best first, each with its `url` (deep-linked
+to the section's #anchor), the `markdown` of its page, its `page` and
+`heading`, and a `text` snippet. Without `q` it answers with every section.
+`q` is capped at 200 characters; CORS GET is allowed.
+
 ## Operating safely
 
 Skills teach operation; they do not register tools or grant access to a server.

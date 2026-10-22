@@ -139,6 +139,45 @@ async function verifyDiscovery() {
   }
 }
 
+/** GET /search.json through the host worker: every section deep-links into a built page. */
+async function verifySearchApi(pages: { url: string }[]) {
+  const env = { ASSETS: { fetch: asset } };
+  const search = (query: string, init?: RequestInit) =>
+    handler.fetch(new Request(`https://${DOCS_HOST}/search.json${query}`, init), env);
+  type Hit = { url: string; markdown: string; page: string; heading: string; text: string };
+
+  const all = await search("");
+  assert.equal(all.status, 200);
+  assert.equal(all.headers.get("access-control-allow-origin"), "*", "search is CORS-readable");
+  assert.match(all.headers.get("cache-control") ?? "", /max-age=\d+/, "search is cacheable");
+  const sections = (await all.json()) as Hit[];
+  assert.ok(sections.length > pages.length, "every section, not every page");
+  const html = new Map<string, string>();
+  for (const section of sections) {
+    assert.deepEqual(Object.keys(section).sort(), ["heading", "markdown", "page", "text", "url"]);
+    const url = new URL(section.url);
+    assert.equal(url.host, DOCS_HOST, `${section.url}: canonical docs URL`);
+    assert.ok(pages.some((page) => page.url === url.pathname), `${section.url}: an indexed page`);
+    assert.equal(section.markdown, `https://${DOCS_HOST}${url.pathname}.md${url.hash}`, `${section.url}: Markdown twin`);
+    if (!html.has(url.pathname)) html.set(url.pathname, await readFile(resolve(root, `.${url.pathname}.html`), "utf8"));
+    if (url.hash) {
+      assert.ok(html.get(url.pathname)!.includes(`id="${url.hash.slice(1)}"`), `${section.url}: anchor exists`);
+    }
+  }
+
+  const hits = (await (await search("?q=install+script")).json()) as Hit[];
+  assert.ok(hits.length > 0 && hits.length <= 10, "at most ten results");
+  assert.ok(hits.slice(0, 3).some((hit) => hit.url === `https://${DOCS_HOST}/installation#install-script`), "install script ranks near the top");
+  assert.equal((await search(`?q=${"a".repeat(201)}`)).status, 400, "an over-long q is refused");
+  assert.equal((await search("", { method: "OPTIONS" })).status, 204, "CORS preflight");
+  const bounced = await handler.fetch(new Request(`https://${SITE_HOST}/search.json?q=detach`), env);
+  assert.equal(bounced.headers.get("location"), `https://${DOCS_HOST}/search.json?q=detach`, "phux.sh bounces search to the docs host");
+  const llms = await readFile(resolve(root, "llms.txt"), "utf8");
+  assert.ok(llms.includes(`https://${DOCS_HOST}/search.json?q=`), "llms.txt advertises search");
+  assert.ok((await readFile(resolve(root, "overview.md"), "utf8")).includes(AGENT_START.search.example), "overview advertises search");
+  return sections.length;
+}
+
 async function verifyPublishedContent() {
   const index = JSON.parse(await readFile(resolve(root, "api/mcp-search.json"), "utf8"));
   const pages = index.pages as { url: string }[];
@@ -157,7 +196,7 @@ async function verifyPublishedContent() {
   await verifyOverview();
   await verifyDiscovery();
   await verifyAgentSurfaces(pages);
-  return pages.length;
+  return { pages: pages.length, sections: await verifySearchApi(pages) };
 }
 
 async function verifyPageCopy(page: Page, base: string, path: string) {
@@ -209,6 +248,7 @@ try {
   await page.locator(".agent-prompt [role=status]").filter({ hasText: "Agent prompt copied." }).waitFor();
   assert.equal(await readClipboard(page), AGENT_START.prompt);
   assert.ok(await page.getByRole("link", { name: "Agent integrations" }).isVisible());
+  assert.ok(await page.getByRole("link", { name: AGENT_START.search.example }).isVisible(), "overview shows the search API");
   for (const width of [320, 390, 768, 1280]) {
     await page.setViewportSize({ width, height: 1000 });
     // Fumadocs switches its sidebar through matchMedia after the resize.
@@ -266,7 +306,7 @@ try {
   assert.ok(await staticPage.getByRole("heading", { level: 1 }).isVisible(), "embedding is readable without JavaScript");
   assert.equal(await staticPage.getByRole("link", { name: "View as Markdown" }).getAttribute("href"), "/embedding.md");
   await staticContext.close();
-  console.log(`PASS docs (${useWebKit ? "WebKit, no pre-granted clipboard permissions" : "Chrome"}): ${count} Markdown pages, discovery links/digests, page and prompt copy, failure recovery, llms-full.txt, reader shell (nav order, outline, search keys, drawer focus), light/dark, 320/390/768/1280px, no-JS. Screenshots: ${artifacts}`);
+  console.log(`PASS docs (${useWebKit ? "WebKit, no pre-granted clipboard permissions" : "Chrome"}): ${count.pages} Markdown pages, ${count.sections} search.json sections (anchors, ranking, limits, CORS), discovery links/digests, page and prompt copy, failure recovery, llms-full.txt, reader shell (nav order, outline, search keys, drawer focus), light/dark, 320/390/768/1280px, no-JS. Screenshots: ${artifacts}`);
 } finally {
   await browser.close();
   server.stop(true);

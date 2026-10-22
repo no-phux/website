@@ -54,6 +54,11 @@ export const OVERVIEW = {
 // The visible handoff and the overview's Markdown/search representation agree.
 export const AGENT_START = {
   prompt: "Read https://docs.phux.sh/llms.txt and help me get started with phux. Choose the setup for my agent host, check my installed version, and verify a read before sending input. Use exact pane targets and bounded waits. Ask before interrupting or destroying existing work.",
+  // GET /search.json (host/search.ts); llms.txt documents the same contract.
+  search: {
+    example: `${SITE.docsUrl}/search.json?q=detach+session`,
+    text: "Search the docs as JSON: the ten best-matching sections, each with its url, markdown, page, heading, and text. Without q, every section.",
+  },
 } as const;
 
 /**
