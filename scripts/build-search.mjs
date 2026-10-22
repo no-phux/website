@@ -50,22 +50,26 @@ function parseFrontmatter(raw) {
 export async function buildSearchIndex(distDir) {
   const files = [];
   const mcpPages = [];
+  const sections = [];
   let pageCount = 0;
 
-  for (const abs of await walk(SYNCED)) {
+  // Sorted so every index (and the unqueried /search.json) is stable across filesystems.
+  for (const abs of (await walk(SYNCED)).sort()) {
     const rel = relative(SYNCED, abs).split(/[\\/]/).join("/");
     if (abs.endsWith(".md")) {
       const raw = await readFile(abs, "utf8");
       const { body, meta } = parseFrontmatter(raw);
+      const structuredData = structure(body);
       files.push({
         type: "page",
         path: rel,
         data: {
           title: meta.title,
           description: meta.description || meta.summary,
-          structuredData: structure(body),
+          structuredData,
         },
       });
+      sections.push(...pageSections(meta.title ?? rel, mcpUrl(rel), structuredData));
       mcpPages.push({
         title: meta.title ?? rel,
         url: mcpUrl(rel),
@@ -95,7 +99,56 @@ export async function buildSearchIndex(distDir) {
     JSON.stringify({ pages: mcpPages, release: await releaseInfo() }),
     "utf8",
   );
-  console.log(`build-search: indexed ${pageCount} pages -> api/search.json + api/mcp-search.json`);
+  // Section-level index behind GET /search.json (host/search.ts ranks it).
+  await writeFile(join(distDir, "api", "sections.json"), JSON.stringify(sections), "utf8");
+  console.log(
+    `build-search: indexed ${pageCount} pages (${sections.length} sections) -> ` +
+      "api/search.json + api/mcp-search.json + api/sections.json",
+  );
+}
+
+const DOCS_ORIGIN = "https://docs.phux.sh";
+
+/**
+ * One record per heading (plus the untitled intro), in page order, from the
+ * same structured data the Fumadocs index uses. Heading ids are the rendered
+ * anchors, so `url` deep-links into the page.
+ */
+export function pageSections(page, route, structuredData) {
+  // A heading that repeats the page title (a body `# Title`) is the page itself.
+  const headings = structuredData.headings.filter((h) => inlineText(h.content) !== page);
+  const titles = new Map(headings.map((h) => [h.id, h.content]));
+  const byHeading = new Map();
+  byHeading.set("", []);
+  for (const { id } of headings) byHeading.set(id, []);
+  for (const { heading, content } of structuredData.contents) {
+    const key = heading && byHeading.has(heading) ? heading : "";
+    byHeading.get(key).push(content);
+  }
+  const out = [];
+  for (const [id, parts] of byHeading) {
+    const text = inlineText(parts.join(" "));
+    if (id === "" && text === "") continue;
+    const anchor = id ? `#${id}` : "";
+    out.push({
+      url: `${DOCS_ORIGIN}${route}${anchor}`,
+      markdown: `${DOCS_ORIGIN}${route}.md${anchor}`,
+      page,
+      heading: id ? inlineText(titles.get(id)) : page,
+      text,
+    });
+  }
+  return out;
+}
+
+/** Strip inline markdown from one structured-data paragraph. */
+function inlineText(value) {
+  return String(value ?? "")
+    .replace(/!?\[([^\]]*)\]\([^)]*\)/g, "$1")
+    .replace(/<\/?[a-z][^>]*>/gi, "")
+    .replace(/[*`]+/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 /** Bare canonical route for a synced markdown path (matches trailingSlash "never"). */

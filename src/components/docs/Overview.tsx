@@ -5,20 +5,20 @@ export function OverviewBody() {
   const { pitch } = OVERVIEW;
   return (
     <div className="docs-overview">
-      <section className="overview-pitch" aria-labelledby="overview-pitch-title">
-        <h2 id="overview-pitch-title">{pitch.headline}</h2>
+      <section className="overview-pitch" aria-labelledby="leave-the-view-keep-the-shell">
+        <h2 id="leave-the-view-keep-the-shell">{pitch.headline}</h2>
         <p>{pitch.text}</p>
       </section>
 
       <div className="overview-actions">
         <a className="overview-primary" href="/installation">Install phux <span aria-hidden="true">→</span></a>
         <a href={`${SITE.url}/embed`}>Try in your browser <span aria-hidden="true">↗</span></a>
-        <a href="#overview-agent-title">Use with an agent <span aria-hidden="true">↓</span></a>
+        <a href="#use-an-agent">Use with an agent <span aria-hidden="true">↓</span></a>
       </div>
 
-      <section className="overview-first-run" aria-labelledby="overview-first-run-title">
+      <section className="overview-first-run" aria-labelledby="try-it">
         <div className="overview-first-run-heading">
-          <h2 id="overview-first-run-title">Try it</h2>
+          <h2 id="try-it">Try it</h2>
           <a href="/getting-started">Full quickstart →</a>
         </div>
         <ol className="overview-first-run-steps">
@@ -33,8 +33,8 @@ export function OverviewBody() {
         <p className="overview-first-run-result">{OVERVIEW.continuity} <a href="/concepts#what-survives-what">Continuity details →</a></p>
       </section>
 
-      <section aria-labelledby="overview-model-title">
-        <h2 id="overview-model-title">The model</h2>
+      <section aria-labelledby="the-model">
+        <h2 id="the-model">The model</h2>
         <figure className="overview-model" aria-labelledby="overview-model-caption">
           <div className="overview-model-server">
             <strong>Server</strong>
@@ -57,8 +57,8 @@ export function OverviewBody() {
         </figure>
       </section>
 
-      <section aria-labelledby="overview-paths-title">
-        <h2 id="overview-paths-title">Guides</h2>
+      <section aria-labelledby="guides">
+        <h2 id="guides">Guides</h2>
         <div className="overview-paths">
           {OVERVIEW.paths.map(({ href, title, text }) => (
             <a href={href} key={href}>
@@ -71,9 +71,9 @@ export function OverviewBody() {
 
       <AgentStart />
 
-      <section className="overview-reference" aria-labelledby="overview-reference-title">
+      <section className="overview-reference" aria-labelledby="reference">
         <div>
-          <h2 id="overview-reference-title">Reference</h2>
+          <h2 id="reference">Reference</h2>
         </div>
         <div className="overview-reference-links">
           <a href="/concepts">Core concepts</a>

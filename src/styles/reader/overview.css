@@ -285,6 +285,19 @@
   text-decoration-color: color-mix(in srgb, var(--color-accent) 55%, transparent);
   text-underline-offset: 0.2em;
 }
+.agent-search {
+  margin: 0.5rem 0 0;
+  color: var(--color-muted);
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+.agent-search a {
+  color: var(--color-fg);
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--color-accent) 55%, transparent);
+  text-underline-offset: 0.2em;
+}
 .overview-reference {
   display: grid;
   grid-template-columns: 1fr 2fr;

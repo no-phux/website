@@ -33,7 +33,17 @@ describe("path classification", () => {
     expect(isDocsPath("/quickstart/install")).toBe(true);
     expect(isDocsPath("/wire/l1")).toBe(true);
     expect(isDocsPath("/api/search.json")).toBe(true);
+    expect(isDocsPath("/search.json")).toBe(true);
+    expect(isDocsPath("/api/sections.json")).toBe(true);
     expect(isDocsPath("/consumers/cockpit")).toBe(true);
+  });
+
+  test("the agent search API keeps its query across the docs bounce", () => {
+    expect(routeRequest("phux.sh", new URL("https://phux.sh/search.json?q=detach"))).toEqual({
+      kind: "redirect",
+      location: "https://docs.phux.sh/search.json?q=detach",
+      status: 301,
+    });
   });
 
   test("marketing paths stay off the docs host", () => {

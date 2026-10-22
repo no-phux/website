@@ -154,6 +154,8 @@ ${AGENT_START.prompt}
 
 [Coding agents](/agents) · [Driving terminals from scripts](/scripting)
 
+${AGENT_START.search.text} [${AGENT_START.search.example}](${AGENT_START.search.example})
+
 ## Reference
 
 [Concepts](/concepts) · [CLI and configuration](/reference) · [Protocol](/protocol) · [Architecture](/architecture) · [Troubleshooting](/troubleshooting) · [All documentation](/docs) · [Docs MCP (read-only)](${SITE.url}/mcp)

@@ -25,6 +25,15 @@
       ]
     },
     {
+      "anchor": "https://docs.phux.sh/search.json",
+      "service-doc": [
+        {
+          "href": "https://docs.phux.sh/llms.txt",
+          "type": "text/plain"
+        }
+      ]
+    },
+    {
       "anchor": "https://phux.sh/install",
       "service-doc": [
         {
