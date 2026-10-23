@@ -31,8 +31,6 @@ const ogAlt = image ? title : `${SITE.name}: ${SITE.tagline}`;
 
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<!-- Warm DNS/TLS for the live demo origin; the terminal island dials it on click. -->
-{origin !== SITE.docsUrl && <link rel="preconnect" href="https://shell.phux.sh" crossorigin />}
 <title>{title}</title>
 <meta name="description" content={description} />
 <link rel="canonical" href={canonical} />

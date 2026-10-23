@@ -69,6 +69,9 @@ jobs:
       - name: Verify documentation before publication
         run: bun run verify:docs
 
+      - name: Verify homepage and hosted shell before publication
+        run: bun run verify:home
+
       - name: Verify responsive live hero before publication
         run: bun run verify:live-layout
 

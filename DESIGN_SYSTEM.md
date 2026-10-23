@@ -67,16 +67,32 @@ applies the saved preference before paint and Astro document swaps.
 
 ## Landing and live shell
 
-The landing carries a short top bar: wordmark plus Docs, Try, and Source. There is
-no visible tagline. The install targets, command, and copy action float as type on
-the canvas — no card, panel, or fill behind them, and hover changes color rather
-than background. The three targets are CLI, Desktop, and Mobile; Mobile swaps the
+The landing carries a short top bar: wordmark plus Docs, Try, and a recognizable
+GitHub source badge (local SVG, no third-party badge request or invented star count).
+A compact 36–52px wordmark and one-line description lead a draggable TUI/GUI
+comparison. The entire comparison must fit in the first screen at mobile and
+desktop widths. It is an explicitly labelled illustrated client preview, not a
+screenshot or a live connection; both sides show the same terminals and state.
+Use a native range input for pointer, touch and keyboard, plus full-client shortcuts.
+Without JavaScript, show both previews and hide the inert controls.
+
+The install targets, command, and copy action float as type on the canvas — no
+card, panel, or fill behind them, and hover changes color rather than background. The three targets are CLI, Desktop, and Mobile; Mobile swaps the
 command line for the TestFlight address request inside the same reserved slot, so
 the landing carries no separate beta band. The quiet footer keeps Demos, More,
 Privacy, and Support instead of repeating the top bar. The landing canvas is
 `#0b0b0d`, with `#ededee` text and neutral accents.
 
-The hero tour shows a server, clients, and signals travelling along connections.
+The glass live workspace stays inline below the fold, with a visible anchor from
+the hero and a separate full-shell link. Its iframe does not exist until the section
+intersects the viewport. Leaving view or hiding the tab removes it after a short
+grace period, releasing its GPU, browser worker and disposable connection; returning
+starts a fresh demo. Say so next to the workspace. Legacy `?hero=light` links scroll
+to this section rather than replacing the homepage. No terminal/GPU/WASM JavaScript
+or demo-origin preconnect belongs in the initial viewport's resource budget.
+
+Below the workspace, the illustrated tour shows a server, clients, and signals
+travelling along connections.
 It autoplays only while on screen, with pause and chapter controls; reduced motion
 shows settled chapters. Faint background hosts are decorative, hidden from
 assistive technology, and do not claim live status. The scene's live-demo invitation is always visible as a bottom chip, for mouse,
@@ -96,12 +112,16 @@ attached the shared shell follows the newest screen's size, which is the tmux
 rule and the honest reading of "one shell, two screens"; the pairing line says
 "Phone linked" so the beat is visible on the big screen.
 
-The live dialog uses one rounded glass shell with a blurred backdrop, not stacked
-outer frames. The terminal canvas is inset within it; pane controls sit below the
+The hosted `/embed` shell and live dialog share ice-blue neutral glass tokens,
+a single rounded frame, a subtle edge and inset highlight, and an opaque readable
+terminal canvas. The standalone shell gets a quiet radial backdrop, GitHub badge,
+and a direct way home; embedded clients hide that page chrome. The dialog adds a
+blurred backdrop, not stacked outer frames. The terminal canvas is inset within it; pane controls sit below the
 canvas, using icons with accessible names and a labelled primary Split pane action.
 The Info disclosure opens an inspector for runtime, network/file limits, shortcuts,
 and session controls, plus identity, startup timing, and focused terminal when
-available. Runtime and connection status remain in the header.
+available. Runtime and connection status remain in the header. OAuth returns wake
+the visibility-hydrated tour dialog; moving the demo down-page must not strand sign-in.
 Terminal interiors use local neutral tokens;
 program output and reader themes are not recolored.
 

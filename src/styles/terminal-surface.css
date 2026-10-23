@@ -1,14 +1,15 @@
 /* One visual language for the preview, live dialog and standalone shell.
    These tokens stay local: program output and docs themes are not recolored. */
 .terminal-surface {
-  --terminal-bg: #0b0b0d;
-  --terminal-surface: #141416;
-  --terminal-raised: #ffffff0c;
-  --terminal-fg: #ededee;
-  --terminal-muted: #aaaab1;
-  --terminal-dim: #95959d;
-  --terminal-rule: #ffffff14;
-  --terminal-focus: #ededee;
+  --terminal-bg: #0b1118;
+  --terminal-surface: #141e27;
+  --terminal-glass: linear-gradient(125deg, #b8ddeb0c, #b9ace306 65%), #101923ed;
+  --terminal-raised: #c4deef0d;
+  --terminal-fg: #deebf2;
+  --terminal-muted: #a7bdcb;
+  --terminal-dim: #9aafbd;
+  --terminal-rule: #c4deef20;
+  --terminal-focus: #c4e1f0;
   --terminal-warning: #e0af68;
   color: var(--terminal-fg);
   background: var(--terminal-bg);

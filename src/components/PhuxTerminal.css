@@ -5,8 +5,10 @@
   width: min(920px, 100%);
   min-width: 0;
   max-width: 100%;
-  border: 0;
-  border-radius: 16px;
+  border: 1px solid var(--terminal-rule);
+  border-radius: 20px;
+  background: var(--terminal-glass);
+  backdrop-filter: blur(16px) saturate(1.1);
   overflow: hidden;
   font-family: var(--font-reading);
   font-size: 13px;
@@ -22,7 +24,7 @@
   padding: 4px 12px;
   box-sizing: border-box;
   border-bottom: 0;
-  background: linear-gradient(#ffffff05, transparent);
+  background: linear-gradient(#c9e6f008, transparent);
   color: var(--terminal-dim);
   font-size: 12px;
 }
@@ -46,8 +48,8 @@
   min-width: 0;
   overflow: hidden;
   background: var(--terminal-bg);
-  margin-inline: 10px;
-  border: 1px solid var(--terminal-rule);
+  margin-inline: 12px;
+  border: 1px solid #c4deef12;
   border-radius: 12px;
 }
 .pterm-canvas-host { width: calc(100% - 16px); min-width: 0; margin: 8px auto; }
@@ -73,7 +75,7 @@
   font: inherit;
   color: var(--terminal-fg);
   border: 1px solid var(--terminal-rule);
-  border-radius: 4px;
+  border-radius: 10px;
   background: transparent;
 }
 .pterm button { min-height: 44px; padding: 6px 12px; cursor: pointer; touch-action: manipulation; transition: background 120ms ease, color 120ms ease, border-color 120ms ease; }
@@ -102,7 +104,7 @@
 .pterm-info summary::-webkit-details-marker { display: none; }
 .pterm-info summary::after { content: "+"; margin-left: 10px; }
 .pterm-info[open] summary::after { content: "−"; }
-.pterm-info-body { position: absolute; top: calc(100% - 2px); right: 10px; z-index: 4; width: min(380px, calc(100% - 20px)); box-sizing: border-box; max-height: min(420px, 65dvh); overflow: auto; border: 1px solid #ffffff20; border-radius: 12px; padding: 20px; background: #1b1b1df5; backdrop-filter: blur(24px); box-shadow: 0 16px 48px #0007, inset 0 1px #ffffff08; }
+.pterm-info-body { position: absolute; top: calc(100% - 2px); right: 10px; z-index: 4; width: min(380px, calc(100% - 20px)); box-sizing: border-box; max-height: min(420px, 65dvh); overflow: auto; border: 1px solid #ffffff20; border-radius: 12px; padding: 20px; background: #16232ef5; backdrop-filter: blur(24px); box-shadow: 0 16px 48px #0007, inset 0 1px #ffffff08; }
 .pterm-facts { display: grid; gap: 10px; color: var(--terminal-muted); font-size: 12px; }
 .pterm-facts > span { display: flex; justify-content: space-between; gap: 16px; text-align: right; }
 .pterm-facts b { text-align: left; }

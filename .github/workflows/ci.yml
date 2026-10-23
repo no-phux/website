@@ -21,6 +21,8 @@ jobs:
     timeout-minutes: 20
     env:
       PHUX_ROOT: ${{ github.workspace }}/phux
+      # Browser acceptance intercepts WebSockets; never allocate a public session.
+      PUBLIC_PHUX_DEMO_WS: wss://demo.invalid/session
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -77,4 +79,5 @@ jobs:
           bun run check
           bun run check:links
           bun run verify:docs
+          bun run verify:home
           bun run verify:live-layout

@@ -1,0 +1,119 @@
+---
+// An illustrative client preview, not a screenshot or an allocated live session.
+// Both sides deliberately show the same terminals, commands and agent state.
+const panes = [
+  { name: "claude", state: "Needs input", lines: ["api › claude", "Reviewing the authentication changes.", "✓ Read src/auth.rs", "✓ Updated session expiry", "", "Allow this change? [y/n]"] },
+  { name: "build", state: "Finished", lines: ["api › cargo test", "   Compiling api v0.4.2", "", "test auth::session ... ok", "test auth::expiry  ... ok", "", "✓ 42 passed · 0 failed", "api › ▋"] },
+];
+---
+<figure class="client-comparison" data-comparison aria-label="Compare phux terminal and desktop clients">
+  <div class="comparison-top">
+    <span><i aria-hidden="true"></i> One server. The same session.</span>
+    <span class="preview-label">Illustrated client preview</span>
+  </div>
+  <div class="comparison-stage" style="--reveal: 50%">
+    <div class="client-layer client-tui" aria-label="Terminal client preview">
+      <div class="client-toolbar"><span>phux attach api</span><span>studio · local</span></div>
+      <div class="client-workspace">
+        <aside class="client-sidebar"><small>SESSIONS</small><b>▾ api</b><span> &nbsp; @3 claude <em>●</em></span><span> &nbsp; @7 build <i>◆</i></span><small>MACHINES</small><span>● studio</span><span>○ devbox</span></aside>
+        <div class="client-panes">{panes.map(pane => <div class="client-pane"><div class="client-pane-title">┌─ {pane.name} <span>{pane.state}</span></div><pre>{pane.lines.join("\n")}</pre></div>)}</div>
+      </div>
+      <div class="client-status"><b>api</b><span>@3 claude · @7 build</span><span>Ctrl+a ? help</span></div>
+    </div>
+    <div class="client-layer client-gui" aria-label="Desktop client preview">
+      <div class="client-toolbar"><span class="client-traffic" aria-hidden="true"><i></i><i></i><i></i></span><span>Phux.app <span class="client-toolbar-dim">/ api</span></span><span>⌘K</span></div>
+      <div class="client-workspace">
+        <aside class="client-sidebar"><small>WORKSPACE</small><b>▾ api</b><span class="is-selected"> &nbsp; claude <em>●</em></span><span> &nbsp; build <i>◆</i></span><small>MACHINES</small><span>● studio</span><span>○ devbox</span></aside>
+        <div class="client-panes">{panes.map(pane => <div class="client-pane"><div class="client-pane-title"><span>{pane.name}</span><small>{pane.state}</small></div><pre>{pane.lines.join("\n")}</pre></div>)}</div>
+      </div>
+      <div class="client-status"><span><i aria-hidden="true">●</i> Connected to studio</span><span>2 terminals · 1 needs input</span></div>
+    </div>
+    <div class="comparison-divider" aria-hidden="true"><span>‹ ›</span></div>
+    <input class="comparison-range" type="range" min="0" max="100" value="50" step="1" aria-label="Reveal desktop client" aria-valuetext="50% desktop client" hidden />
+    <div class="comparison-corners" aria-hidden="true"><span>TUI</span><span>GUI</span></div>
+  </div>
+  <figcaption>
+    <button type="button" data-client-position="0" hidden><b>TUI</b><span>Any terminal. Local or SSH.</span></button>
+    <span class="comparison-hint">Drag to compare <span aria-hidden="true">↔</span></span>
+    <button type="button" data-client-position="100" hidden><b>GUI</b><span>A native desktop window.</span></button>
+  </figcaption>
+  <noscript><p class="comparison-fallback">Terminal and desktop are two views of the same session. <a href="https://docs.phux.sh/clients">Explore the clients ↗</a></p></noscript>
+</figure>
+<script>
+  document.querySelectorAll<HTMLElement>("[data-comparison]").forEach(root => {
+    const slider = root.querySelector<HTMLInputElement>(".comparison-range")!;
+    const stage = root.querySelector<HTMLElement>(".comparison-stage")!;
+    const choices = root.querySelectorAll<HTMLButtonElement>("[data-client-position]");
+    const update = () => {
+      stage.style.setProperty("--reveal", `${slider.value}%`);
+      slider.setAttribute("aria-valuetext", `${slider.value}% desktop client`);
+      choices.forEach(button => button.setAttribute("aria-pressed", String(button.dataset.clientPosition === slider.value)));
+    };
+    slider.hidden = false;
+    slider.addEventListener("input", update);
+    choices.forEach(button => {
+      button.hidden = false;
+      button.addEventListener("click", () => { slider.value = button.dataset.clientPosition!; update(); });
+    });
+    update();
+  });
+</script>
+<style>
+  .client-comparison { margin: 22px 0 0; text-align: left; --preview-muted: #9babb6; }
+  .comparison-top { display: flex; justify-content: space-between; gap: 12px; margin: 0 4px 10px; color: #a8bbc7; font-size: 11px; }
+  .comparison-top > span:first-child { display: flex; align-items: center; gap: 8px; }
+  .comparison-top i { width: 5px; height: 5px; background: #a9c9b2; border-radius: 50%; }
+  .preview-label { color: #82929e; }
+  .comparison-stage { position: relative; height: clamp(270px, 29vw, 348px); overflow: hidden; isolation: isolate; border: 1px solid #b7d5e329; border-radius: 15px; background: #0a1118; box-shadow: 0 20px 64px #0004; }
+  .client-layer { position: absolute; inset: 0; display: flex; flex-direction: column; color: #d1dee6; font: 12px/1.65 var(--font-code); }
+  .client-tui { background: #0a0e13; }
+  .client-gui { background: linear-gradient(135deg, #a6d6ed0c, #b8acdf05), #101820; clip-path: inset(0 0 0 calc(100% - var(--reveal))); }
+  .client-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; height: 36px; flex: none; padding: 0 16px; color: #a9beca; border-bottom: 1px solid #c4deeb13; font-size: 11px; }
+  .client-gui .client-toolbar { font-family: var(--font-reading); }
+  .client-toolbar-dim { color: #8195a3; }
+  .client-traffic { display: flex; gap: 5px; }
+  .client-traffic i { width: 7px; height: 7px; border-radius: 50%; background: #94acbb45; }
+  .client-workspace { display: flex; flex: 1; min-height: 0; }
+  .client-sidebar { display: flex; flex-direction: column; gap: 5px; width: 150px; flex: none; padding: 16px 12px; border-right: 1px solid #b6d1e31a; color: #9db0bd; font-size: 11px; }
+  .client-sidebar small { margin: 3px 0 6px; color: #899eac; font-size: 9px; letter-spacing: .08em; }
+  .client-sidebar small:nth-of-type(2) { margin-top: 20px; }
+  .client-sidebar b { color: #d9e7ef; font-weight: 500; }
+  .client-sidebar em, .client-sidebar i { font-style: normal; float: right; }
+  .client-sidebar em { color: #e8bb83; } .client-sidebar i { color: #aad5ba; }
+  .client-gui .client-sidebar { background: #d4e8f003; font-family: var(--font-reading); }
+  .client-sidebar .is-selected { background: #b6dbed0e; border-radius: 5px; }
+  .client-panes { display: grid; grid-template-columns: 1fr 1fr; flex: 1; min-width: 0; }
+  .client-pane { min-width: 0; padding: 12px 14px; overflow: hidden; }
+  .client-pane + .client-pane { border-left: 1px solid #b6d1e326; }
+  .client-pane-title { display: flex; justify-content: space-between; gap: 12px; white-space: nowrap; font-size: 11px; color: #b1c7d6; }
+  .client-pane-title > span:last-child, .client-pane-title small { font-size: 10px; color: #c5b594; }
+  .client-gui .client-panes { gap: 8px; padding: 8px; }
+  .client-gui .client-pane { border: 1px solid #c1dceb16; border-radius: 8px; background: #070e1599; }
+  .client-gui .client-pane-title { font-family: var(--font-reading); }
+  .client-gui .client-pane-title > span { color: #cbdfe9; }
+  .client-pane pre { margin: 18px 0 0; font: inherit; white-space: pre; color: #b1c4d0; }
+  .client-status { display: flex; align-items: center; justify-content: space-between; gap: 12px; height: 28px; padding: 0 12px; background: #b8d6e609; color: #a4b7c3; font-size: 10px; }
+  .client-status b { background: #a4c6da; color: #101820; padding: 0 8px; border-radius: 3px; }
+  .client-status i { color: #a9c9b2; font-style: normal; }
+  .client-gui .client-status { font-family: var(--font-reading); }
+  .comparison-divider { position: absolute; inset: 0 auto 0 calc(100% - var(--reveal)); width: 1px; background: #c0dce9; z-index: 2; pointer-events: none; }
+  .comparison-divider > span { position: absolute; left: 0; top: 50%; display: grid; place-items: center; transform: translate(-50%, -50%); width: 40px; height: 40px; border: 1px solid #e0f0f7aa; border-radius: 50%; background: #d3e9f3; box-shadow: 0 3px 24px #0005; color: #172631; font: 600 15px var(--font-reading); }
+  .comparison-range { appearance: none; -webkit-appearance: none; position: absolute; z-index: 3; inset: calc(50% - 22px) -22px auto; width: calc(100% + 44px); height: 44px; margin: 0; background: transparent; cursor: ew-resize; direction: rtl; touch-action: pan-y; }
+  .comparison-range::-webkit-slider-thumb { appearance: none; width: 44px; height: 44px; background: transparent; }
+  .comparison-range::-moz-range-thumb { width: 44px; height: 44px; background: transparent; border: 0; }
+  .comparison-range:focus-visible { outline: 2px solid #d3e9f3; outline-offset: -3px; border-radius: 3px; }
+  .comparison-corners { position: absolute; inset: auto 12px 38px; display: flex; justify-content: space-between; pointer-events: none; color: #a7becb; font: 10px var(--font-code); }
+  .comparison-corners span { padding: 2px 6px; background: #0b151de6; border-radius: 4px; }
+  figcaption { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-top: 8px; }
+  figcaption button { display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 4px; border: 0; background: none; color: #a4b6c2; font: 12px var(--font-reading); cursor: pointer; }
+  figcaption button b { color: #e1eaf0; font-size: 11px; font-weight: 500; }
+  figcaption button[aria-pressed=true] b { text-decoration: underline; text-underline-offset: 4px; }
+  .comparison-hint { color: #9daeb9; font-size: 11px; }
+  .comparison-hint > span { margin-left: 6px; color: #c0dce9; }
+  .comparison-fallback { color: #a4b6c2; font-size: 13px; }
+  .comparison-fallback a { text-decoration: underline; }
+  [hidden] { display: none !important; }
+  @media (max-width: 700px) { .client-sidebar { width: 110px; padding-inline: 10px; } .client-pane { padding-inline: 10px; } .client-panes { grid-template-columns: 1fr; } .client-pane:nth-child(2) { display: none; } .client-gui .client-pane { padding: 10px; } .client-layer { font-size: 11px; } .client-pane-title > span:last-child, .client-pane-title small { display: none; } .preview-label { display: none; } figcaption button { gap: 5px; font-size: 11px; } .comparison-hint { font-size: 0; } .comparison-hint > span { font-size: 14px; margin: 0; } }
+  @media (max-width: 380px) { .client-sidebar { width: 88px; font-size: 10px; } .client-toolbar { padding-inline: 10px; } figcaption button span { max-width: 105px; text-align: left; } }
+  @media (scripting: none) { .comparison-divider, .comparison-hint, .comparison-corners { display: none; } .comparison-stage { height: 560px; } .client-tui { bottom: 50%; } .client-gui { top: 50%; clip-path: none; border-top: 1px solid #c1dceb33; } }
+</style>
