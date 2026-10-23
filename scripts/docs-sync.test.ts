@@ -56,6 +56,25 @@ describe("documentation discovery interface", () => {
     expect(warning).toHaveBeenCalledWith("  skip (missing): docs/clients.md");
   });
 
+  test("publishes host services in Build for phux with local documentation links", async () => {
+    for (const file of ["program-protocol.md", "program-sequences.md", "protocol.md"]) await source(file);
+    await source("host-services.md", "# Host services\n\nHTTP over the phux connection.\n\n## Commands\n\nSee the [protocol](./protocol.md#commands-events-resources).\n");
+    const { entries } = await discover(docs);
+    expect(entries.find(({ slug }) => slug === "host-services")).toMatchObject({
+      repoPath: "docs/host-services.md", group: "build", order: 2,
+    });
+    const out = join(root, "out");
+    await mkdir(out);
+    expect(await writeDocumentation(out, entries, revision, versions, siteRevision)).toEqual({ written: 5, failed: [] });
+    expect((await metadata(out)).pages).toEqual([
+      "---Get started---", "overview", "---Build for phux---", "program-protocol", "program-sequences", "host-services",
+      "---Work on phux---", "protocol",
+    ]);
+    const guide = await readFile(join(out, "host-services.md"), "utf8");
+    expect(guide).toContain('sourcePath: "docs/host-services.md"');
+    expect(guide).toContain("[protocol](/protocol#commands-events-resources)");
+  });
+
   test("orders public section pages using all nav-order aliases, then basename", async () => {
     await source("reference/README.md");
     await source("reference/Beta.md", "---\nnav-order: -2\n---\n# Beta");

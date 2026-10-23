@@ -36,6 +36,7 @@ export const DOCS_PREFIXES = [
   "/embedding",
   "/program-protocol",
   "/program-sequences",
+  "/host-services",
   "/troubleshooting",
   "/reference",
   "/architecture",
