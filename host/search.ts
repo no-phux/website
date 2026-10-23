@@ -153,14 +153,15 @@ function scoreSection(entry: IndexedSection, terms: string[]): Score {
 /**
  * Extra weight for the query's terms in order. The terms are stopword-free,
  * so the fields drop stopwords too: "unbind key" is the phrase in "Unbinding
- * a key". A stopword-only query keeps them on both sides.
+ * a key". A body phrase outweighs an incidental single-term heading match.
+ * A stopword-only query keeps them on both sides.
  */
 function phraseBonus(entry: IndexedSection, terms: string[]): number {
   const keepsStopwords = terms.some((term) => STOPWORDS.has(term));
   const heading = keepsStopwords ? entry.heading : entry.headingContent;
   const text = keepsStopwords ? entry.text : entry.textContent;
   if (containsPhrase(heading, terms)) return 10;
-  if (containsPhrase(text, terms)) return 4;
+  if (containsPhrase(text, terms)) return 8;
   return 0;
 }
 
