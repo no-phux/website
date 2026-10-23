@@ -4,6 +4,7 @@ import assert from "node:assert/strict";
 import { mkdir } from "node:fs/promises";
 import { extname, resolve } from "node:path";
 import { chromium } from "playwright-core";
+import { verifyClientComparison, verifyHomeAuthReturn, verifyHostedShell, verifyTouchComparison, verifyWorkspaceResize } from "./home-interaction-checks";
 
 const root = resolve(import.meta.dir, "../dist");
 const artifacts = resolve(import.meta.dir, "../.home-check");
@@ -28,7 +29,10 @@ const base = `http://127.0.0.1:${server.port}`;
 const browser = await chromium.launch({ channel: "chrome", headless: true });
 try {
   await mkdir(artifacts, { recursive: true });
-  const context = await browser.newContext({ permissions: ["clipboard-read", "clipboard-write"] });
+  const context = await browser.newContext({ viewport: { width: 1440, height: 900 }, permissions: ["clipboard-read", "clipboard-write"], hasTouch: true });
+  // Offline acceptance: never allocate production demo sessions or use real identity.
+  await context.routeWebSocket(/wss?:\/\//, socket => socket.close());
+  await context.route("**/auth/session", route => route.fulfill({ json: { authenticated: false } }));
   const page = await context.newPage();
   const errors: string[] = [];
   const requests: string[] = [];
@@ -46,8 +50,11 @@ try {
   });
   await page.goto(`${base}/`);
   assert.equal((await page.getByRole("heading", { level: 1 }).innerText()).trim(), "phux");
-  assert.equal(await page.locator("#home-light").isHidden(), true, "the classic terminal is the default hero");
-  assert.equal(await page.locator("[data-classic-home]").isVisible(), true, "the terminal is on screen at first paint");
+  assert.equal(await page.locator("#home-light iframe").count(), 0, "no live app exists before scrolling");
+  assert.ok(await page.getByRole("slider", { name: "Reveal desktop client" }).isVisible(), "the client comparison is the first demo");
+  await page.waitForTimeout(350);
+  assert.ok(!requests.some(url => /(?:HeroDemo|PhuxTerminal|VgpuPrototype)[^/]*\.js|\.wasm|\/auth\/session|\/healthz|phux-architecture\.mp4/.test(url)), "first fold does not download React demos, GPU, WASM, film or allocate sessions");
+  await verifyClientComparison(page);
   assert.equal(await page.locator("#how-it-works").count(), 0, "no homepage explainer");
   assert.equal(await page.locator(".hero-headline, .live-invitation, .features").count(), 0, "the landing carries no slogan block");
   const installBox = await page.locator("#install").boundingBox();
@@ -59,13 +66,13 @@ try {
   assert.equal(await page.locator("body > header").count(), 1, "the landing carries one top bar");
   assert.deepEqual(
     await page.locator("body > header nav[aria-label='Primary navigation']").getByRole("link").allInnerTexts(),
-    ["phux", "Docs", "Try", "Source"],
-    "the top bar carries the wordmark and the Docs/Try/Source links",
+    ["phux", "Docs", "Try", "GitHub\nSource ↗"],
+    "the top bar carries a recognizable GitHub source badge",
   );
   assert.equal(await page.locator(".tour-distant-host").count(), 3, "restrained background hosts");
   const entry = page.getByRole("link", { name: "Open demo", exact: true });
-  await page.locator("astro-island:not([ssr]) .tour-entry").waitFor();
   await page.locator(".tour").scrollIntoViewIfNeeded();
+  await page.locator("astro-island:not([ssr]) .tour-entry").waitFor();
   assert.equal(await page.locator(".tour").getAttribute("data-pace"), "quick", "opens with the quick lap");
   await page.getByRole("button", { name: "Pause tour" }).click();
   const pausedProgress = await page.locator('.tour-chapters button[aria-pressed="true"]').getAttribute("style");
@@ -81,7 +88,7 @@ try {
   await page.keyboard.press("Tab");
   await page.waitForFunction(() => getComputedStyle(document.querySelector(".tour-open")!).opacity === "1");
   assert.equal(await page.locator(".tour-open").evaluate((node) => getComputedStyle(node).opacity), "1", "keyboard focus reveals the demo");
-  assert.match(await page.locator(".tour-open").evaluate((node) => getComputedStyle(node).backdropFilter), /blur/, "focus blurs the tour");
+  assert.equal(await page.locator(".tour-open").evaluate((node) => getComputedStyle(node).backdropFilter), "none", "the invitation never blurs or covers the illustration");
   assert.equal((await page.locator(".tour-open").innerText()).trim(), "Open demo");
   assert.equal(await page.locator("dialog[open]").count(), 0, "discovery does not launch a session");
   await entry.hover();
@@ -151,15 +158,20 @@ try {
   assert.equal(beta.payload?.platform, "android", "the Android request says so");
   assert.ok(await request.getByRole("button", { name: "iPhone instead" }).isVisible(), "the switch offers the way back");
   for (const width of [320, 390, 768, 1280]) {
-    await page.setViewportSize({ width, height: 1000 });
+    await page.setViewportSize({ width, height: width < 600 ? 740 : 900 });
+    await page.evaluate(() => window.scrollTo(0, 0));
+    const preview = (await page.locator(".comparison-stage").boundingBox())!;
+    assert.ok(preview.y < 200 && preview.y + preview.height < (width < 600 ? 540 : 650), `the entire comparison is in the first screen at ${width}px`);
+    assert.ok(parseFloat(await page.locator("h1").evaluate(node => getComputedStyle(node).fontSize)) <= 52, "the wordmark does not dominate the first screen");
     for (const name of ["desktop", "cli"]) {
       await target(name).click();
       assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `no overflow with ${name} at ${width}px`);
     }
     assert.ok(await page.locator("#install code").evaluate((code) => code.scrollWidth <= code.clientWidth), `full install command readable at ${width}px`);
-    await page.screenshot({ path: `${artifacts}/home-${width}.png`, fullPage: true });
+    assert.equal(await page.locator("#beta-note").innerText(), "", "changing install targets clears unrelated signup/copy feedback");
+    await page.locator("#install-command").evaluate(node => Promise.all(node.getAnimations().map(animation => animation.finished)));
+    await page.screenshot({ path: `${artifacts}/home-${width}.png` });
   }
-  assert.ok(!requests.some((url) => /\.wasm|\/auth\/session|\/healthz|phux-architecture\.mp4/.test(url)), "idle homepage does not allocate sessions or fetch film/WASM");
   await page.getByRole("link", { name: "Open demo", exact: true }).click();
   await page.locator("dialog[open]").waitFor();
   assert.equal(await page.locator(".tour").getAttribute("data-playing"), "false", "live demo suspends the illustrated tour");
@@ -180,7 +192,8 @@ try {
   assert.equal(await page.getByRole("link", { name: "request access to phux for iPhone" }).getAttribute("href"), "/more#testflight");
   await page.goto(`${base}/telemetry`);
   assert.equal(await page.getByRole("link", { name: "release mailing list" }).getAttribute("href"), "/more#beta");
-  // The opt-in live hero carries its own install hook, whether or not a demo session connects.
+  // Legacy live links now scroll to an inline workspace; neither hides the hero
+  // nor allocates anything until the workspace itself is visible.
   await page.goto(`${base}/?hero=light`);
   const live = page.frameLocator("#home-light iframe");
   const hookLine = live.locator(".install-hook-line code");
@@ -189,6 +202,7 @@ try {
   const settled = await stillness();
   await page.waitForTimeout(1500);
   assert.equal(await stillness(), settled, "the hero frame stays stable while its terminals connect");
+  await verifyWorkspaceResize(page);
   assert.equal(await live.locator(".live-primary > .install-hook").count(), 1, "install controls follow their terminal rather than an external CTA slot");
   assert.equal(await hookLine.innerText(), "curl -fsSL https://phux.sh/install | sh", "the live hero leads with the CLI install");
   await live.locator(".install-hook-copy").click();
@@ -197,15 +211,29 @@ try {
   assert.equal(await live.locator(".install-hook-lede, .install-hook-proof, .live-session-hint").count(), 0, "the live hero has no surrounding marketing prose");
   await live.getByRole("button", { name: "iPhone" }).click();
   assert.ok(await live.locator(".install-hook-request input[name=email]").isVisible(), "the iPhone target requests TestFlight");
+  assert.ok(await page.locator(".hero").isVisible(), "the live workspace never replaces the product introduction");
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await page.waitForFunction(() => !document.querySelector("#home-light iframe"));
+  await page.waitForTimeout(250);
+  assert.equal(await page.locator("#home-light iframe").count(), 0, "scrolling away releases the iframe, GPU and disposable connection");
+  await page.getByRole("link", { name: "Try the live workspace" }).click();
+  await page.locator("#home-light iframe").waitFor();
+  await page.frameLocator("#home-light iframe").locator(".install-hook").waitFor();
+  assert.equal(await page.locator("#home-light iframe").count(), 1, "returning creates exactly one fresh workspace");
+
+  await verifyTouchComparison(page, base);
+  await verifyHostedShell(page, base, artifacts);
+  await verifyHomeAuthReturn(page, base);
   assert.deepEqual(errors, [], "no browser exceptions");
   await context.close();
   const stillContext = await browser.newContext({ reducedMotion: "reduce" });
   const stillPage = await stillContext.newPage();
   await stillPage.goto(`${base}/?hero=classic`);
+  await stillPage.locator(".tour").scrollIntoViewIfNeeded();
   await stillPage.locator("astro-island:not([ssr]) .tour").waitFor();
   assert.equal(await stillPage.locator(".tour-play").count(), 0, "reduced motion does not autoplay");
   assert.equal(await stillPage.locator(".tour").getAttribute("data-playing"), "false");
-  assert.equal(await stillPage.locator(".tour-heading, .tour-caption, .tour-pace").count(), 0, "reduced motion does not restore the slogan");
+  assert.ok(await stillPage.locator(".tour-summary").textContent(), "the illustration has a readable explanation");
   assert.match(await stillPage.locator(".tour-terminal").innerText(), /Finished/, "reduced motion shows the settled chapter");
   await stillContext.close();
   const staticContext = await browser.newContext({ javaScriptEnabled: false });
@@ -213,11 +241,14 @@ try {
   await staticPage.goto(base);
   assert.equal((await staticPage.getByRole("heading", { level: 1 }).innerText()).trim(), "phux");
   assert.ok(await staticPage.locator("#install code").isVisible());
+  assert.equal(await staticPage.getByRole("slider").count(), 0, "no-JS does not offer an inert slider");
+  assert.ok(await staticPage.locator(".client-tui").isVisible() && await staticPage.locator(".client-gui").isVisible(), "no-JS shows both static client previews");
+  assert.equal(await staticPage.locator("iframe").count(), 0, "no-JS never downloads the live app");
   assert.equal(await staticPage.getByRole("link", { name: "Open demo", exact: true }).getAttribute("href"), "/embed");
   assert.match(await staticPage.locator(".tour-terminal").innerText(), /Finished/, "no-JS tour shows a settled scene");
   assert.equal(await staticPage.locator(".tour-lines > span").first().evaluate((node) => getComputedStyle(node).opacity), "1", "static output stays fully readable");
   await staticContext.close();
-  console.log(`PASS home: copy, quick lap → walkthrough, chapters/pause/reduced motion, demo open/close/focus, 320/390/768/1280px, no-JS, secondary content, idle resource budget. Screenshots: ${artifacts}`);
+  console.log(`PASS home: first-fold comparison, pointer/touch/keyboard reveal, lazy workspace lifecycle, install/copy/beta, tour chapters/pause/focus, glass shell auth/failure recovery, mobile/tablet/desktop, reduced motion, no-JS, idle resource budget. Screenshots: ${artifacts}`);
 } finally {
   await browser.close();
   server.stop(true);

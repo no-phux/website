@@ -126,11 +126,12 @@ async function scenario(dpr: number) {
     });
   });
   try {
-    await page.goto("https://phux.sh/?hero=light");
-    // Dynamic React hydration can outlive window.load on a cold production page.
-    // Wait for the interactive hero, rather than following its no-JS fallback.
+    await page.goto("https://phux.sh/");
+    // The illustrative tour hydrates only when scrolled into view. Keep this
+    // acceptance on its real dialog path, not the separate glass workspace.
+    await page.locator(".tour").scrollIntoViewIfNeeded();
     await page.locator("astro-island:not([ssr]) .tour").waitFor();
-    await page.getByRole("link", { name: /Try it in your browser/ }).click();
+    await page.getByRole("link", { name: "Open demo", exact: true }).click();
     await page.locator('.pterm[data-status="live"]').waitFor({ timeout: 30_000 });
     assert.ok(await page.locator("canvas").evaluate((canvas) => canvas.parentElement!.contains(document.activeElement)), "ready canvas receives focus");
     await geometry(page, dpr, 1280);

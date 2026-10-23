@@ -2,7 +2,8 @@
 import BaseLayout from "../layouts/BaseLayout.astro";
 import AuthReturn from "../components/AuthReturn.astro";
 import HeroDemo from "../components/HeroDemo";
-import HomeHeroSwitch from "../components/HomeHeroSwitch.astro";
+import ClientComparison from "../components/ClientComparison.astro";
+import LiveWorkspaceSection from "../components/LiveWorkspaceSection.astro";
 import { SITE, docsHref } from "../lib/site";
 import { cliInstall, desktopDownload, desktopFirstOpen, desktopInstall, installTargets } from "../lib/install";
 import release from "../lib/release.json";
@@ -37,10 +38,10 @@ const projectLinks = [
 
 <BaseLayout minimal>
   <AuthReturn slot="head" />
-  <HomeHeroSwitch>
-  <div class="home" data-classic-home>
+  <div class="home">
     <section class="hero" aria-labelledby="product-name">
-      <h1 id="product-name">{SITE.name}</h1>
+      <div class="hero-intro"><h1 id="product-name">{SITE.name}</h1><p>Your terminals. Every client.</p></div>
+      <ClientComparison />
       <div class="install" id="install" data-install aria-label="Install phux">
         <div class="install-head">
           <div class="install-tabs" role="group" aria-label="Choose an install">
@@ -116,13 +117,14 @@ const projectLinks = [
         <span aria-hidden="true"> · </span>
         <a href={docsHref("/installation")}>Other installs</a>
       </div>
-    </section>
-
-    <section class="terminal" aria-label="Try phux">
-      <HeroDemo client:load wsUrl={SITE.demoWsUrl} />
+      <div class="hero-actions"><a class="try-workspace" href="#live-workspace">Try the live workspace <span aria-hidden="true">↓</span></a><a href="/embed">Open a shell <span aria-hidden="true">↗</span></a></div>
     </section>
   </div>
-  </HomeHeroSwitch>
+  <LiveWorkspaceSection />
+  <section class="terminal home" aria-labelledby="tour-title">
+    <div class="tour-intro"><p class="section-kicker">How it connects</p><h2 id="tour-title">Close a window. Keep the work.</h2><p>One server owns your terminals. The TUI, desktop, and phone are views into it.</p></div>
+    <HeroDemo client:visible wsUrl={SITE.demoWsUrl} />
+  </section>
   <div hidden data-webmcp data-product={SITE.name} data-cli={cliInstall}
     data-desktop={desktopInstall} data-docs={SITE.docsUrl}
     data-release-tag={release.tag} data-release-url={release.url}></div>
@@ -131,6 +133,7 @@ const projectLinks = [
 <script>
   import { registerSiteTools, siteModelContext } from "../webmcp.ts";
   import { wireBetaRequest } from "../lib/beta.ts";
+  import { wireInstallTargets } from "../lib/home-install";
   const facts = document.querySelector<HTMLElement>("[data-webmcp]");
   const context = siteModelContext(globalThis);
   if (facts && context) {
@@ -140,6 +143,10 @@ const projectLinks = [
       docsUrl: facts.dataset.docs ?? "", releaseTag: facts.dataset.releaseTag ?? "",
       releaseUrl: facts.dataset.releaseUrl ?? "",
     });
+  }
+  // A native OAuth return must wake the otherwise visibility-hydrated dialog.
+  if (document.documentElement.dataset.nativeAuthResult) {
+    document.querySelector(".terminal")?.scrollIntoView({ block: "center", behavior: "instant" });
   }
   // The latest-releases popover closes on Escape or a click outside it.
   const latest = document.querySelector<HTMLDetailsElement>("details.latest");
@@ -170,79 +177,7 @@ const projectLinks = [
   // command settles with opacity and a short translate. The Mobile target has
   // no command: it swaps the command line for the beta request form. No
   // clip or backdrop animation: both are what made the first pass stutter.
-  const install = document.querySelector<HTMLElement>("[data-install]");
-  const code = install?.querySelector<HTMLElement>("#install-command");
-  const note = install?.querySelector<HTMLElement>("#install-note");
-  const tabs = install?.querySelector<HTMLElement>(".install-tabs");
-  const line = install?.querySelector<HTMLElement>(".install-line");
-  const request = install?.querySelector<HTMLFormElement>(".install-request");
-  const commandBox = install?.querySelector<HTMLElement>(".install-command");
-  const download = install?.querySelector<HTMLElement>("#install-download");
-  const targets = install ? [...install.querySelectorAll<HTMLButtonElement>("[data-install-target]")] : [];
-  if (install && code && note && tabs && line && request && commandBox && download && targets.length > 0) {
-    const still = matchMedia("(prefers-reduced-motion: reduce)");
-    let active = targets[0];
-
-    const placePill = (target: HTMLButtonElement) => {
-      const frame = tabs.getBoundingClientRect();
-      const box = target.getBoundingClientRect();
-      tabs.style.setProperty("--pill-x", `${box.left - frame.left}px`);
-      tabs.style.setProperty("--pill-width", `${box.width}px`);
-    };
-    // Equal-width targets mean the mark only ever translates; keep the width
-    // set once per layout and let the transform transition carry the motion.
-    const settle = (element: HTMLElement, distance: number, duration: number) => {
-      if (still.matches) return;
-      element.animate(
-        [{ opacity: 0, transform: `translateY(${distance}px)` }, { opacity: 1, transform: "none" }],
-        { duration, easing: "cubic-bezier(.22,.61,.36,1)" },
-      );
-    };
-    const swap = (target: HTMLButtonElement) => {
-      if (target === active) return;
-      active = target;
-      for (const candidate of targets) {
-        candidate.setAttribute("aria-pressed", String(candidate === target));
-      }
-      const command = target.dataset.installCommand ?? "";
-      const mobile = command === "";
-      const desktop = target.dataset.installTarget === "desktop";
-      code.textContent = command;
-      note.textContent = target.dataset.installNote ?? "";
-      if (button) {
-        button.dataset.copy = command;
-        button.dataset.label = desktop ? "Copy curl" : "Copy";
-        button.textContent = button.dataset.label;
-      }
-      line.hidden = mobile;
-      request.hidden = !mobile;
-      commandBox.hidden = desktop;
-      download.hidden = !desktop;
-      placePill(target);
-      settle(mobile ? request : desktop ? download : code, mobile ? 4 : 6, mobile ? 340 : 420);
-      settle(note, 4, 340);
-    };
-    targets.forEach((target, index) => {
-      target.addEventListener("pointerenter", () => swap(target));
-      target.addEventListener("focus", () => swap(target));
-      target.addEventListener("click", () => swap(target));
-      target.addEventListener("keydown", (event) => {
-        const step = event.key === "ArrowRight" ? 1 : event.key === "ArrowLeft" ? -1 : 0;
-        if (step === 0) return;
-        event.preventDefault();
-        const next = targets[(index + step + targets.length) % targets.length];
-        next.focus();
-        swap(next);
-      });
-    });
-    // Tab widths are only final once fonts settle; re-place on the same signals.
-    const relayout = () => placePill(active);
-    relayout();
-    requestAnimationFrame(relayout);
-    document.fonts?.ready.then(relayout);
-    addEventListener("resize", relayout);
-    addEventListener("load", relayout);
-  }
+  wireInstallTargets(button);
 
   wireBetaRequest(
     document.getElementById("beta-form") as HTMLFormElement | null,
@@ -253,12 +188,22 @@ const projectLinks = [
 
 <style>
   .home { width: min(100%, 1120px); margin: auto; padding-inline: 24px; box-sizing: border-box; }
-  .hero { text-align: center; padding-top: clamp(24px, 5vw, 56px); }
-  h1 { margin: 0; font-size: clamp(80px, 15vw, 144px); line-height: 1; font-weight: 700; letter-spacing: -0.085em; }
+  .hero { text-align: center; padding-top: 16px; }
+  .hero-intro { display: flex; justify-content: center; align-items: center; gap: 22px; }
+  h1 { margin: 0; font-size: clamp(36px, 5vw, 52px); line-height: 1; font-weight: 700; letter-spacing: -0.075em; }
+  .hero-intro > p { margin: 0; padding-left: 22px; border-left: 1px solid #c2d6e32a; color: #b8c9d4; font-size: clamp(14px, 2vw, 18px); letter-spacing: -.02em; }
+  .hero-actions { display: flex; align-items: center; justify-content: center; gap: 24px; margin-top: 16px; font-size: 12px; color: #afc2cf; }
+  .hero-actions a { display: inline-flex; align-items: center; gap: 16px; min-height: 44px; }
+  .hero-actions .try-workspace { padding: 0 16px; border: 1px solid #c2d6e32a; border-radius: 9px; color: #e0eaf0; background: #c2d6e307; }
+  .hero-actions a:hover { color: #fff; }
+  .tour-intro { margin-bottom: 24px; }
+  .section-kicker { margin: 0 0 8px; color: #adc7d5; font: 11px var(--font-code); letter-spacing: .08em; text-transform: uppercase; }
+  .tour-intro h2 { margin: 0; font-size: clamp(24px, 3vw, 32px); line-height: 1.2; font-weight: 500; letter-spacing: -.035em; }
+  .tour-intro > p:last-child { margin: 12px 0 0; color: #a0b1bc; font-size: 14px; }
   /* No dock, no card: the targets, the command or request, and the note are
      plain type floating on the canvas. Structure comes from spacing and the two
      hairlines only. */
-  .install { position: relative; width: 100%; margin: 30px auto 0; box-sizing: border-box; text-align: left; }
+  .install { position: relative; width: 100%; margin: 14px auto 0; box-sizing: border-box; text-align: left; }
   .install-head { display: flex; justify-content: center; }
   .install-tabs { position: relative; display: flex; gap: 6px; }
   /* The travelling mark is a hairline under the active target, not a pill. */
@@ -309,7 +254,7 @@ const projectLinks = [
   .latest-panel p { margin: 0; padding-top: 10px; border-top: 1px solid var(--color-rule); }
   .latest-panel p a { color: var(--color-muted); }
   .copy-status { min-height: 20px; margin: 4px 0 0; color: var(--color-muted); font-size: 12px; }
-  .terminal { margin-top: 28px; }
+  .terminal { margin-top: 72px; margin-bottom: 64px; }
   @media (max-width: 820px) {
     .install-tabs button { min-width: 76px; padding: 0 8px; font-size: 12px; }
     .install-line { grid-template-columns: minmax(0, 1fr) auto; padding: 14px 0 2px; }
@@ -321,6 +266,13 @@ const projectLinks = [
   }
   @media (max-width: 600px) {
     .home { padding-inline: 20px; }
+    .hero { padding-top: 8px; }
+    .hero-intro { gap: 14px; }
+    .hero-intro > p { padding-left: 14px; }
+    .terminal { margin-top: 54px; }
+    .hero-actions { gap: 14px; font-size: 11px; }
+    .hero-actions .try-workspace { padding-inline: 12px; }
+    .hero-actions a { gap: 8px; }
     /* A wrapped command needs two lines; the stacked request form needs two
        rows. Either way the stage keeps both targets the same height. */
     .install-stage { min-height: 84px; }

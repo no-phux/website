@@ -9,8 +9,9 @@
 .tour[data-pace="quick"] { --tour-response: 60ms; }
 .tour-frame {
   overflow: hidden;
-  border: 0;
-  background: transparent;
+  border: 1px solid #b9d5e51c;
+  border-radius: 20px;
+  background: linear-gradient(140deg, #adcfe107, transparent 60%), #0c1219;
 }
 /* Canvas: one stage unit is --u pixels, so the scene scales as a whole. */
 .tour-canvas {
@@ -54,13 +55,13 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  border: 0;
+  border: 1px solid #c4deef24;
   border-radius: 1.15em;
-  background: var(--terminal-surface);
+  background: linear-gradient(135deg, #c4deef06, transparent), var(--terminal-surface);
   box-shadow: 0 1.1em 2.2em #0006;
 }
-.tour-window[data-view="off"] { opacity: 0.5; filter: saturate(0.4); }
-.tour-window[data-view="detached"] { opacity: 0.4; filter: saturate(0.2); transform: translateY(0.6em) scale(0.97); }
+.tour-window[data-view="off"] { opacity: 0.7; filter: saturate(0.6); }
+.tour-window[data-view="detached"] { opacity: 0.6; filter: saturate(0.4); transform: translateY(0.6em) scale(0.97); }
 .tour[data-chapter="agents"] .tour-desktop { border-color: #bb9af755; transform: translateY(-0.4em); }
 .tour[data-chapter="away"] .tour-phone { border-color: #a5c38c99; transform: translateY(-0.5em) scale(1.025); box-shadow: 0 0 4em #a5c38c12, 0 1em 2.4em #0008; }
 .tour[data-chapter="remote"] .tour-devbox { border-color: #7aa2f799; box-shadow: 0 0 4em #7aa2f712; }
@@ -173,6 +174,7 @@
 .tour-devbox[data-view="off"] { opacity: 0; transform: translateY(0.8em); }
 .tour-devbox { transition: opacity var(--tour-response) ease, transform var(--tour-response) ease; }
 
+.tour-summary { margin: 0; padding: 12px 20px 0; min-height: 3em; color: #b4c8d5; font: 13px/1.6 var(--font-reading); text-align: center; }
 .tour-controls { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 12px; }
 .tour-chapters { display: flex; gap: 2px; padding: 2px; border: 0; border-radius: 8px; }
 .tour-chapters button, .tour-play {
@@ -216,35 +218,10 @@
 .tour-distant-host.is-0 { top: 1%; right: 5%; }
 .tour-distant-host.is-1 { bottom: 1%; right: 4%; }
 .tour-distant-host.is-2 { bottom: 4%; left: 52%; width: 9%; opacity: 0.7; }
-.tour-entry { position: absolute; inset: 0; z-index: 1; border-radius: 16px; color: inherit; text-decoration: none; }
-.tour-entry:focus-visible { outline: none; }
-.tour-open {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  opacity: 0;
-  background: #08080a33;
-  backdrop-filter: blur(3px);
-  -webkit-backdrop-filter: blur(3px);
-  color: var(--terminal-fg);
-  font: 13px var(--font-reading);
-  letter-spacing: -0.01em;
-  transition: opacity 160ms ease;
-}
-.tour-entry:is(:hover, :focus-visible) .tour-open { opacity: 1; }
-@media (hover: none) {
-  .tour-open {
-    inset: auto 0 12px;
-    place-items: center;
-    height: 36px;
-    opacity: 0.85;
-    background: none;
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
-  }
-  .tour-entry:focus-visible .tour-open { inset: 0; height: auto; opacity: 1; background: #08080a33; backdrop-filter: blur(3px); }
-}
+.tour-entry { position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); z-index: 1; display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 0 20px; border: 1px solid #c4deef30; border-radius: 999px; background: #17232ded; color: #d9eaf3; text-decoration: none; white-space: nowrap; }
+.tour-entry:hover { background: #223442; color: #fff; border-color: #c4deef60; }
+.tour-entry:focus-visible { outline: 2px solid var(--terminal-focus); outline-offset: 3px; }
+.tour-open { opacity: 1; color: inherit; font: 13px var(--font-reading); letter-spacing: -.01em; }
 .tour-node { pointer-events: none; }
 .tour-window, .tour-host { box-shadow: 0 12px 32px #0005; }
 @container (max-width: 640px) {

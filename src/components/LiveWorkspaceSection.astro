@@ -1,0 +1,85 @@
+<section class="workspace-section" id="live-workspace" aria-labelledby="workspace-title">
+  <div class="workspace-heading">
+    <div><p class="section-kicker">Try it for real</p><h2 id="workspace-title">Your workspace. In the browser.</h2><p>Type, split a pane, make it yours. This is a disposable live demo, not a recording.</p></div>
+    <a href="/embed">Open full shell <span aria-hidden="true">↗</span></a>
+  </div>
+  <div id="home-light" class="workspace-frame" aria-label="PHUX live workspace">
+    <div class="workspace-placeholder"><span aria-hidden="true">⌘</span><p>The workspace connects when it comes into view.</p><a href="/concepts/vgpu?variant=combo">Open the glass workspace ↗</a></div>
+  </div>
+  <p class="workspace-note">A limited edge shell, no sign-in. Scroll away to release it. For Linux, <a href="/embed">open the full shell</a>.</p>
+</section>
+<script>
+  import { homeHero } from "../lib/home-hero";
+  const host = document.getElementById("home-light");
+  if (host) {
+    let frame: HTMLIFrameElement | null = null;
+    let inView = false;
+    let release: ReturnType<typeof setTimeout> | undefined;
+    const disconnect = () => {
+      frame?.remove();
+      frame = null;
+      host.removeAttribute("data-connected");
+    };
+    const connect = () => {
+      clearTimeout(release);
+      if (frame) return;
+      frame = document.createElement("iframe");
+      frame.title = "PHUX live workspace — interactive demo";
+      frame.src = "/concepts/vgpu?variant=combo&embedded=home";
+      frame.allow = "clipboard-write; web-share";
+      host.append(frame);
+      host.dataset.connected = "true";
+    };
+    // A hidden iframe is still a running app. Remove it offscreen so its GPU,
+    // workers, animation loops and disposable connection really are released.
+    const sync = () => {
+      clearTimeout(release);
+      if (inView && !document.hidden) connect();
+      else release = setTimeout(disconnect, 800);
+    };
+    const observer = new IntersectionObserver(([entry]) => { inView = Boolean(entry?.isIntersecting); sync(); }, { threshold: 0.05 });
+    observer.observe(host);
+    document.addEventListener("visibilitychange", sync);
+    window.addEventListener("pagehide", disconnect);
+    window.addEventListener("pageshow", sync);
+    let width = innerWidth;
+    window.addEventListener("resize", () => {
+      if (innerWidth === width) return;
+      width = innerWidth;
+      // The child's 100svh minimum cannot shrink a formerly taller frame.
+      // Rebase on width changes, then remeasure without replacing its session.
+      host.style.removeProperty("height");
+      void host.offsetHeight;
+      frame?.contentWindow?.postMessage({ type: "phux:hero-viewport" }, location.origin);
+    });
+    window.addEventListener("message", event => {
+      if (!frame || event.origin !== location.origin || event.source !== frame.contentWindow) return;
+      if (event.data?.type !== "phux:hero-height" || !Number.isFinite(event.data.height)) return;
+      const height = Math.max(520, Math.min(1200, event.data.height));
+      host.style.height = `${height}px`;
+    });
+    // Preserve old shared live-workspace links without hiding the homepage.
+    if (homeHero(location.search, document.documentElement.dataset.nativeAuthResult, document.documentElement.dataset.homeHero) === "light") {
+      host.scrollIntoView({ block: "center", behavior: "instant" });
+    }
+  }
+</script>
+<style>
+  .workspace-section { padding-top: 76px; scroll-margin-top: 20px; }
+  .workspace-heading { width: min(calc(100% - 48px), 1072px); margin: 0 auto 20px; display: flex; align-items: end; justify-content: space-between; gap: 24px; }
+  .section-kicker { margin: 0 0 8px; color: #adc7d5; font: 11px var(--font-code); letter-spacing: .08em; text-transform: uppercase; }
+  h2 { margin: 0; color: #e0eaf0; font-size: clamp(24px, 3vw, 32px); font-weight: 500; letter-spacing: -.035em; line-height: 1.2; }
+  .workspace-heading p:not(.section-kicker) { max-width: 52ch; margin: 12px 0 0; color: #a0b1bc; font-size: 14px; line-height: 1.65; }
+  .workspace-heading > a { display: inline-flex; align-items: center; gap: 16px; flex: none; min-height: 44px; color: #d2e3ec; font-size: 13px; }
+  .workspace-heading > a:hover { text-decoration: underline; }
+  .workspace-frame { position: relative; height: 620px; background: radial-gradient(ellipse at 25% 45%, #5a9bb013, transparent 65%), radial-gradient(ellipse at 80% 70%, #8471b51a, transparent 60%), #0a0a0a; overflow: hidden; contain: layout paint; }
+  .workspace-frame :global(iframe) { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+  .workspace-placeholder { height: 100%; display: grid; align-content: center; justify-items: center; gap: 12px; padding: 24px; text-align: center; color: #9cafbd; font-size: 13px; }
+  .workspace-placeholder > span { font-size: 32px; color: #c2d9e5; }
+  .workspace-placeholder p { margin: 0; }
+  .workspace-placeholder a { min-height: 44px; display: inline-flex; align-items: center; text-decoration: underline; text-underline-offset: 4px; color: #c2d9e5; }
+  .workspace-frame[data-connected] .workspace-placeholder { visibility: hidden; }
+  .workspace-note { max-width: 1072px; margin: 16px auto 0; padding-inline: 24px; color: #9aaab5; font-size: 12px; text-align: center; }
+  .workspace-note a { text-decoration: underline; text-underline-offset: 3px; }
+  @media (max-width: 600px) { .workspace-section { padding-top: 54px; } .workspace-heading { width: calc(100% - 40px); flex-direction: column; align-items: start; gap: 8px; } .workspace-heading p:not(.section-kicker) { font-size: 13px; } }
+</style>

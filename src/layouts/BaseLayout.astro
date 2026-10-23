@@ -1,6 +1,7 @@
 ---
 import "../styles/global.css";
 import Head from "../components/Head.astro";
+import GitHubBadge from "../components/GitHubBadge.astro";
 import { SITE, NAV, docsHref } from "../lib/site";
 
 interface Props {
@@ -21,12 +22,11 @@ const path = Astro.url.pathname;
 const navigation = minimal ? [
   { href: docsHref("/overview"), label: "Docs" },
   { href: "/embed", label: "Try" },
-  { href: SITE.github, label: "Source", external: true },
 ] : NAV;
 ---
 
 <!doctype html>
-<html lang="en" data-design={SITE.designMode} data-home={minimal || undefined} data-home-hero={minimal ? "light" : undefined}>
+<html lang="en" data-design={SITE.designMode} data-home={minimal || undefined}>
   <head>
     <Head title={title} description={description} type="website" />
     <slot name="head" />
@@ -54,6 +54,7 @@ const navigation = minimal ? [
               </a>
             ))
           }
+          {minimal && <GitHubBadge />}
         </div>
       </nav>
     </header>

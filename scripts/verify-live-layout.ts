@@ -45,6 +45,9 @@ try {
   await mkdir(artifacts, { recursive: true });
   for (const width of [320, 390, 768, 1440]) {
     const context = await browser.newContext({ viewport: { width, height: 900 }, isMobile: width < 600, hasTouch: width < 600, reducedMotion: "reduce", permissions: ["clipboard-read", "clipboard-write"] });
+    if (process.env.HERO_LIVE !== "1") {
+      await context.routeWebSocket(/wss?:\/\//, socket => socket.close());
+    }
     // Serve the local build under the public browser origin, which the real
     // demo WebSocket requires. This never serves or modifies production assets.
     await context.route("https://phux.sh/**", async route => {
@@ -67,7 +70,9 @@ try {
     if (process.env.HERO_LIVE === "1") await hero.locator('.live-session-stage[data-phase="live"] .live-secondary canvas[data-renderer]').first().waitFor({ timeout: 45_000 });
     await verifyWorkspaceLayout(hero, width);
     await hero.locator(".install-hook").screenshot({ path: `${artifacts}install-${baseline ? "before" : "after"}-${width}.png` });
-    await page.screenshot({ path: `${artifacts}hero-${baseline ? "before" : "after"}-${width}.png`, fullPage: true });
+    // Full-page capture scrolls away from the workspace and legitimately disposes
+    // this lazy iframe; capture the active viewport rather than changing its lifecycle.
+    await page.screenshot({ path: `${artifacts}hero-${baseline ? "before" : "after"}-${width}.png` });
     assert.ok(await hero.getByRole("region", { name: "Install phux", exact: true }).isVisible(), "install controls keep an accessible name without a heading");
     await hero.getByRole("button", { name: "Desktop", exact: true }).click();
     assert.equal(await hero.getByRole("link", { name: "Download", exact: true }).getAttribute("href"), "/download/desktop", "Desktop is a download");
@@ -84,7 +89,7 @@ try {
       const form = node.closest("form")!.getBoundingClientRect();
       return { height: box.height, width: box.width, font: style.fontSize, appearance: style.appearance, formHeight: form.height, overflow: document.documentElement.scrollWidth > innerWidth };
     });
-    await page.screenshot({ path: `${artifacts}iphone-${baseline ? "before" : "after"}-${width}.png`, fullPage: true });
+    await page.screenshot({ path: `${artifacts}iphone-${baseline ? "before" : "after"}-${width}.png` });
     console.log(JSON.stringify({ viewport: width, ...geometry }));
     if (!baseline) {
       assert.equal(geometry.overflow, false, `no frame overflow at ${width}`);
@@ -119,7 +124,7 @@ try {
       await dialog.getByRole("button", { name: "Close terminal view" }).click();
       await hero.locator(".live-satellite-grid[data-count='3']").waitFor();
       await verifyWorkspaceLayout(hero, width);
-      await page.screenshot({ path: `${artifacts}four-terminals-${width}.png`, fullPage: true });
+      await page.screenshot({ path: `${artifacts}four-terminals-${width}.png` });
     }
     await context.close();
   }

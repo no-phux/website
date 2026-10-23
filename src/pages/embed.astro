@@ -2,6 +2,7 @@
 import "../styles/global.css";
 import AuthReturn from "../components/AuthReturn.astro";
 import PhuxTerminal from "../components/PhuxTerminal";
+import GitHubBadge from "../components/GitHubBadge.astro";
 import { SITE } from "../lib/site";
 ---
 
@@ -11,18 +12,19 @@ import { SITE } from "../lib/site";
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <meta name="robots" content="noindex" />
-    <meta name="theme-color" content="#0b0b0d" />
+    <meta name="theme-color" content="#0a1016" />
     <title>{SITE.name} — hosted terminal</title>
     <AuthReturn />
+    <script is:inline>document.documentElement.dataset.embedded = String(window.self !== window.top);</script>
   </head>
   <body>
     <main>
-      <h1>{SITE.name} hosted terminal</h1>
-      <div class="embed-frame">
-        <nav class="embed-nav" aria-label="Terminal navigation" hidden>
-          <a href="/">← phux</a>
-          <span>Browser terminal</span>
+      <div class="embed-frame" data-configured={String(Boolean(SITE.demoWsUrl))}>
+        <nav class="embed-nav" aria-label="Terminal navigation">
+          <a class="embed-brand" href="/">← phux</a>
+          <GitHubBadge />
         </nav>
+        <div class="embed-intro"><p>Browser client / disposable workspace</p><h1>Your phux shell.</h1></div>
       <PhuxTerminal
         client:load
         wsUrl={SITE.demoWsUrl}
@@ -32,49 +34,37 @@ import { SITE } from "../lib/site";
         autoStart
         statusParentOrigin="https://phall.io"
       />
-        <noscript><p>This terminal needs JavaScript. <a href="https://docs.phux.sh/quickstart/install">Install phux locally instead.</a></p></noscript>
+        <p class="embed-note">An instant edge demo, or five minutes of Linux with sign-in. <a href="https://docs.phux.sh/installation">Install phux to keep your work.</a></p>
+        <noscript><p>This terminal needs JavaScript. <a href="https://docs.phux.sh/installation">Install phux locally instead.</a></p></noscript>
       </div>
     </main>
   </body>
 </html>
 
-<script>
-  // Embedded clients keep their host's navigation; standalone gets a way back.
-  if (window.self === window.top) {
-    document.querySelector<HTMLElement>(".embed-nav")?.removeAttribute("hidden");
-  }
-</script>
-
 <style>
-  html,
-  body {
-    min-height: 100%;
-    margin: 0;
-    background: #0b0b0d;
-  }
-  body {
-    padding: 0;
-  }
+  html, body { min-height: 100%; margin: 0; background: #0a1016; color: #d7e4ec; }
+  body { padding: 0; background: radial-gradient(ellipse at 12% 28%, #69c6db14, transparent 56%), radial-gradient(ellipse at 88% 68%, #a798df18, transparent 55%); }
   main {
     min-height: 100dvh;
     display: grid;
     grid-template-columns: minmax(0, 1fr);
     place-items: center;
-    padding: clamp(8px, 2vw, 24px);
+    padding: clamp(12px, 3vw, 36px);
     box-sizing: border-box;
   }
-  h1 {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip: rect(0 0 0 0);
-  }
-  .embed-frame { width: min(920px, 100%); min-width: 0; }
-  .embed-nav { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 12px; color: #aaaab1; font-size: 12px; }
-  .embed-nav[hidden] { display: none; }
-  .embed-nav a { display: inline-flex; align-items: center; min-height: 44px; color: #ededee; }
-  .embed-nav a:hover { text-decoration: underline; }
+  h1 { margin: 0; font-size: clamp(25px, 4vw, 34px); font-weight: 500; letter-spacing: -.04em; line-height: 1.2; }
+  .embed-frame { width: min(1080px, 100%); min-width: 0; }
+  .embed-nav { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 30px; color: #a9becb; font-size: 12px; }
+  .embed-brand { display: inline-flex; align-items: center; min-height: 44px; color: #e1edf3; font-size: 18px; font-weight: 600; letter-spacing: -.04em; }
+  .embed-brand:hover { color: #fff; }
+  .embed-intro { margin-bottom: 24px; }
+  .embed-intro > p { margin: 0 0 10px; color: #a1b9c8; font: 10px var(--font-code); text-transform: uppercase; letter-spacing: .1em; }
+  .embed-frame :global(.pterm) { width: 100%; box-shadow: 0 32px 100px #0005, inset 0 1px #e0efff10; }
+  .embed-note { margin: 20px 8px 0; color: #9fb3c2; font-size: 12px; text-align: center; }
+  .embed-note a { color: #c6dce8; text-decoration: underline; }
+  html[data-embedded="true"] :is(.embed-nav, .embed-intro, .embed-note) { display: none; }
+  html[data-embedded="true"] main { padding: 8px; }
+  @media (max-width: 600px) { main { align-items: start; padding-top: 12px; } .embed-nav { margin-bottom: 20px; } .embed-intro { margin-bottom: 18px; } .embed-note { text-align: left; line-height: 1.7; } }
   noscript p { color: #aaaab1; font-size: 13px; }
   noscript a { text-decoration: underline; }
 </style>
