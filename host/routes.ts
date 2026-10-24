@@ -20,6 +20,7 @@ export const DOCS_PREFIXES = [
   "/compare",
   "/config",
   "/keys",
+  "/tmux-import",
   "/themes",
   "/status-bar",
   "/hooks",

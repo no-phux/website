@@ -63,6 +63,7 @@ export function wireInstallTargets(copyButton: HTMLButtonElement | null) {
   });
   // Font loading and resize may change tab widths; target swaps never do.
   const relayout = () => placePill(active);
+  install.closest("details")?.addEventListener("toggle", relayout);
   relayout();
   requestAnimationFrame(relayout);
   document.fonts?.ready.then(relayout);

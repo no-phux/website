@@ -63,3 +63,6 @@ worker/.dev.vars
 
 # seo.ts reports (regenerated; may hold Search Console data)
 .seo/
+
+# Beads / Dolt files (added by bd init)
+*.gate.lock*

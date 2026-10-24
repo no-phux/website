@@ -3,55 +3,34 @@ import assert from "node:assert/strict";
 import type { Page } from "playwright-core";
 
 export async function verifyClientComparison(page: Page) {
-  const slider = page.getByRole("slider", { name: "Reveal desktop client" });
-  await slider.focus();
-  await slider.press("ArrowLeft");
-  assert.equal(await slider.inputValue(), "51", "the native slider supports keyboard adjustment");
-  await slider.press("Home");
-  assert.equal(await slider.inputValue(), "0", "Home reveals the terminal client");
-  await slider.press("End");
-  assert.equal(await slider.inputValue(), "100", "End reveals the desktop client");
-  await page.locator('[data-client-position="0"]').click();
-  assert.equal(await slider.inputValue(), "0", "the TUI shortcut reveals the full terminal");
-  await page.locator('[data-client-position="100"]').click();
-  assert.equal(await slider.inputValue(), "100", "the GUI shortcut reveals the full desktop");
-  await slider.fill("50");
-  const track = (await slider.boundingBox())!;
-  await page.mouse.move(track.x + track.width / 2, track.y + track.height / 2);
-  await page.mouse.down();
-  await page.mouse.move(track.x + track.width * .75, track.y + track.height / 2, { steps: 12 });
-  await page.mouse.up();
-  assert.ok(Number(await slider.inputValue()) < 35, "dragging the divider changes the reveal");
-  assert.equal(await slider.getAttribute("aria-valuetext"), `${await slider.inputValue()}% desktop client`, "assistive text tracks the actual reveal");
-  // The visible divider and native thumb must agree away from the midpoint.
-  // Native thumbs have half-thumb end insets; a full-width visual rule does not.
-  await slider.fill("90");
-  const stage = (await page.locator(".comparison-stage").boundingBox())!;
-  const handleX = stage.x + 1 + (stage.width - 2) * .1;
-  await page.mouse.move(handleX - 14, track.y + track.height / 2);
-  await page.mouse.down();
-  assert.equal(await slider.inputValue(), "90", "grabbing the visible handle never jumps onto the range track");
-  await page.mouse.move(handleX + 20, track.y + track.height / 2, { steps: 6 });
-  await page.mouse.up();
-  assert.ok(Number(await slider.inputValue()) < 90, "the off-center handle remains draggable");
-  await slider.fill("50");
+  const images = page.locator("[data-product-image] img");
+  assert.equal(await images.count(), 2, "two real product screenshots");
+  for (const image of await images.all()) {
+    assert.ok(await image.evaluate((node: HTMLImageElement) => node.complete && node.naturalWidth >= 1400), "the full-resolution product capture loaded");
+    assert.match(await image.getAttribute("src") ?? "", /^\/product\/.+\.webp$/);
+  }
+  const desktop = page.getByRole("link", { name: "Enlarge Desktop screenshot" });
+  await desktop.focus();
+  await desktop.press("Enter");
+  const dialog = page.getByRole("dialog", { name: "Product screenshot" });
+  assert.ok(await dialog.isVisible(), "keyboard opens a full-size screenshot");
+  assert.match(await dialog.locator("img").getAttribute("src") ?? "", /desktop\.webp$/);
+  await page.keyboard.press("Escape");
+  assert.equal(await dialog.isVisible(), false, "Escape closes the screenshot");
+  assert.ok(await desktop.evaluate(node => node === document.activeElement), "closing returns focus to the screenshot link");
+  await page.getByRole("link", { name: "Enlarge TUI screenshot" }).click();
+  assert.ok(await dialog.isVisible());
+  await page.getByRole("button", { name: "Close screenshot", exact: true }).click();
+  assert.equal(await dialog.isVisible(), false, "the close button dismisses the screenshot");
 }
 
-export async function verifyTouchComparison(page: Page, base: string) {
+export async function verifyTouchComparison(page: Page, base: string, artifacts: string) {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto(base);
-  const slider = page.getByRole("slider", { name: "Reveal desktop client" });
-  const box = (await slider.boundingBox())!;
-  const cdp = await page.context().newCDPSession(page);
-  const touch = (x: number) => [{ x, y: box.y + box.height / 2 }];
-  try {
-    await cdp.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: touch(box.x + box.width / 2) });
-    await cdp.send("Input.dispatchTouchEvent", { type: "touchMove", touchPoints: touch(box.x + box.width * .25) });
-    await cdp.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
-    assert.ok(Number(await slider.inputValue()) > 60, "the comparison responds to a real touch gesture");
-  } finally {
-    await cdp.detach();
-  }
+  await page.screenshot({ path: `${artifacts}/home-mobile.png` });
+  await page.getByRole("link", { name: "Enlarge Desktop screenshot" }).tap();
+  assert.ok(await page.getByRole("dialog", { name: "Product screenshot" }).isVisible(), "touch opens the real desktop capture");
+  await page.getByRole("button", { name: "Close screenshot", exact: true }).tap();
 }
 
 export async function verifyHostedShell(page: Page, base: string, artifacts: string) {
@@ -61,10 +40,12 @@ export async function verifyHostedShell(page: Page, base: string, artifacts: str
     return;
   }
   await page.getByRole("heading", { name: "A Linux shell, right here." }).waitFor();
+  await page.locator(".pterm-overlay").evaluate(node => Promise.all(node.getAnimations().map(animation => animation.finished)));
   for (const name of ["Continue with GitHub", "Continue with Google", "Use instant edge shell"]) {
     const action = page.getByRole("button", { name, exact: true });
     assert.ok(await action.isVisible(), `${name}: preserved in the glass shell`);
-    assert.ok((await action.boundingBox())!.height >= 44, `${name}: touch target`);
+    const height = (await action.boundingBox())!.height;
+    assert.ok(height >= 44, `${name}: ${height}px touch target must be at least 44px`);
   }
   await page.getByText("Info", { exact: true }).click();
   assert.match(await page.locator(".pterm-info-body").innerText(), /Network.*blocked/s, "the inspector keeps the honest limits");

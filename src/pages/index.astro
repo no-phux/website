@@ -40,8 +40,12 @@ const projectLinks = [
   <AuthReturn slot="head" />
   <div class="home">
     <section class="hero" aria-labelledby="product-name">
-      <div class="hero-intro"><h1 id="product-name">{SITE.name}</h1><p>Your terminals. Every client.</p></div>
+      <div class="hero-intro"><h1 id="product-name">Your agents.<br />Your command center.</h1><p>Agents, shells, and machines. One place to run the whole show.</p></div>
       <ClientComparison />
+      <div class="download-actions">
+        <a class="download-primary" href={desktopDownload}>Download Phux for Mac <span aria-hidden="true">↓</span></a>
+      </div>
+      <details class="install-options"><summary>CLI, Linux &amp; mobile</summary>
       <div class="install" id="install" data-install aria-label="Install phux">
         <div class="install-head">
           <div class="install-tabs" role="group" aria-label="Choose an install">
@@ -50,7 +54,7 @@ const projectLinks = [
                 type="button"
                 data-install-target={target.id}
                 data-install-command={target.command}
-                data-install-note={target.id === "desktop" ? `${desktopFirstOpen} Or copy the installer (macOS and Linux).` : target.note}
+                data-install-note={target.id === "desktop" ? desktopFirstOpen : target.id === "mobile" ? "iPhone: TestFlight · Android: Google Play testing" : target.note}
                 aria-pressed={index === 0 ? "true" : "false"}
               >{target.label}</button>
             ))}
@@ -91,6 +95,7 @@ const projectLinks = [
         <p class="install-note" id="install-note">{installs[0].note}</p>
         <p class="copy-status" id="beta-note" role="status" aria-live="polite"></p>
       </div>
+      </details>
       <div class="release">
         macOS &amp; Linux
         <span aria-hidden="true"> · </span>
@@ -117,12 +122,21 @@ const projectLinks = [
         <span aria-hidden="true"> · </span>
         <a href={docsHref("/installation")}>Other installs</a>
       </div>
-      <div class="hero-actions"><a class="try-workspace" href="#live-workspace">Try the live workspace <span aria-hidden="true">↓</span></a><a href="/embed">Open a shell <span aria-hidden="true">↗</span></a></div>
+      <div class="hero-actions"><a href="#live-workspace">Try the live workspace <span aria-hidden="true">↓</span></a></div>
     </section>
   </div>
+  <section class="possibilities home" aria-labelledby="possibilities-title">
+    <h2 id="possibilities-title">More running. Less running around.</h2>
+    <div class="possibility-grid">
+      <a href={docsHref("/agents")}><h3>See who needs you.</h3><p>Agent state, questions, and handoffs in one place.</p></a>
+      <a href={docsHref("/remote")}><h3>Work across machines.</h3><p>Local and remote work, within reach.</p></a>
+      <a href={docsHref("/scripting")}><h3>Drive it your way.</h3><p>Keyboard, desktop, CLI, or an agent at the controls.</p></a>
+    </div>
+    <p class="direction">The direction: multiplex everything. Keep the human in command.</p>
+  </section>
   <LiveWorkspaceSection />
   <section class="terminal home" aria-labelledby="tour-title">
-    <div class="tour-intro"><p class="section-kicker">How it connects</p><h2 id="tour-title">Close a window. Keep the work.</h2><p>One server owns your terminals. The TUI, desktop, and phone are views into it.</p></div>
+    <div class="tour-intro"><h2 id="tour-title">Close a window. Keep the work.</h2></div>
     <HeroDemo client:visible wsUrl={SITE.demoWsUrl} />
   </section>
   <div hidden data-webmcp data-product={SITE.name} data-cli={cliInstall}
@@ -187,19 +201,29 @@ const projectLinks = [
 </script>
 
 <style>
-  .home { width: min(100%, 1120px); margin: auto; padding-inline: 24px; box-sizing: border-box; }
-  .hero { text-align: center; padding-top: 16px; }
-  .hero-intro { display: flex; justify-content: center; align-items: center; gap: 22px; }
-  h1 { margin: 0; font-size: clamp(36px, 5vw, 52px); line-height: 1; font-weight: 700; letter-spacing: -0.075em; }
-  .hero-intro > p { margin: 0; padding-left: 22px; border-left: 1px solid #c2d6e32a; color: #b8c9d4; font-size: clamp(14px, 2vw, 18px); letter-spacing: -.02em; }
+  .home { width: min(100%, 1280px); margin: auto; padding-inline: 24px; box-sizing: border-box; }
+  .hero { text-align: center; padding-top: 28px; }
+  .hero-intro { max-width: 820px; margin: auto; }
+  h1 { margin: 0; font-size: clamp(38px, 5.5vw, 72px); line-height: 1.04; font-weight: 600; letter-spacing: -.055em; }
+  .hero-intro > p { margin: 18px 0 0; color: #aebbc2; font-size: clamp(14px, 1.5vw, 17px); line-height: 1.5; }
+  .download-actions { display: flex; justify-content: center; align-items: center; gap: 24px; }
+  .download-primary { display: inline-flex; justify-content: center; align-items: center; gap: 24px; min-height: 52px; padding: 0 26px; border-radius: 8px; background: #c4f48b; color: #14200c; font-size: 15px; font-weight: 600; transition: background 160ms; }
+  .download-primary:hover { background: #d6ffa7; }
+  .install-options { max-width: 800px; margin: 8px auto 0; }
+  .install-options > summary { width: fit-content; margin: auto; padding: 12px; color: #aebbc2; font-size: 13px; cursor: pointer; }
+  .possibilities { padding-top: 112px; }
+  .possibilities h2 { margin: 0; font-size: clamp(26px, 3vw, 40px); font-weight: 500; letter-spacing: -.04em; text-align: center; }
+  .possibility-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 36px; margin-top: 36px; }
+  .possibility-grid a { padding-top: 20px; border-top: 1px solid var(--color-rule); }
+  .possibility-grid h3 { margin: 0; font-size: 18px; font-weight: 500; letter-spacing: -.02em; }
+  .possibility-grid p { margin: 10px 0 0; color: #a0b1bc; font-size: 14px; line-height: 1.65; }
+  .possibility-grid a:hover h3 { color: #c4f48b; }
+  .direction { margin: 40px 0 0; color: #a0b1bc; text-align: center; font-size: 13px; line-height: 1.6; }
   .hero-actions { display: flex; align-items: center; justify-content: center; gap: 24px; margin-top: 16px; font-size: 12px; color: #afc2cf; }
   .hero-actions a { display: inline-flex; align-items: center; gap: 16px; min-height: 44px; }
-  .hero-actions .try-workspace { padding: 0 16px; border: 1px solid #c2d6e32a; border-radius: 9px; color: #e0eaf0; background: #c2d6e307; }
   .hero-actions a:hover { color: #fff; }
   .tour-intro { margin-bottom: 24px; }
-  .section-kicker { margin: 0 0 8px; color: #adc7d5; font: 11px var(--font-code); letter-spacing: .08em; text-transform: uppercase; }
   .tour-intro h2 { margin: 0; font-size: clamp(24px, 3vw, 32px); line-height: 1.2; font-weight: 500; letter-spacing: -.035em; }
-  .tour-intro > p:last-child { margin: 12px 0 0; color: #a0b1bc; font-size: 14px; }
   /* No dock, no card: the targets, the command or request, and the note are
      plain type floating on the canvas. Structure comes from spacing and the two
      hairlines only. */
@@ -267,11 +291,13 @@ const projectLinks = [
   @media (max-width: 600px) {
     .home { padding-inline: 20px; }
     .hero { padding-top: 8px; }
-    .hero-intro { gap: 14px; }
-    .hero-intro > p { padding-left: 14px; }
+    .hero-intro > p { max-width: 32ch; margin-inline: auto; }
+    .download-actions { gap: 18px; }
+    .download-primary { padding-inline: 18px; font-size: 13px; gap: 14px; }
+    .possibilities { padding-top: 72px; }
+    .possibility-grid { grid-template-columns: 1fr; gap: 24px; }
     .terminal { margin-top: 54px; }
     .hero-actions { gap: 14px; font-size: 11px; }
-    .hero-actions .try-workspace { padding-inline: 12px; }
     .hero-actions a { gap: 8px; }
     /* A wrapped command needs two lines; the stacked request form needs two
        rows. Either way the stage keeps both targets the same height. */
@@ -280,7 +306,7 @@ const projectLinks = [
     .install-request input, .install-request button { width: 100%; }
   }
   @media (prefers-reduced-motion: reduce) {
-    .install-tabs::before, .install-tabs button, .install-copy, .install-request input, .install-request button { transition: none; }
+    .download-primary, .install-tabs::before, .install-tabs button, .install-copy, .install-request input, .install-request button { transition: none; }
   }
   @media (scripting: none) {
     .install-head { display: none; }
