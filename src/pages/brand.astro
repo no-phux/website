@@ -1,0 +1,70 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import lock from "../../brand.lock.json";
+import releases from "../../public/brand/index.json";
+
+const version = lock.version;
+const base = `/brand/releases/${version}`;
+const history = Object.keys(releases.releases).sort((a, b) =>
+  b.localeCompare(a, undefined, { numeric: true }),
+);
+---
+
+<BaseLayout title="PHUX — Brand assets" description="Approved PHUX artwork, platform icons, and brand asset downloads.">
+  <article class="wrap brand-kit">
+    <header>
+      <p class="eyebrow">PHUX brand kit · {version}</p>
+      <h1>Made for PHUX.</h1>
+      <p class="intro">Approved artwork for referring to PHUX in your project, publication, or integration.</p>
+    </header>
+
+    <section class="previews" aria-label="Brand artwork">
+      <figure><img src="/favicon.svg" alt="PHUX geometric fox mark" width="192" height="192" /><figcaption>Website mark</figcaption></figure>
+      <figure><img src="/brand/images/desktop.svg" alt="PHUX desktop terminal icon" width="192" height="192" /><figcaption>Desktop icon</figcaption></figure>
+      <figure><img src="/brand/images/mobile.png" alt="PHUX mobile prompt mark" width="192" height="192" /><figcaption>Mobile icon</figcaption></figure>
+      <figure class="wordmark"><img src="/brand/images/wordmark.svg" alt="PHUX documentation wordmark" width="480" height="130" /><figcaption>Documentation wordmark</figcaption></figure>
+    </section>
+
+    <section aria-labelledby="download-title">
+      <h2 id="download-title">Download the kit</h2>
+      <p>The archive includes the existing desktop, mobile, and documentation variants, a visual preview, usage guidance, and a file manifest.</p>
+      <p><a class="download" href={`${base}/phux-brand.zip`} download>Download PHUX brand {version}</a></p>
+      <p><a href={`${base}/manifest.json`}>File manifest</a> · <a href={`${base}/SHA256SUMS`}>Archive checksum</a></p>
+      <details>
+        <summary>Verify this download</summary>
+        <p>SHA-256</p><code class="checksum">{lock.sha256}</code>
+        <p>Source revision <code>{lock.source_revision}</code></p>
+      </details>
+    </section>
+
+    <section aria-labelledby="usage-title">
+      <h2 id="usage-title">Use with care</h2>
+      <p>Keep the artwork legible and its proportions intact. Describe your relationship to PHUX accurately. The included USAGE.md records guidance and the licenses retained by imported artwork.</p>
+    </section>
+
+    <section aria-labelledby="history-title">
+      <h2 id="history-title">Release archive</h2>
+      <ul>{history.map((item) => <li><a href={`/brand/releases/${item}/phux-brand.zip`}>PHUX brand {item}</a></li>)}</ul>
+    </section>
+  </article>
+</BaseLayout>
+
+<style>
+  .brand-kit { max-width: 900px; padding-block: 5rem; }
+  header { margin-bottom: 3rem; }
+  .eyebrow { color: var(--muted, #a4aab5); }
+  h1 { font-size: clamp(2.5rem, 7vw, 5rem); line-height: 1.1; }
+  h2 { font-size: 1.35rem; font-weight: 600; margin-bottom: .75rem; }
+  .download { display: inline-block; margin-block: 1rem; padding: .8rem 1.15rem; border-radius: .5rem; background: #8fdfc0; color: #090a0c; font-weight: 600; }
+  .download:hover { background: #b4ecd7; }
+  .download:focus-visible { outline: 3px solid currentColor; outline-offset: 4px; }
+  .intro { max-width: 40rem; font-size: 1.2rem; }
+  section { margin-block: 3rem; }
+  .previews { display: flex; flex-wrap: wrap; gap: 2rem; }
+  figure { margin: 0; }
+  img { max-width: 100%; height: auto; border-radius: 1rem; }
+  figcaption { margin-top: .75rem; color: var(--muted, #a4aab5); }
+  .checksum { display: block; overflow-wrap: anywhere; }
+  details { margin-top: 1.5rem; }
+  summary { cursor: pointer; }
+</style>

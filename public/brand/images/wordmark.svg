@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 260" role="img" aria-labelledby="title desc">
+  <title id="title">phux wordmark</title>
+  <desc id="desc">The no-phux pane mark beside the phux wordmark and the tagline: a terminal is an object on a wire.</desc>
+  <defs>
+    <linearGradient id="surface" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#141922"/>
+      <stop offset="1" stop-color="#090b0f"/>
+    </linearGradient>
+    <linearGradient id="live" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#bef264"/>
+      <stop offset="1" stop-color="#86efac"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="960" height="260" rx="34" fill="#090b0f"/>
+  <rect x="18" y="18" width="924" height="224" rx="26" fill="url(#surface)" stroke="#1e2530"/>
+
+  <!-- the mark -->
+  <g fill="#0f131b" stroke="#3a4250" stroke-width="11">
+    <rect x="178" y="70" width="74" height="74" rx="14"/>
+    <rect x="178" y="158" width="74" height="74" rx="14"/>
+    <rect x="266" y="158" width="74" height="74" rx="14"/>
+  </g>
+  <rect x="266" y="70" width="74" height="74" rx="14" fill="url(#live)"/>
+  <polyline points="285,91 298,107 285,123"
+            fill="none" stroke="#0a0d12" stroke-width="7"
+            stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- the wire off the edge -->
+  <path d="M340 107 H356" fill="none" stroke="#bef264" stroke-width="7" stroke-linecap="round"/>
+  <circle cx="364" cy="107" r="8" fill="#bef264"/>
+
+  <!-- the wordmark -->
+  <text x="404" y="152"
+        fill="#f4f7fb"
+        font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace"
+        font-size="96"
+        font-weight="700">phux</text>
+  <text x="409" y="192"
+        fill="#9aa4b2"
+        font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace"
+        font-size="21">a terminal is an object on a wire</text>
+</svg>

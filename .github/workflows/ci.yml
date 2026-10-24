@@ -78,6 +78,7 @@ jobs:
           bun run build
           bun run check
           bun run check:links
+          bun run verify:brand
           bun run verify:docs
           bun run verify:home
           bun run verify:live-layout
