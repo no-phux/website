@@ -68,6 +68,7 @@ const ORIENTATION: { file: string; slug: string; group: Group; order: number }[]
   { file: "plugins.md", slug: "plugins", group: "customize", order: 5 },
   { file: "distros.md", slug: "distros", group: "customize", order: 6 },
   { file: "projects.md", slug: "projects", group: "customize", order: 7 },
+  { file: "tmux-import.md", slug: "tmux-import", group: "customize", order: 8 },
   { file: "scripting.md", slug: "scripting", group: "automate", order: 0 },
   { file: "agents.md", slug: "agents", group: "automate", order: 1 },
   { file: "acp.md", slug: "acp", group: "automate", order: 2 },
@@ -89,6 +90,7 @@ const ORIENTATION: { file: string; slug: string; group: Group; order: number }[]
   { file: "development.md", slug: "development", group: "internals", order: 6 },
   { file: "releasing.md", slug: "releasing", group: "internals", order: 7 },
   { file: "substrate.md", slug: "substrate", group: "internals", order: 8 },
+  { file: "brand-assets.md", slug: "brand-assets", group: "internals", order: 9 },
 ];
 
 /** Reading order of the generated reference pages; unlisted ones follow alphabetically. */

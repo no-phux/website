@@ -1,0 +1,9 @@
+{
+  "releases": {
+    "1.0.0": {
+      "sha256": "140408fdbbb7ee95212cb17995932b965721437faebaf0bb5815f7e0b02120aa",
+      "source_revision": "528b7752937be7a57c16f06344bdf2b0136f7d8b"
+    }
+  },
+  "schema": 1
+}

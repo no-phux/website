@@ -22,3 +22,12 @@ are repository secrets on this repo (`CLOUDFLARE_API_TOKEN`,
 variable.
 
 [Apache-2.0](./LICENSE). Copyright 2026 phall.
+
+Brand artwork is pinned in `brand.lock.json` and checked by `bun run
+brand:check` during builds. The private phux-brand library publishes approved
+releases; phux's `brand-update` workflow opens update PRs here. This repo owns
+`/brand` and the append-only public archives in `public/brand/releases/`.
+Old archives remain available for restoring older app pins. Normal builds
+require no access to the private source library. `bun run brand:restore`
+restores the current pin; use `python3 scripts/brand.py sync --archive PATH
+--sha256 SHA256` to install an explicitly checksummed release or rollback.

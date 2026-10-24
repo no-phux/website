@@ -1,0 +1,11 @@
+{
+  "schema": 1,
+  "consumer": "website",
+  "targets": {
+    "website/favicon.svg": "public/favicon.svg",
+    "tooling/brand.py": "scripts/brand.py",
+    "desktop/AppIcon.svg": "public/brand/images/desktop.svg",
+    "logos/docs-wordmark.svg": "public/brand/images/wordmark.svg",
+    "ios/icon-1024.png": "public/brand/images/mobile.png"
+  }
+}

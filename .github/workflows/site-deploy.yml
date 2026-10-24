@@ -66,6 +66,9 @@ jobs:
       - name: Check built links
         run: bun run check:links
 
+      - name: Verify brand downloads before publication
+        run: bun run verify:brand
+
       - name: Verify documentation before publication
         run: bun run verify:docs
 

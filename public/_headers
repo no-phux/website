@@ -37,3 +37,8 @@
 
 /.well-known/ai-catalog.json
   Access-Control-Allow-Origin: *
+
+# Versioned approved brand releases are retained unchanged. The mutable index
+# lives at /brand/index.json, outside this prefix.
+/brand/releases/*
+  Cache-Control: public, max-age=31536000, immutable
