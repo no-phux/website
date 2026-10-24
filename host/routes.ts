@@ -13,6 +13,7 @@ export const DOCS_HOST = "docs.phux.sh";
 /** Paths that belong on docs.phux.sh. Prefix match, including the exact path. */
 export const DOCS_PREFIXES = [
   "/overview",
+  "/brand-assets",
   "/docs",
   "/installation",
   "/getting-started",

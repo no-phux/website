@@ -86,6 +86,7 @@ export interface Envelope {
   colo?: string;
   tls_version?: string;
   http_version?: string;
+  edge?: { ray?: string; tlsCipher?: string; ja4?: string; botScore?: number; verifiedBot?: boolean };
   /** Allowlisted request metadata only; excludes identity/credential headers. */
   headers?: string;
   body_sample?: string;
@@ -154,6 +155,8 @@ interface TripwireCf {
   colo?: string;
   tlsVersion?: string;
   httpProtocol?: string;
+  tlsCipher?: string;
+  botManagement?: { ja4?: string; score?: number; verifiedBot?: boolean };
 }
 
 /**
@@ -184,10 +187,27 @@ export const buildTripwireEnvelope = Effect.fnUntraced(function*(
     colo: cf?.colo?.slice(0, 8) || undefined,
     tls_version: cf?.tlsVersion?.slice(0, 16) || undefined,
     http_version: cf?.httpProtocol?.slice(0, 16) || undefined,
+    edge: tripwireEdge(request, cf),
     headers: sanitizedHeaders(request.headers),
     body_sample: init.bodySample?.slice(0, 1024),
   };
 });
+
+function tripwireEdge(request: Request, cf: TripwireCf | undefined): Envelope["edge"] {
+  const score = cf?.botManagement?.score;
+  const edge = {
+    ray: request.headers.get("cf-ray")?.slice(0, 64) || undefined,
+    tlsCipher: cf?.tlsCipher?.slice(0, 80) || undefined,
+    ja4: cf?.botManagement?.ja4?.slice(0, 128) || undefined,
+    botScore: validBotScore(score),
+    verifiedBot: typeof cf?.botManagement?.verifiedBot === "boolean" ? cf.botManagement.verifiedBot : undefined,
+  };
+  return Object.values(edge).some(value => value !== undefined) ? edge : undefined;
+}
+function validBotScore(score: number | undefined): number | undefined {
+  if (typeof score !== "number" || !Number.isInteger(score)) return undefined;
+  return score >= 1 && score <= 99 ? score : undefined;
+}
 
 /** Allowlist avoids accidentally retaining novel auth headers or URL tokens. */
 const FINGERPRINT_HEADERS = new Set([

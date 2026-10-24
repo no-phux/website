@@ -30,6 +30,7 @@ describe("docs host detection", () => {
 describe("path classification", () => {
   test("docs prefixes include overview, guides, and search", () => {
     expect(isDocsPath("/overview")).toBe(true);
+    expect(routeRequest(SITE_HOST, urlOn(SITE_HOST, "/brand-assets"))).toEqual({ kind: "redirect", location: "https://docs.phux.sh/brand-assets", status: 301 });
     expect(isDocsPath("/quickstart/install")).toBe(true);
     expect(isDocsPath("/wire/l1")).toBe(true);
     expect(isDocsPath("/api/search.json")).toBe(true);

@@ -27,7 +27,7 @@ export async function handleTrap(
   const delay = options.delayMs ?? rotation.depthDelayMs;
   if (delay > 0) await new Promise((resolve) => setTimeout(resolve, delay));
   let bodySample: string | undefined;
-  if (trap === "wp-login" && request.method === "POST") {
+  if (["POST", "PUT", "PATCH", "DELETE"].includes(request.method)) {
     bodySample = await readPrefix(request.body, 1024).catch(() => undefined);
   }
   const response = trapResponse(trap, request.method, rotation);
