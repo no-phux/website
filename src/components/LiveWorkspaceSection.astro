@@ -1,12 +1,12 @@
 <section class="workspace-section" id="live-workspace" aria-labelledby="workspace-title">
   <div class="workspace-heading">
-    <div><p class="section-kicker">Try it for real</p><h2 id="workspace-title">Your workspace. In the browser.</h2><p>Type, split a pane, make it yours. This is a disposable live demo, not a recording.</p></div>
+    <div><h2 id="workspace-title">Your workspace. In the browser.</h2><p>A disposable live demo. Type, split, explore.</p></div>
     <a href="/embed">Open full shell <span aria-hidden="true">↗</span></a>
   </div>
   <div id="home-light" class="workspace-frame" aria-label="PHUX live workspace">
     <div class="workspace-placeholder"><span aria-hidden="true">⌘</span><p>The workspace connects when it comes into view.</p><a href="/concepts/vgpu?variant=combo">Open the glass workspace ↗</a></div>
   </div>
-  <p class="workspace-note">A limited edge shell, no sign-in. Scroll away to release it. For Linux, <a href="/embed">open the full shell</a>.</p>
+  <p class="workspace-note">Limited edge shell · no sign-in</p>
 </section>
 <script>
   import { homeHero } from "../lib/home-hero";
@@ -67,7 +67,6 @@
 <style>
   .workspace-section { padding-top: 76px; scroll-margin-top: 20px; }
   .workspace-heading { width: min(calc(100% - 48px), 1072px); margin: 0 auto 20px; display: flex; align-items: end; justify-content: space-between; gap: 24px; }
-  .section-kicker { margin: 0 0 8px; color: #adc7d5; font: 11px var(--font-code); letter-spacing: .08em; text-transform: uppercase; }
   h2 { margin: 0; color: #e0eaf0; font-size: clamp(24px, 3vw, 32px); font-weight: 500; letter-spacing: -.035em; line-height: 1.2; }
   .workspace-heading p:not(.section-kicker) { max-width: 52ch; margin: 12px 0 0; color: #a0b1bc; font-size: 14px; line-height: 1.65; }
   .workspace-heading > a { display: inline-flex; align-items: center; gap: 16px; flex: none; min-height: 44px; color: #d2e3ec; font-size: 13px; }

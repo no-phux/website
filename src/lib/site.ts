@@ -9,15 +9,15 @@ export const SITE = {
   docsDomain: "docs.phux.sh",
   docsUrl: "https://docs.phux.sh",
   category: "Programmable terminal runtime",
-  tagline: "Persistent terminals for people and agents.",
+  tagline: "Your agents. Your command center.",
   description:
-    `${name} keeps shells running and puts their input, output, and events behind a public API. Connect from a terminal, desktop, browser, or agent—locally or across machines.`,
+    `${name} brings agents, shells, and machines into one programmable workspace. See what needs you, keep work running, and take control from the TUI, desktop, or CLI.`,
   github: "https://github.com/no-phux/phux",
   // One switch for the visual system. Mode tokens live in global.css.
   designMode: "terminal",
   // Names the /og.png artwork. Link previews cache by URL, so change this
   // whenever src/pages/og.png.ts draws a different picture.
-  previewArtwork: "studio-crop",
+  previewArtwork: "real-clients",
   // Set when the WS demo backend is deployed. When empty the terminal island
   // renders the static poster + a "coming online" state instead of dialing out.
   demoWsUrl: import.meta.env.PUBLIC_PHUX_DEMO_WS ?? "",
