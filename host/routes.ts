@@ -24,6 +24,7 @@ export const DOCS_PREFIXES = [
   "/status-bar",
   "/hooks",
   "/plugins",
+  "/distros",
   "/projects",
   "/scripting",
   "/agents",

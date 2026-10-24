@@ -92,6 +92,25 @@ export async function verifyWorkspaceResize(page: Page) {
   assert.equal(await page.locator("#home-light iframe").getAttribute("data-instance"), "retained", "resize never replaces the active session");
 }
 
+export async function verifyWorkspaceInstallCopy(page: Page) {
+  const live = page.frameLocator("#home-light iframe");
+  const hookLine = live.locator(".install-hook-line code");
+  assert.equal(await live.locator(".live-primary > .install-hook").count(), 1, "install controls follow their terminal rather than an external CTA slot");
+  assert.equal(await hookLine.innerText(), "curl -fsSL https://phux.sh/install | sh", "the live hero leads with the CLI install");
+  // Keep the clipboard asynchronous so reading before copy completion fails reliably.
+  await hookLine.evaluate(() => {
+    const writeText = navigator.clipboard.writeText.bind(navigator.clipboard);
+    navigator.clipboard.writeText = async (text) => {
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      await writeText(text);
+    };
+  });
+  await live.locator(".install-hook-copy").click();
+  await live.locator(".install-hook-status").filter({ hasText: /^Copied\.$/ }).waitFor();
+  assert.equal(await page.evaluate(() => navigator.clipboard.readText()), "curl -fsSL https://phux.sh/install | sh", "the hook copies from inside the frame");
+  assert.equal(await live.locator(".install-hook-status").innerText(), "Copied.", "copy keeps concise accessible feedback");
+}
+
 export async function verifyHomeAuthReturn(page: Page, base: string) {
   await page.goto(`${base}/?auth=error&auth_error=cancelled&hero=light`);
   await page.getByRole("dialog").waitFor();

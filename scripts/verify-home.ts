@@ -4,7 +4,7 @@ import assert from "node:assert/strict";
 import { mkdir } from "node:fs/promises";
 import { extname, resolve } from "node:path";
 import { chromium } from "playwright-core";
-import { verifyClientComparison, verifyHomeAuthReturn, verifyHostedShell, verifyTouchComparison, verifyWorkspaceResize } from "./home-interaction-checks";
+import { verifyClientComparison, verifyHomeAuthReturn, verifyHostedShell, verifyTouchComparison, verifyWorkspaceInstallCopy, verifyWorkspaceResize } from "./home-interaction-checks";
 
 const root = resolve(import.meta.dir, "../dist");
 const artifacts = resolve(import.meta.dir, "../.home-check");
@@ -203,11 +203,7 @@ try {
   await page.waitForTimeout(1500);
   assert.equal(await stillness(), settled, "the hero frame stays stable while its terminals connect");
   await verifyWorkspaceResize(page);
-  assert.equal(await live.locator(".live-primary > .install-hook").count(), 1, "install controls follow their terminal rather than an external CTA slot");
-  assert.equal(await hookLine.innerText(), "curl -fsSL https://phux.sh/install | sh", "the live hero leads with the CLI install");
-  await live.locator(".install-hook-copy").click();
-  assert.equal(await page.evaluate(() => navigator.clipboard.readText()), "curl -fsSL https://phux.sh/install | sh", "the hook copies from inside the frame");
-  assert.equal(await live.locator(".install-hook-status").innerText(), "Copied.", "copy keeps concise accessible feedback");
+  await verifyWorkspaceInstallCopy(page);
   assert.equal(await live.locator(".install-hook-lede, .install-hook-proof, .live-session-hint").count(), 0, "the live hero has no surrounding marketing prose");
   await live.getByRole("button", { name: "iPhone" }).click();
   assert.ok(await live.locator(".install-hook-request input[name=email]").isVisible(), "the iPhone target requests TestFlight");

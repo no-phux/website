@@ -82,6 +82,17 @@ describe("host routing", () => {
     expect(routeRequest(DOCS_HOST, urlOn(DOCS_HOST, "/wire/l1"))).toEqual({ kind: "asset" });
   });
 
+  test("distributions use the docs origin for HTML and Markdown without swallowing sibling assets", () => {
+    for (const path of ["/distros", "/distros.html", "/distros.md", "/distros/index.html"]) {
+      expect(routeRequest(SITE_HOST, urlOn(SITE_HOST, `${path}?from=guide`))).toEqual({
+        kind: "redirect", location: `https://${DOCS_HOST}${path}?from=guide`, status: 301,
+      });
+      expect(routeRequest(DOCS_HOST, urlOn(DOCS_HOST, path))).toEqual({ kind: "asset" });
+    }
+    expect(isDocsPath("/distros-old")).toBe(false);
+    expect(isDocsPath("/distros.png")).toBe(false);
+  });
+
   test("docs.phux.sh sends installers and embed back to phux.sh", () => {
     expect(routeRequest(DOCS_HOST, urlOn(DOCS_HOST, "/install"))).toEqual({
       kind: "redirect",
