@@ -40,10 +40,12 @@ export async function verifyHostedShell(page: Page, base: string, artifacts: str
     return;
   }
   await page.getByRole("heading", { name: "A Linux shell, right here." }).waitFor();
+  await page.locator(".pterm-overlay").evaluate(node => Promise.all(node.getAnimations().map(animation => animation.finished)));
   for (const name of ["Continue with GitHub", "Continue with Google", "Use instant edge shell"]) {
     const action = page.getByRole("button", { name, exact: true });
     assert.ok(await action.isVisible(), `${name}: preserved in the glass shell`);
-    assert.ok((await action.boundingBox())!.height >= 44, `${name}: touch target`);
+    const height = (await action.boundingBox())!.height;
+    assert.ok(height >= 44, `${name}: ${height}px touch target must be at least 44px`);
   }
   await page.getByText("Info", { exact: true }).click();
   assert.match(await page.locator(".pterm-info-body").innerText(), /Network.*blocked/s, "the inspector keeps the honest limits");
