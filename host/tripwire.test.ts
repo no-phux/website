@@ -122,6 +122,23 @@ describe("policy response execution", () => {
     expect((events[0]!.body_sample as string).length).toBe(1024);
   });
 
+  test("captures bounded payloads on generic traps and allowlists optional edge evidence", async () => {
+    const events: Record<string, unknown>[] = [];
+    const pending: Promise<unknown>[] = [];
+    const request = new Request("https://example.test/.env", { method: "PUT", body: "payload".repeat(1000), headers: { "cf-ray": "ray-123", authorization: "Bearer never-retain", cookie: "secret-cookie" } });
+    Object.defineProperty(request, "cf", { value: { tlsCipher: "TLS_AES_128_GCM_SHA256", httpProtocol: "HTTP/2", botManagement: { ja4: "t13d1516h2_example_fingerprint", score: 3, verifiedBot: false }, accountId: "never-retain" } });
+    await handleTrap(request, { ANALYTICS: { fetch: async request => {
+      events.push(...(await request.json() as { events: typeof events }).events);
+      return new Response(null, { status: 204 });
+    } } }, { waitUntil: promise => pending.push(promise) }, "env", syntheticRotation());
+    await Promise.all(pending);
+    expect((events[0]!.body_sample as string).length).toBe(1024);
+    expect(events[0]!.edge).toEqual({ ray: "ray-123", tlsCipher: "TLS_AES_128_GCM_SHA256", ja4: "t13d1516h2_example_fingerprint", botScore: 3, verifiedBot: false });
+    expect(events[0]!.http_version).toBe("HTTP/2");
+    expect(JSON.stringify(events)).not.toContain("never-retain");
+    expect(JSON.stringify(events)).not.toContain("secret-cookie");
+  });
+
   test("generic capture-only rules return ordinary misses", async () => {
     for (const trap of ["probe", "robots-bait"] as const) {
       const response = await handleTrap(new Request("https://example.test/fixture/probe"), {}, undefined, trap, syntheticRotation());

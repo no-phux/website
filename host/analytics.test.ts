@@ -403,3 +403,11 @@ describe("analytics HttpRouter", () => {
     expect(claim.status).toBe(405);
   });
 });
+
+test("ordinary analytics never acquires the tripwire-only edge fingerprint", async () => {
+  const request = new Request("https://phux.sh/", { headers: { "cf-ray": "edge-ray" } });
+  Object.defineProperty(request, "cf", { value: { tlsCipher: "TLS_AES_128_GCM_SHA256", botManagement: { ja4: "fingerprint", score: 1, verifiedBot: false } } });
+  const envelope = await runAnalytics(buildEnvelope(request, new Response("ok")));
+  expect(envelope.edge).toBeUndefined();
+  expect(envelope.body_sample).toBeUndefined();
+});
