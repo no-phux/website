@@ -75,6 +75,28 @@ describe("documentation discovery interface", () => {
     expect(guide).toContain("[protocol](/protocol#commands-events-resources)");
   });
 
+  test("publishes distributions beside plugins in Customize with local guide links", async () => {
+    await source("plugins.md", "# Plugins\n\nExtend phux.\n\n## More\n\nSee [Distributions](./distros.md).\n");
+    await source("distros.md", "# Distributions\n\nPortable defaults.\n\n## Write a distro\n\nCompose [plugins](./plugins.md).\n");
+    await source("projects.md");
+    const { entries, excluded } = await discover(docs);
+    expect(entries.find(({ slug }) => slug === "distros")).toMatchObject({
+      repoPath: "docs/distros.md", group: "customize", order: 6,
+    });
+    expect(excluded).toEqual([]);
+    const out = join(root, "out");
+    await mkdir(out);
+    expect(await writeDocumentation(out, entries, revision, versions, siteRevision)).toEqual({ written: 4, failed: [] });
+    expect((await metadata(out)).pages).toEqual([
+      "---Get started---", "overview", "---Customize---", "plugins", "distros", "projects",
+    ]);
+    expect(await readFile(join(out, "plugins.md"), "utf8")).toContain("[Distributions](/distros)");
+    const guide = await readFile(join(out, "distros.md"), "utf8");
+    expect(guide).toContain('title: "Distributions"');
+    expect(guide).toContain('sourcePath: "docs/distros.md"');
+    expect(guide).toContain("[plugins](/plugins)");
+  });
+
   test("orders public section pages using all nav-order aliases, then basename", async () => {
     await source("reference/README.md");
     await source("reference/Beta.md", "---\nnav-order: -2\n---\n# Beta");
