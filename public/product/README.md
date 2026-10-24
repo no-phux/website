@@ -1,8 +1,15 @@
-# Product captures
+# Workspace captures
 
-Captured October 24, 2026. These are actual product pixels; neither image is a UI mockup.
+Real TUI and Desktop screenshots supplied by the user on October 24, 2026:
 
-- `tui.webp`: the installed phux CLI's real TUI, composited by `phux rec --composited showcase --size 1440x900 -o capture.png --duration 1`. The last APNG frame was extracted with Pillow and losslessly encoded as WebP. The session runs this website's actual tests and the agent section of `phux --help`.
-- `desktop.webp`: screenshot of `/Applications/Phux.app` 0.44.1, with its Agent Fleet open against the running local server. Resized to 1920px wide and encoded as WebP at quality 90. Agent state is a snapshot of the capture time.
+- `desktop-workspace.webp`: `Screenshot 2026-10-24 at 5.33.46 PM.png`.
+- `tui-workspace.webp`: `Screenshot 2026-10-24 at 5.33.40 PM.png`.
 
-Refresh from running clients, then inspect both images. Do not replace these with illustrative HTML, generated imagery, or invented agent state.
+Both source images are 3840 × 2160. Each uses the same crop: x=324, y=116,
+width=3088, height=1740. This removes the macOS desktop and menu bar while
+preserving the complete app window. The crops are encoded as lossless WebP,
+without resizing or changing the product UI.
+
+They show the same `default` workspace with different active agent tabs.
+The homepage overlays them at identical dimensions for its drag reveal.
+Do not substitute an Agent Fleet overview, invented UI, or unrelated session.

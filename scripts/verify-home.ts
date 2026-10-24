@@ -55,7 +55,7 @@ try {
   assert.equal(await page.locator(".download-primary").getAttribute("href"), "/download/desktop", "the primary action downloads the actual desktop release");
   await page.waitForTimeout(350);
   assert.ok(!requests.some(url => /(?:HeroDemo|PhuxTerminal|VgpuPrototype)[^/]*\.js|\.wasm|\/auth\/session|\/healthz|phux-architecture\.mp4/.test(url)), "first fold does not download React demos, GPU, WASM, film or allocate sessions");
-  await verifyClientComparison(page);
+  await verifyClientComparison(page, artifacts);
   await page.screenshot({ path: `${artifacts}/home-desktop.png` });
   assert.equal(await page.locator("#how-it-works").count(), 0, "no homepage explainer");
   assert.equal(await page.locator(".hero-headline, .live-invitation, .features").count(), 0, "the landing carries no slogan block");
@@ -165,9 +165,9 @@ try {
     await page.setViewportSize({ width, height: width < 600 ? 740 : 900 });
     await page.evaluate(() => window.scrollTo(0, 0));
     const preview = (await page.locator(".client-comparison").boundingBox())!;
-    assert.ok(preview.y < 340 && preview.y + preview.height < (width < 600 ? 540 : 760), `the entire comparison is in the first screen at ${width}px`);
+    assert.ok(preview.y < 340 && preview.y + preview.height < (width < 600 ? 540 : 850), `the entire comparison is in the first screen at ${width}px`);
     const downloadBox = (await page.locator(".download-primary").boundingBox())!;
-    assert.ok(downloadBox.y + downloadBox.height < (width < 600 ? 650 : 850), "the primary download follows the screenshots within the first screen");
+    assert.ok(downloadBox.y + downloadBox.height < (width < 600 ? 650 : 900), "the primary download follows the reveal within the first screen");
     for (const name of ["desktop", "cli"]) {
       await target(name).click();
       assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `no overflow with ${name} at ${width}px`);
@@ -250,7 +250,7 @@ try {
   assert.match(await staticPage.locator(".tour-terminal").innerText(), /Finished/, "no-JS tour shows a settled scene");
   assert.equal(await staticPage.locator(".tour-lines > span").first().evaluate((node) => getComputedStyle(node).opacity), "1", "static output stays fully readable");
   await staticContext.close();
-  console.log(`PASS home: real product captures, keyboard/touch enlargement, first-fold download, lazy workspace lifecycle, install/copy/beta, tour chapters/pause/focus, glass shell auth/failure recovery, mobile/tablet/desktop, reduced motion, no-JS, idle resource budget. Screenshots: ${artifacts}`);
+  console.log(`PASS home: real workspace captures, pointer/touch/keyboard reveal and enlargement, first-fold download, lazy workspace lifecycle, install/copy/beta, tour chapters/pause/focus, glass shell auth/failure recovery, mobile/tablet/desktop, reduced motion, no-JS, idle resource budget. Screenshots: ${artifacts}`);
 } finally {
   await browser.close();
   server.stop(true);

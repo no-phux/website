@@ -1,29 +1,55 @@
 ---
 const clients = [
-  { id: "gui", label: "Desktop", src: "/product/desktop.webp", width: 1920, height: 1222, alt: "Real Phux desktop Agent Fleet showing working agents and an agent ready for review." },
-  { id: "tui", label: "TUI", src: "/product/tui.webp", width: 1440, height: 896, alt: "Real phux terminal UI with a split workspace, passing tests, and agent commands." },
+  { id: "tui", label: "TUI", src: "/product/tui-workspace.webp", alt: "Real phux TUI showing coding agents and sessions in the default workspace." },
+  { id: "gui", label: "Desktop", src: "/product/desktop-workspace.webp", alt: "Real Phux desktop showing the same default workspace, session sidebar, and agent tabs." },
 ];
 ---
-<div class="client-comparison" data-comparison aria-label="Phux terminal and desktop screenshots">
-  {clients.map(client => (
-    <figure class={`client-${client.id}`}>
-      <a href={client.src} data-product-image aria-label={`Enlarge ${client.label} screenshot`}>
-        <img src={client.src} width={client.width} height={client.height} alt={client.alt} loading="eager" fetchpriority="high" />
+<figure class="client-comparison" data-comparison aria-label="Compare the real phux TUI and Desktop workspace">
+  <div class="comparison-stage" style="--reveal: 50%">
+    {clients.map(client => (
+      <a class={`client-layer client-${client.id}`} href={client.src} data-product-image aria-label={`Enlarge ${client.label} screenshot`}>
+        <img src={client.src} width="3088" height="1740" alt={client.alt} loading="eager" fetchpriority="high" />
       </a>
-      <figcaption>{client.label}</figcaption>
-    </figure>
-  ))}
-</div>
+    ))}
+    <div class="comparison-divider" aria-hidden="true"><span>‹ ›</span></div>
+    <input class="comparison-range" type="range" min="0" max="100" value="50" step="1" aria-label="Reveal desktop client" aria-valuetext="50% desktop client" hidden />
+  </div>
+  <figcaption>
+    <button type="button" data-client-position="0" hidden>TUI</button>
+    <span class="comparison-hint">Drag to compare</span>
+    <button type="button" data-client-position="100" hidden>Desktop</button>
+  </figcaption>
+</figure>
 <dialog class="product-image" aria-label="Product screenshot">
   <button type="button" aria-label="Close screenshot">×</button>
   <img alt="" />
 </dialog>
 <script>
+  const root = document.querySelector<HTMLElement>("[data-comparison]")!;
+  const slider = root.querySelector<HTMLInputElement>(".comparison-range")!;
+  const stage = root.querySelector<HTMLElement>(".comparison-stage")!;
+  const choices = root.querySelectorAll<HTMLButtonElement>("[data-client-position]");
+  const tui = root.querySelector<HTMLElement>(".client-tui")!;
+  const desktop = root.querySelector<HTMLElement>(".client-gui")!;
+  const update = () => {
+    stage.style.setProperty("--reveal", `${slider.value}%`);
+    slider.setAttribute("aria-valuetext", `${slider.value}% desktop client`);
+    tui.inert = slider.value === "100";
+    desktop.inert = slider.value === "0";
+    choices.forEach(button => button.setAttribute("aria-pressed", String(button.dataset.clientPosition === slider.value)));
+  };
+  slider.hidden = false;
+  slider.addEventListener("input", update);
+  choices.forEach(button => {
+    button.hidden = false;
+    button.addEventListener("click", () => { slider.value = button.dataset.clientPosition!; update(); });
+  });
+  update();
+
   const dialog = document.querySelector<HTMLDialogElement>(".product-image")!;
   const image = dialog.querySelector("img")!;
-  document.querySelectorAll<HTMLAnchorElement>("[data-product-image]").forEach(link => {
+  root.querySelectorAll<HTMLAnchorElement>("[data-product-image]").forEach(link => {
     link.addEventListener("click", event => {
-      // Keep the direct image link for modified clicks and no-JS visitors.
       if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
       event.preventDefault();
       image.src = link.href;
@@ -35,19 +61,32 @@ const clients = [
   dialog.addEventListener("click", event => { if (event.target === dialog) dialog.close(); });
 </script>
 <style>
-  .client-comparison { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 32px 0 24px; text-align: left; }
-  figure { min-width: 0; margin: 0; }
-  figure a { display: block; overflow: hidden; border: 1px solid #c2d6e32a; border-radius: 12px; background: #080d10; box-shadow: 0 20px 64px #0004; cursor: zoom-in; }
-  figure img { display: block; width: 100%; height: auto; aspect-ratio: 1440 / 914; object-fit: contain; }
-  figcaption { margin-top: 10px; text-align: center; font-size: 12px; color: #aebbc2; }
-  .product-image { width: min(1440px, calc(100vw - 32px)); max-width: none; max-height: calc(100dvh - 32px); padding: 44px 12px 12px; border: 1px solid #c2d6e32a; border-radius: 14px; background: #101517; color: #eee; }
+  .client-comparison { width: min(100%, 900px); margin: 24px auto 20px; text-align: left; }
+  .comparison-stage { position: relative; aspect-ratio: 3088 / 1740; overflow: hidden; isolation: isolate; border: 1px solid #c2d6e32a; border-radius: 12px; background: #080d10; box-shadow: 0 20px 64px #0004; }
+  .client-layer { position: absolute; inset: 0; display: block; cursor: zoom-in; }
+  .client-layer img { display: block; width: 100%; height: 100%; object-fit: contain; }
+  .client-gui { clip-path: inset(0 0 0 calc(100% - var(--reveal))); }
+  .comparison-divider { position: absolute; inset: 0 auto 0 calc(100% - var(--reveal)); width: 1px; background: #d3e9f3; z-index: 2; pointer-events: none; }
+  .comparison-divider > span { position: absolute; left: 0; top: 50%; display: grid; place-items: center; transform: translate(-50%, -50%); width: 40px; height: 40px; border: 1px solid #e0f0f7aa; border-radius: 50%; background: #d3e9f3; box-shadow: 0 3px 24px #0005; color: #172631; font: 600 15px var(--font-reading); }
+  .comparison-range { appearance: none; -webkit-appearance: none; position: absolute; z-index: 3; inset: calc(50% - 22px) -22px auto; width: calc(100% + 44px); height: 44px; margin: 0; background: transparent; cursor: ew-resize; direction: rtl; touch-action: pan-y; }
+  .comparison-range::-webkit-slider-thumb { appearance: none; width: 44px; height: 44px; background: transparent; }
+  .comparison-range::-moz-range-thumb { width: 44px; height: 44px; background: transparent; border: 0; }
+  .comparison-range:focus-visible { outline: none; }
+  .comparison-stage:has(.comparison-range:focus-visible) .comparison-divider > span { outline: 2px solid #d3e9f3; outline-offset: 4px; }
+  figcaption { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-top: 4px; }
+  figcaption button { min-height: 44px; padding: 0 4px; border: 0; background: none; color: #aebbc2; font: 12px var(--font-reading); cursor: pointer; }
+  figcaption button[aria-pressed=true] { color: #ededee; text-decoration: underline; text-underline-offset: 4px; }
+  .comparison-hint { color: #aebbc2; font-size: 11px; }
+  .product-image { width: min(1600px, calc(100vw - 32px)); max-width: none; max-height: calc(100dvh - 32px); padding: 44px 12px 12px; border: 1px solid #c2d6e32a; border-radius: 14px; background: #101517; color: #eee; }
   .product-image::backdrop { background: #000d; }
   .product-image img { display: block; max-width: 100%; max-height: calc(100dvh - 104px); margin: auto; object-fit: contain; }
   .product-image button { position: absolute; top: 0; right: 4px; width: 44px; height: 44px; border: 0; background: none; color: inherit; font: 28px var(--font-reading); cursor: pointer; }
-  @media (max-width: 600px) {
-    .client-comparison { display: flex; gap: 12px; margin: 24px -20px; padding: 0 20px 8px; overflow-x: auto; scroll-snap-type: x mandatory; }
-    figure { flex: 0 0 88%; scroll-snap-align: center; }
-    figure a { border-radius: 8px; }
-    figcaption { font-size: 12px; }
+  [hidden] { display: none !important; }
+  @media (max-width: 600px) { .comparison-stage { border-radius: 8px; } }
+  @media (scripting: none) {
+    .comparison-stage { display: grid; grid-template-columns: 1fr 1fr; aspect-ratio: auto; }
+    .client-layer { position: static; clip-path: none; }
+    .client-layer img { height: auto; }
+    .comparison-divider, .comparison-hint { display: none; }
   }
 </style>

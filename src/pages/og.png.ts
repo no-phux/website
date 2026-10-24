@@ -17,8 +17,8 @@ export const GET: APIRoute = async () => {
       <text x="36" y="594" fill="#aebbc2" font-size="22">Agents, shells, and machines. One place to run the whole show.</text>
     </g>
   </svg>`);
-  const desktop = resolve("public/product/desktop.webp");
-  const tui = resolve("public/product/tui.webp");
+  const desktop = resolve("public/product/desktop-workspace.webp");
+  const tui = resolve("public/product/tui-workspace.webp");
   const [desktopImage, tuiImage] = await Promise.all([
     sharp(desktop).resize(552, 352, { fit: "contain", background: "#080d10" }).png().toBuffer(),
     sharp(tui).resize(552, 352, { fit: "contain", background: "#080d10" }).png().toBuffer(),
