@@ -81,7 +81,7 @@ describe("documentation discovery interface", () => {
     await source("projects.md");
     const { entries, excluded } = await discover(docs);
     expect(entries.find(({ slug }) => slug === "distros")).toMatchObject({
-      repoPath: "docs/distros.md", group: "customize", order: 6,
+      repoPath: "docs/distros.md", group: "customize", order: 7,
     });
     expect(excluded).toEqual([]);
     const out = join(root, "out");
@@ -95,6 +95,38 @@ describe("documentation discovery interface", () => {
     expect(guide).toContain('title: "Distributions"');
     expect(guide).toContain('sourcePath: "docs/distros.md"');
     expect(guide).toContain("[plugins](/plugins)");
+  });
+
+  test("publishes tmux import after Keys in Customize with local guide links", async () => {
+    for (const file of ["config.md", "themes.md", "status-bar.md", "hooks.md", "plugins.md", "distros.md", "projects.md", "scripting.md"]) await source(file);
+    await source("keys.md", "# Keys\n\nNative bindings.\n\n## Coming from tmux\n\nSee the [tmux importer guide](./tmux-import.md).\n");
+    await source("getting-started.md", "# Getting started\n\nFirst steps.\n\n## Coming from tmux\n\nSee [Bring your tmux keys to phux](./tmux-import.md).\n");
+    await source("tmux-import.md", "# Bring your tmux keys to phux\n\nImport native bindings.\n\n## Apply and undo\n\nSee [when settings take effect](./config.md#when-a-change-takes-effect) and the [JSON error contract](./scripting.md#json-output-and-errors).\n");
+    const { entries, excluded } = await discover(docs);
+    expect(entries.find(({ slug }) => slug === "tmux-import")).toMatchObject({
+      repoPath: "docs/tmux-import.md", group: "customize", order: 2,
+    });
+    const customize = entries.filter(({ group }) => group === "customize").sort((a, b) => a.order - b.order);
+    expect(customize.map(({ slug }) => slug)).toEqual([
+      "config", "keys", "tmux-import", "themes", "status-bar", "hooks", "plugins", "distros", "projects",
+    ]);
+    expect(customize.map(({ order }) => order)).toEqual([0, 1, 2, 3, 4, 5, 6, 7, 8]);
+    expect(excluded).toEqual([]);
+    const out = join(root, "out");
+    await mkdir(out);
+    expect(await writeDocumentation(out, entries, revision, versions, siteRevision)).toEqual({ written: 12, failed: [] });
+    expect((await metadata(out)).pages).toEqual([
+      "---Get started---", "overview", "getting-started", "---Customize---",
+      "config", "keys", "tmux-import", "themes", "status-bar", "hooks", "plugins", "distros", "projects",
+      "---Automate---", "scripting",
+    ]);
+    expect(await readFile(join(out, "keys.md"), "utf8")).toContain("[tmux importer guide](/tmux-import)");
+    expect(await readFile(join(out, "getting-started.md"), "utf8")).toContain("[Bring your tmux keys to phux](/tmux-import)");
+    const guide = await readFile(join(out, "tmux-import.md"), "utf8");
+    expect(guide).toContain('title: "Bring your tmux keys to phux"');
+    expect(guide).toContain('sourcePath: "docs/tmux-import.md"');
+    expect(guide).toContain("[when settings take effect](/config#when-a-change-takes-effect)");
+    expect(guide).toContain("[JSON error contract](/scripting#json-output-and-errors)");
   });
 
   test("orders public section pages using all nav-order aliases, then basename", async () => {

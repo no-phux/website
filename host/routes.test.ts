@@ -93,6 +93,22 @@ describe("host routing", () => {
     expect(isDocsPath("/distros.png")).toBe(false);
   });
 
+  test("tmux import uses the docs origin for HTML and Markdown without swallowing sibling assets", () => {
+    for (const path of ["/tmux-import", "/tmux-import/", "/tmux-import.html", "/tmux-import.md", "/tmux-import/index.html"]) {
+      for (const host of [SITE_HOST, `www.${SITE_HOST}`]) {
+        expect(routeRequest(host, urlOn(host, `${path}?from=keys`))).toEqual({
+          kind: "redirect", location: `https://${DOCS_HOST}${path}?from=keys`, status: 301,
+        });
+      }
+      expect(routeRequest(DOCS_HOST, urlOn(DOCS_HOST, path))).toEqual({ kind: "asset" });
+      expect(routeRequest("phux-site.account.workers.dev", urlOn(SITE_HOST, path))).toEqual({ kind: "asset" });
+    }
+    for (const path of ["/tmux-import-old", "/tmux-import.png"]) {
+      expect(isDocsPath(path)).toBe(false);
+      expect(routeRequest(SITE_HOST, urlOn(SITE_HOST, path))).toEqual({ kind: "asset" });
+    }
+  });
+
   test("docs.phux.sh sends installers and embed back to phux.sh", () => {
     expect(routeRequest(DOCS_HOST, urlOn(DOCS_HOST, "/install"))).toEqual({
       kind: "redirect",
