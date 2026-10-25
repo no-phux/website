@@ -5,3 +5,6 @@ src/lib/phux-web/phux_web* linguist-generated=true
 motion/*.plan.json linguist-generated=true
 public/benchmarks/** linguist-generated=true
 public/demos/**/*.cast linguist-generated=true
+
+# Immutable producer-generated release manifests; preserve signed hashes.
+public/brand/releases/**/manifest.json linguist-generated=true
