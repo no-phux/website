@@ -48,7 +48,7 @@ export default Alchemy.Stack(
         htmlHandling: "auto-trailing-slash",
         notFoundHandling: "none",
       },
-      domain: { name: "phux.sh", aliases: ["docs.phux.sh"] },
+      domain: { name: "phux.sh", aliases: ["docs.phux.sh", "phux.computer", "www.phux.computer"] },
       workersDev: false,
       observability: { enabled: false },
       env: {

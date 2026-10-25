@@ -9,6 +9,7 @@
 
 export const SITE_HOST = "phux.sh";
 export const DOCS_HOST = "docs.phux.sh";
+export const SITE_ALIASES = ["phux.computer", "www.phux.computer"] as const;
 
 /** Paths that belong on docs.phux.sh. Prefix match, including the exact path. */
 export const DOCS_PREFIXES = [
@@ -96,6 +97,14 @@ export function isMarketingOnlyPath(pathname: string): boolean {
 
 export function routeRequest(host: string, url: URL): HostRoute {
   const path = url.pathname;
+
+  if (SITE_ALIASES.some((alias) => alias === hostnameOf(host))) {
+    const destination = new URL(url);
+    destination.protocol = "https:";
+    destination.host = SITE_HOST;
+    destination.port = "";
+    return { kind: "redirect", location: destination.href, status: 301 };
+  }
 
   if (isDocsHost(host)) {
     if (path === "/" || path === "/index.html" || path === "") {

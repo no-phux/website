@@ -11,6 +11,12 @@ Cloudflare account:
 Both Workers have a service binding to the private `phux-ops-analytics`
 Worker, whose stack lives in `no-phux/ops`.
 
+`phux.computer` and `www.phux.computer` are also custom domains on `phux-site`.
+They permanently redirect (301) to `https://phux.sh`, preserving the path and
+query string. Alchemy manages their DNS and TLS through Workers custom domains;
+they need no separate DNS records or zone Redirect Rules. Both zones must be in
+the phux account and accessible to the deployment credential.
+
 ```sh
 bun install
 bun run plan          # site:  alchemy plan  --stage prod --profile phux
