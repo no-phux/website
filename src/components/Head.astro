@@ -25,7 +25,9 @@ const canonical = new URL(path, origin).href;
 const previewIdentity = encodeURIComponent(
   `${SITE.name}|${SITE.category}|${SITE.tagline}|${SITE.previewArtwork}`,
 );
-const ogImage = image ? new URL(image, origin).href : new URL(`/og.png?v=${previewIdentity}`, SITE.url).href;
+const ogUrl = new URL(image ?? "/og.png", image ? origin : SITE.url);
+ogUrl.searchParams.set("v", previewIdentity);
+const ogImage = ogUrl.href;
 const ogAlt = image ? title : `${SITE.name}: ${SITE.tagline}`;
 ---
 
@@ -55,5 +57,5 @@ const ogAlt = image ? title : `${SITE.name}: ${SITE.tagline}`;
     <meta name="theme-color" content="#121311" media="(prefers-color-scheme: dark)" />
   </>
 ) : <meta name="theme-color" content="#07080b" />}
-<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+<link rel="icon" href={`/favicon.svg?v=${SITE.previewArtwork}`} type="image/svg+xml" />
 <link rel="sitemap" href="/sitemap-index.xml" />
