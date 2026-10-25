@@ -9,6 +9,10 @@
     "ios/icon-1024.png": "public/brand/images/mobile.png",
     "logos/fox.svg": "public/brand/images/fox.svg",
     "logos/fox-light.svg": "public/brand/images/fox-light.svg",
-    "logos/fox-dark.svg": "public/brand/images/fox-dark.svg"
+    "logos/fox-dark.svg": "public/brand/images/fox-dark.svg",
+    "identity/profile.json": "public/brand/profile.json",
+    "logos/mark.svg": "public/brand/images/mark.svg",
+    "logos/mark-light.svg": "public/brand/images/mark-light.svg",
+    "logos/mark-dark.svg": "public/brand/images/mark-dark.svg"
   }
 }

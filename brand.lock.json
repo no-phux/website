@@ -3,15 +3,19 @@
   "files": {
     "desktop/AppIcon.svg": {
       "destination": "public/brand/images/desktop.svg",
-      "sha256": "2e5cc4fb1a9205913dd57f87cfc7e54f2341bed039336b4b89b3754cd8cce116"
+      "sha256": "86d4b248a40c4dbe33689669f8e862b1c7628804867996671ba227e1d18bf7db"
+    },
+    "identity/profile.json": {
+      "destination": "public/brand/profile.json",
+      "sha256": "a6da7ab1b9c46cc2e2f835d2370433edf13b1fd0cce7b244f3fb95ea4479f9fa"
     },
     "ios/icon-1024.png": {
       "destination": "public/brand/images/mobile.png",
-      "sha256": "54422e93a424b2ae13b2ff1b01456614baf74b550533881641928ef5da6e5f79"
+      "sha256": "b83e88f4fccd020f85a8341ab97efa6d19d113c8a894f3215d764f2d09fc6d33"
     },
     "logos/docs-wordmark.svg": {
       "destination": "public/brand/images/wordmark.svg",
-      "sha256": "cff08321d62a2b717d09e446041cfef97fecde45ef6d58cfef55ab539095736c"
+      "sha256": "9cda166900ba0be12aecfb1378515d3173d5b57704e29e20f81a5100a9cc0c01"
     },
     "logos/fox-dark.svg": {
       "destination": "public/brand/images/fox-dark.svg",
@@ -25,18 +29,30 @@
       "destination": "public/brand/images/fox.svg",
       "sha256": "54a9ca6373d1d215854868c13744043b343f9d2232886fb111b79ae34e4f4458"
     },
+    "logos/mark-dark.svg": {
+      "destination": "public/brand/images/mark-dark.svg",
+      "sha256": "4cef25d518efda71d21b6d202c6f62b147461d7bc7de2b8799eeac927c9f8a2b"
+    },
+    "logos/mark-light.svg": {
+      "destination": "public/brand/images/mark-light.svg",
+      "sha256": "6ff5980e9c5e31fe3a5754dbc7a9a5c798d4c7ae5d7bc3fdb0c0417e97ab62c5"
+    },
+    "logos/mark.svg": {
+      "destination": "public/brand/images/mark.svg",
+      "sha256": "6ff5980e9c5e31fe3a5754dbc7a9a5c798d4c7ae5d7bc3fdb0c0417e97ab62c5"
+    },
     "tooling/brand.py": {
       "destination": "scripts/brand.py",
       "sha256": "7c1b9f2253ce695d65748b10ea2b2a0cf9a22c45f0d2d2d45001dc289a603e1d"
     },
     "website/favicon.svg": {
       "destination": "public/favicon.svg",
-      "sha256": "aafbcb555c605b676c896c243bf6fbd75d0493f63ad00902b34d6045e3fb701f"
+      "sha256": "daad9b260fbb7b875d485bbeb43a3c4eec80e3050b35169e2dff0f09f2d66ce1"
     }
   },
   "schema": 1,
-  "sha256": "378506af0aedae53adc2106d19f7463ef4bb390c24103b0dcd3ba678ecd83690",
-  "source_revision": "2bdb12736c58ff074ec9a92b71c72cc8ea52723d",
-  "url": "https://phux.sh/brand/releases/1.1.2/phux-brand.zip",
-  "version": "1.1.2"
+  "sha256": "24bb2b00c7ec6f8f3572e147ea42c9cf5b68998bc70423a827c58d437f63f94c",
+  "source_revision": "81098b48140abb6f8643f5c05661afd08781c418",
+  "url": "https://phux.sh/brand/releases/1.2.0/phux-brand.zip",
+  "version": "1.2.0"
 }

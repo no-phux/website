@@ -19,6 +19,10 @@
     "1.1.2": {
       "sha256": "378506af0aedae53adc2106d19f7463ef4bb390c24103b0dcd3ba678ecd83690",
       "source_revision": "2bdb12736c58ff074ec9a92b71c72cc8ea52723d"
+    },
+    "1.2.0": {
+      "sha256": "24bb2b00c7ec6f8f3572e147ea42c9cf5b68998bc70423a827c58d437f63f94c",
+      "source_revision": "81098b48140abb6f8643f5c05661afd08781c418"
     }
   },
   "schema": 1
