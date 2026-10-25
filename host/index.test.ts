@@ -15,6 +15,19 @@ function assetsOf(body: string, contentType = "text/html") {
 }
 
 describe("markdown negotiation", () => {
+  test("alias redirects precede assets, APIs, and app association handling", async () => {
+    for (const host of ["phux.computer", "www.phux.computer"]) {
+      for (const path of ["/", "/api/beta", "/_astro/site.js", "/.well-known/apple-app-site-association", "/apple-app-site-association"]) {
+        const response = await handler.fetch(
+          new Request(`https://${host}${path}?from=alias`, { headers: { accept: "text/markdown" } }),
+          { ASSETS: { fetch: async () => { throw new Error("alias must not fetch assets"); } } },
+        );
+        expect(response.status).toBe(301);
+        expect(response.headers.get("location")).toBe(`https://phux.sh${path}?from=alias`);
+      }
+    }
+  });
+
   test("Accept: text/markdown gets a markdown response with token count", async () => {
     const request = new Request("https://phux.sh/", {
       headers: { accept: "text/markdown" },

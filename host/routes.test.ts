@@ -60,6 +60,18 @@ describe("path classification", () => {
 });
 
 describe("host routing", () => {
+  test("phux.computer aliases permanently redirect to HTTPS phux.sh with the URL intact", () => {
+    for (const host of ["phux.computer", "www.phux.computer", "PHUX.COMPUTER:8080"]) {
+      for (const path of ["/", "/install", "/overview.md?from=alias&x=a%2Fb", "/_astro/site.js", "/.well-known/apple-app-site-association", "//example.com/path?next=https%3A%2F%2Fexample.com"]) {
+        const url = new URL(`http://${host}${path}`);
+        expect(routeRequest(host, url)).toEqual({
+          kind: "redirect", location: `https://phux.sh${path}`, status: 301,
+        });
+      }
+    }
+    expect(routeRequest("other.phux.computer", new URL("https://other.phux.computer/"))).toEqual({ kind: "asset" });
+  });
+
   test("direct Markdown pages follow the same host split as HTML", () => {
     for (const path of ["/overview.md", "/quickstart.md", "/consumers/getting-started.md", "/wire/l1.md"]) {
       expect(routeRequest(SITE_HOST, urlOn(SITE_HOST, `${path}?from=agent`))).toEqual({

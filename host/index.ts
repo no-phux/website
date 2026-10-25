@@ -45,17 +45,15 @@ export default {
   async fetch(request: Request, env: Env, ctx?: WaitUntil): Promise<Response> {
     const url = new URL(request.url);
 
-    // Apple's association file is answered before any routing, because
-    // Universal Links treat a redirect as no association at all. Anything
-    // that could 3xx this path silently un-pairs every iOS device, which is
-    // precisely the failure this handler exists to prevent (phux-z84.4).
-    const association = handleAssociationRequest(url);
-    if (association) return association;
-
     const routed = routeRequest(url.hostname, url);
     if (routed.kind === "redirect") {
       return Response.redirect(routed.location, routed.status);
     }
+
+    // Canonical hosts never redirect Apple's association path (phux-z84.4).
+    // Alias domains redirect everything; they are not app-associated domains.
+    const association = handleAssociationRequest(url);
+    if (association) return association;
 
     // Bundled scripts/styles are host-neutral and carry no visitor telemetry.
     // Keep host routing above this shortcut; do not bypass it for docs assets.
