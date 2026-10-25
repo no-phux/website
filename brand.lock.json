@@ -51,8 +51,8 @@
     }
   },
   "schema": 1,
-  "sha256": "24bb2b00c7ec6f8f3572e147ea42c9cf5b68998bc70423a827c58d437f63f94c",
-  "source_revision": "81098b48140abb6f8643f5c05661afd08781c418",
-  "url": "https://phux.sh/brand/releases/1.2.0/phux-brand.zip",
-  "version": "1.2.0"
+  "sha256": "c4d7a1ac4f91c90f1fa57ea8fe6d6348653497e3b2ee0d4eefbfce79d1348f0a",
+  "source_revision": "5b044a9e0ac0fa9957d7abdfbeefc17be60a3f82",
+  "url": "https://phux.sh/brand/releases/1.3.1/phux-brand.zip",
+  "version": "1.3.1"
 }
