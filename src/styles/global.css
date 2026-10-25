@@ -442,5 +442,5 @@ a:hover {
 }
 
 /* Canonical Sculptural Fox artwork, shared with the native applications. */
-.brand { display: inline-flex; align-items: center; gap: 0.5rem; }
+.nav .brand, .foot-brand .brand { display: inline-flex; align-items: center; gap: 0.5rem; }
 .brand-fox { width: 32px; height: 32px; flex: none; }

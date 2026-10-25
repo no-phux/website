@@ -80,7 +80,10 @@ async function verifyAgentSurfaces(pages: { url: string }[]) {
   assert.ok((await readFile(resolve(root, "llms.txt"), "utf8")).includes("https://docs.phux.sh/llms-full.txt"), "llms.txt points at llms-full.txt");
   const html = await readFile(resolve(root, "config.html"), "utf8");
   assert.ok(html.includes('<link rel="alternate" type="text/markdown" href="/config.md"'), "page advertises its Markdown");
-  assert.ok(html.includes(`content="https://${DOCS_HOST}/og/config.png"`), "page has its own social card");
+  const card = new URL(html.match(/<meta property="og:image" content="([^"]+)"/)?.[1] ?? "missing");
+  assert.equal(card.origin, `https://${DOCS_HOST}`, "social card uses the docs origin");
+  assert.equal(card.pathname, "/og/config.png", "page has its own social card");
+  assert.ok(card.searchParams.get("v"), "social card has a cache identity");
   assert.ok((await readFile(resolve(root, "og/config.png"))).subarray(1, 4).toString() === "PNG", "social card is a PNG");
 }
 
