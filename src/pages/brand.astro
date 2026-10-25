@@ -1,5 +1,6 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
+import profile from "../../public/brand/profile.json";
 import lock from "../../brand.lock.json";
 import releases from "../../public/brand/index.json";
 
@@ -19,21 +20,21 @@ const history = Object.keys(releases.releases).sort((a, b) =>
     </header>
 
     <section class="previews" aria-label="Brand artwork">
-      <figure><img src={`/favicon.svg?v=${version}`} alt="PHUX Sculptural Fox website mark" width="192" height="192" /><figcaption>Website mark</figcaption></figure>
-      <figure><img src={`/brand/images/desktop.svg?v=${version}`} alt="PHUX Sculptural Fox desktop icon" width="192" height="192" /><figcaption>Desktop icon</figcaption></figure>
-      <figure><img src={`/brand/images/mobile.png?v=${version}`} alt="PHUX Sculptural Fox mobile icon" width="192" height="192" /><figcaption>Mobile icon</figcaption></figure>
+      <figure><img src={`/favicon.svg?v=${version}`} alt={`PHUX ${profile.name} website mark`} width="192" height="192" /><figcaption>Website mark</figcaption></figure>
+      <figure><img src={`/brand/images/desktop.svg?v=${version}`} alt={`PHUX ${profile.name} desktop icon`} width="192" height="192" /><figcaption>Desktop icon</figcaption></figure>
+      <figure><img src={`/brand/images/mobile.png?v=${version}`} alt={`PHUX ${profile.name} mobile icon`} width="192" height="192" /><figcaption>Mobile icon</figcaption></figure>
       <figure class="wordmark"><img src={`/brand/images/wordmark.svg?v=${version}`} alt="PHUX documentation wordmark" width="480" height="130" /><figcaption>Documentation wordmark</figcaption></figure>
     </section>
 
-    <section class="previews" aria-label="Standalone fox variants">
-      <figure><img src={`/brand/images/fox.svg?v=${version}`} alt="Sculptural Fox in titanium" width="192" height="192" /><figcaption>Titanium</figcaption></figure>
-      <figure class="dark-surface"><img src={`/brand/images/fox-light.svg?v=${version}`} alt="Light monochrome fox" width="192" height="192" /><figcaption>On graphite</figcaption></figure>
-      <figure class="light-surface"><img src={`/brand/images/fox-dark.svg?v=${version}`} alt="Dark monochrome fox" width="192" height="192" /><figcaption>On warm stone</figcaption></figure>
+    <section class="previews" aria-label="Standalone mark variants">
+      <figure><img src={`/brand/images/mark.svg?v=${version}`} alt={`PHUX ${profile.name}`} width="192" height="192" /><figcaption>{profile.name}</figcaption></figure>
+      <figure class="dark-surface"><img src={`/brand/images/mark-light.svg?v=${version}`} alt={`Light ${profile.name} mark`} width="192" height="192" /><figcaption>On graphite</figcaption></figure>
+      <figure class="light-surface"><img src={`/brand/images/mark-dark.svg?v=${version}`} alt={`Dark ${profile.name} mark`} width="192" height="192" /><figcaption>On warm stone</figcaption></figure>
     </section>
 
     <section aria-labelledby="download-title">
       <h2 id="download-title">Download the kit</h2>
-      <p>Sculptural Fox is the shared PHUX identity: folded titanium, graphite, and warm stone. The kit includes true vector marks, light and dark variants, desktop and mobile icons, the wordmark, usage guidance, and a file manifest.</p>
+      <p>The current shared PHUX profile is {profile.name}. The kit includes true vector marks, light and dark variants, desktop and mobile icons, the wordmark, usage guidance, and a file manifest.</p>
       <p><a class="download" href={`${base}/phux-brand.zip`} download>Download PHUX brand {version}</a></p>
       <p><a href={`${base}/manifest.json`}>File manifest</a> · <a href={`${base}/SHA256SUMS`}>Archive checksum</a></p>
       <details>

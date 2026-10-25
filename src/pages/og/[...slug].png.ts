@@ -54,7 +54,7 @@ export const GET: APIRoute = async ({ props }) => {
   <path d="M${PAD} ${H - PAD - 34}H${W - PAD}" stroke="#1b1c19" stroke-opacity="0.12" stroke-width="2"/>
   <text x="${PAD}" y="${H - PAD + 6}" font-family="${MONO}" font-size="24" fill="#6b6c66">${xml(`${SITE.docsDomain}/${page.id}`)}</text>
 </svg>`;
-  const fox = await sharp(resolve("public/brand/images/fox-dark.svg")).resize(52, 52).png().toBuffer();
+  const fox = await sharp(resolve("public/brand/images/mark-dark.svg")).resize(52, 52).png().toBuffer();
   const image = await sharp(Buffer.from(svg)).composite([{ input: fox, left: PAD, top: PAD - 16 }]).png().toBuffer();
   return new Response(new Uint8Array(image), { headers: { "content-type": "image/png" } });
 };
