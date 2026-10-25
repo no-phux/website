@@ -1,0 +1,159 @@
+{
+  "files": {
+    "LICENSES/Apache-2.0.txt": {
+      "bytes": 11379,
+      "id": "apache-license",
+      "rights": "Apache-2.0 license text",
+      "sha256": "5ba6bc69e37a252179e1be4f63d1b03c5600f930f6099462260f2700d090550d"
+    },
+    "USAGE.md": {
+      "bytes": 1791,
+      "sha256": "a95f35e190c8c7b14ea9a3467059a16ec72dd426959632d6fa5e325c3978d9d0"
+    },
+    "android/drawable/ic_launcher_foreground.xml": {
+      "bytes": 1308,
+      "id": "android-ic_launcher_foreground",
+      "rights": "PHUX project artwork; brand usage guidelines apply",
+      "sha256": "b2629b7f4840bec84d2648bb635596656f0995137699f41e8dce7ea4ad853122"
+    },
+    "android/drawable/ic_launcher_monochrome.xml": {
+      "bytes": 1308,
+      "id": "android-ic_launcher_monochrome",
+      "rights": "PHUX project artwork; brand usage guidelines apply",
+      "sha256": "b2629b7f4840bec84d2648bb635596656f0995137699f41e8dce7ea4ad853122"
+    },
+    "android/mipmap-anydpi-v26/ic_launcher.xml": {
+      "bytes": 712,
+      "id": "android-ic_launcher-adaptive",
+      "rights": "PHUX project artwork; brand usage guidelines apply",
+      "sha256": "85b982d5a04dfec48fa33790728122542a8909ea78e317c6fba42fcc522ec88d"
+    },
+    "android/mipmap-hdpi/ic_launcher.png": {
+      "bytes": 2717,
+      "id": "android-mipmap-hdpi",
+      "rights": "PHUX project artwork; brand usage guidelines apply",
+      "sha256": "08c44aeb1a63a59c42a9271f8dffaa22800ef9c189edb0a628e1e6a35f5f93e1"
+    },
+    "android/mipmap-mdpi/ic_launcher.png": {
+      "bytes": 1517,
+      "id": "android-mipmap-mdpi",
+      "rights": "PHUX project artwork; brand usage guidelines apply",
+      "sha256": "eec9c8988b087ca6daa71d4d1d2171aa1249752ffebef9fd51840b6817be0e70"
+    },
+    "android/mipmap-xhdpi/ic_launcher.png": {
+      "bytes": 4007,
+      "id": "android-mipmap-xhdpi",
+      "rights": "PHUX project artwork; brand usage guidelines apply",
+      "sha256": "bfa5ba53e9dd008d9a83229fae6e05d9552af5cfe3ef254f5b9e72b641bc3780"
+    },
+    "android/mipmap-xxhdpi/ic_launcher.png": {
+      "bytes": 7027,
+      "id": "android-mipmap-xxhdpi",
+      "rights": "PHUX project artwork; brand usage guidelines apply",
+      "sha256": "32d821528d813f49dca6daa8695ed84f38739171407f0ae09ee3a30b1a795d10"
+    },
+    "android/mipmap-xxxhdpi/ic_launcher.png": {
+      "bytes": 10186,
+      "id": "android-mipmap-xxxhdpi",
+      "rights": "PHUX project artwork; brand usage guidelines apply",
+      "sha256": "9af85c734c7b28a23d0f651c4fff3cac90cb037455b3d506f191f103199fc42a"
+    },
+    "android/values/brand_colors.xml": {
+      "bytes": 155,
+      "id": "android-brand-colors",
+      "rights": "PHUX project artwork; brand usage guidelines apply",
+      "sha256": "89bcca16646953238358f46fab21eec7853f246992a8880366717bd5d941c95f"
+    },
+    "desktop/AppIcon.svg": {
+      "bytes": 2334,
+      "id": "desktop-icon",
+      "rights": "PHUX project artwork; brand usage guidelines apply",
+      "sha256": "2e5cc4fb1a9205913dd57f87cfc7e54f2341bed039336b4b89b3754cd8cce116"
+    },
+    "ios/BrandGeometry.swift": {
+      "bytes": 4233,
+      "id": "mobile-runtime-geometry",
+      "rights": "PHUX project artwork; brand usage guidelines apply",
+      "sha256": "193d11119164c8b3f337472199704c67c2c3eadd3ea05af3912aa004018face8"
+    },
+    "ios/Contents.json": {
+      "bytes": 705,
+      "id": "ios-Contents",
+      "rights": "PHUX project artwork; brand usage guidelines apply",
+      "sha256": "f92ae268595dec56f1eec4451098bcf8f0cdd3d9ed67a52400897375085c602c"
+    },
+    "ios/icon-1024-dark.png": {
+      "bytes": 60796,
+      "id": "ios-icon-1024-dark",
+      "rights": "PHUX project artwork; brand usage guidelines apply",
+      "sha256": "c4701f2a8590f4cc347e420560fc14f4a6247cb928b1cd3840bee0cd02018991"
+    },
+    "ios/icon-1024-tinted.png": {
+      "bytes": 23185,
+      "id": "ios-icon-1024-tinted",
+      "rights": "PHUX project artwork; brand usage guidelines apply",
+      "sha256": "22cd3b35298b1e90805934b43a3056a0ad20c879d4a81bf48396c1bfd8c74a93"
+    },
+    "ios/icon-1024.png": {
+      "bytes": 76929,
+      "id": "ios-icon-1024",
+      "rights": "PHUX project artwork; brand usage guidelines apply",
+      "sha256": "54422e93a424b2ae13b2ff1b01456614baf74b550533881641928ef5da6e5f79"
+    },
+    "logos/docs-wordmark.png": {
+      "bytes": 24810,
+      "id": "docs-wordmark-raster",
+      "rights": "PHUX project artwork; brand usage guidelines apply",
+      "sha256": "3eaca2dd2a05474c7afda4131eda676dc6fcfb940186498aa24a8c77a775fdd0"
+    },
+    "logos/docs-wordmark.svg": {
+      "bytes": 2795,
+      "id": "docs-wordmark",
+      "rights": "PHUX project artwork; brand usage guidelines apply",
+      "sha256": "cff08321d62a2b717d09e446041cfef97fecde45ef6d58cfef55ab539095736c"
+    },
+    "logos/fox-dark.svg": {
+      "bytes": 2251,
+      "id": "fox-dark",
+      "rights": "PHUX project artwork; brand usage guidelines apply",
+      "sha256": "fba367465137501de3a394451708801d6d7596179f81e1ab767f59acb9eafa94"
+    },
+    "logos/fox-light.svg": {
+      "bytes": 2251,
+      "id": "fox-light",
+      "rights": "PHUX project artwork; brand usage guidelines apply",
+      "sha256": "653e07e829714f4b35c644e50d8ad871c1d709c68e5df003e98c0623db09f3e6"
+    },
+    "logos/fox.svg": {
+      "bytes": 2276,
+      "id": "fox-metal",
+      "rights": "PHUX project artwork; brand usage guidelines apply",
+      "sha256": "54a9ca6373d1d215854868c13744043b343f9d2232886fb111b79ae34e4f4458"
+    },
+    "preview.html": {
+      "bytes": 2625,
+      "sha256": "396360411a52ec7926c8c8201fdaa01fb02a7ee37638854ae51dea275f5f128f"
+    },
+    "tokens/mobile-mark.json": {
+      "bytes": 793,
+      "id": "mobile-mark-spec",
+      "rights": "PHUX project artwork; brand usage guidelines apply",
+      "sha256": "4a76b3c3ffcb9b5a3c50cddd6722b447db53647140fd64a82bcb383ffde7db44"
+    },
+    "tooling/brand.py": {
+      "bytes": 9131,
+      "id": "consumer-installer",
+      "rights": "PHUX brand tooling; Apache-2.0",
+      "sha256": "7c1b9f2253ce695d65748b10ea2b2a0cf9a22c45f0d2d2d45001dc289a603e1d"
+    },
+    "website/favicon.svg": {
+      "bytes": 2305,
+      "id": "website-fox",
+      "rights": "PHUX project artwork; brand usage guidelines apply",
+      "sha256": "aafbcb555c605b676c896c243bf6fbd75d0493f63ad00902b34d6045e3fb701f"
+    }
+  },
+  "schema": 1,
+  "source_revision": "b5272cbe8305a0f1dff5440b6b97a8acbc6eaee0",
+  "version": "1.1.0"
+}

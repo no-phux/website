@@ -1,6 +1,6 @@
 <section class="workspace-section" id="live-workspace" aria-labelledby="workspace-title">
   <div class="workspace-heading">
-    <div><h2 id="workspace-title">Your workspace. In the browser.</h2><p>A disposable live demo. Type, split, explore.</p></div>
+    <div><h2 id="workspace-title">Try it. Make it yours.</h2><p>A disposable workspace in your browser. Type, split, explore.</p></div>
     <a href="/embed">Open full shell <span aria-hidden="true">↗</span></a>
   </div>
   <div id="home-light" class="workspace-frame" aria-label="PHUX live workspace">
@@ -65,20 +65,21 @@
   }
 </script>
 <style>
-  .workspace-section { padding-top: 76px; scroll-margin-top: 20px; }
-  .workspace-heading { width: min(calc(100% - 48px), 1072px); margin: 0 auto 20px; display: flex; align-items: end; justify-content: space-between; gap: 24px; }
-  h2 { margin: 0; color: #e0eaf0; font-size: clamp(24px, 3vw, 32px); font-weight: 500; letter-spacing: -.035em; line-height: 1.2; }
-  .workspace-heading p:not(.section-kicker) { max-width: 52ch; margin: 12px 0 0; color: #a0b1bc; font-size: 14px; line-height: 1.65; }
+  .workspace-section { width: min(calc(100% - 80px), 1160px); margin-inline: auto; padding-top: 100px; scroll-margin-top: 32px; }
+  .workspace-heading { margin: 0 auto 28px; display: flex; align-items: end; justify-content: space-between; gap: 24px; }
+  h2 { margin: 0; color: #e7e2da; font-size: clamp(30px, 3.5vw, 44px); font-weight: 500; letter-spacing: -.045em; line-height: 1.15; }
+  .workspace-heading p { max-width: 52ch; margin: 12px 0 0; color: #9ca79f; font-size: 14px; line-height: 1.65; }
   .workspace-heading > a { display: inline-flex; align-items: center; gap: 16px; flex: none; min-height: 44px; color: #d2e3ec; font-size: 13px; }
   .workspace-heading > a:hover { text-decoration: underline; }
-  .workspace-frame { position: relative; height: 620px; background: radial-gradient(ellipse at 25% 45%, #5a9bb013, transparent 65%), radial-gradient(ellipse at 80% 70%, #8471b51a, transparent 60%), #0a0a0a; overflow: hidden; contain: layout paint; }
+  .workspace-frame { position: relative; height: 620px; border-radius: 16px; background: #0a0c0d; overflow: hidden; contain: layout paint; box-shadow: 0 0 0 1px #c8d0c025, 0 24px 80px #0003; }
   .workspace-frame :global(iframe) { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
   .workspace-placeholder { height: 100%; display: grid; align-content: center; justify-items: center; gap: 12px; padding: 24px; text-align: center; color: #9cafbd; font-size: 13px; }
   .workspace-placeholder > span { font-size: 32px; color: #c2d9e5; }
   .workspace-placeholder p { margin: 0; }
   .workspace-placeholder a { min-height: 44px; display: inline-flex; align-items: center; text-decoration: underline; text-underline-offset: 4px; color: #c2d9e5; }
   .workspace-frame[data-connected] .workspace-placeholder { visibility: hidden; }
-  .workspace-note { max-width: 1072px; margin: 16px auto 0; padding-inline: 24px; color: #9aaab5; font-size: 12px; text-align: center; }
+  .workspace-note { margin: 14px auto 0; color: #8a978d; font-size: 11px; text-align: center; }
   .workspace-note a { text-decoration: underline; text-underline-offset: 3px; }
-  @media (max-width: 600px) { .workspace-section { padding-top: 54px; } .workspace-heading { width: calc(100% - 40px); flex-direction: column; align-items: start; gap: 8px; } .workspace-heading p:not(.section-kicker) { font-size: 13px; } }
+  @media (max-width: 900px) { .workspace-section { width: calc(100% - 56px); } }
+  @media (max-width: 650px) { .workspace-section { width: calc(100% - 40px); padding-top: 64px; } .workspace-heading { flex-direction: column; align-items: start; gap: 8px; margin-bottom: 18px; } .workspace-heading p { font-size: 13px; } .workspace-frame { border-radius: 10px; } }
 </style>

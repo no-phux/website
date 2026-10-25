@@ -4,6 +4,7 @@ import assert from "node:assert/strict";
 import { mkdir } from "node:fs/promises";
 import { extname, resolve } from "node:path";
 import { chromium } from "playwright-core";
+import { verifyStaticHome } from "./home-static-checks";
 import { verifyClientComparison, verifyHomeAuthReturn, verifyHostedShell, verifyTouchComparison, verifyWorkspaceInstallCopy, verifyWorkspaceResize } from "./home-interaction-checks";
 
 const root = resolve(import.meta.dir, "../dist");
@@ -49,31 +50,35 @@ try {
     });
   });
   await page.goto(`${base}/`);
-  assert.equal((await page.getByRole("heading", { level: 1 }).innerText()).trim(), "Your agents.\nYour command center.");
+  assert.equal((await page.getByRole("heading", { level: 1 }).innerText()).trim(), "Run the\nwhole show.");
   assert.equal(await page.locator("#home-light iframe").count(), 0, "no live app exists before scrolling");
   assert.ok(await page.locator(".client-comparison").isVisible(), "real product screenshots lead the page");
   assert.equal(await page.locator(".download-primary").getAttribute("href"), "/download/desktop", "the primary action downloads the actual desktop release");
   await page.waitForTimeout(350);
   assert.ok(!requests.some(url => /(?:HeroDemo|PhuxTerminal|VgpuPrototype)[^/]*\.js|\.wasm|\/auth\/session|\/healthz|phux-architecture\.mp4/.test(url)), "first fold does not download React demos, GPU, WASM, film or allocate sessions");
   await verifyClientComparison(page, artifacts);
+  await page.evaluate(() => window.scrollTo(0, 0));
   await page.screenshot({ path: `${artifacts}/home-desktop.png` });
+  await page.screenshot({ path: `${artifacts}/home-full.png`, fullPage: true });
   assert.equal(await page.locator("#how-it-works").count(), 0, "no homepage explainer");
   assert.equal(await page.locator(".hero-headline, .live-invitation, .features").count(), 0, "the landing carries no slogan block");
   await page.locator(".install-options > summary").click();
   await page.waitForFunction(() => parseFloat(document.querySelector<HTMLElement>(".install-tabs")!.style.getPropertyValue("--pill-width")) > 0);
   const installBox = await page.locator("#install").boundingBox();
-  const tourBox = await page.locator(".tour").boundingBox();
-  assert.ok(installBox && tourBox && installBox.y < tourBox.y, "the install sits above the tour");
+  const comparisonBox = await page.locator(".client-comparison").boundingBox();
+  assert.ok(installBox && comparisonBox && installBox.y < comparisonBox.y, "install controls lead into the real product");
+  assert.equal(await page.locator(".tour").isVisible(), false, "the optional walkthrough stays closed initially");
   assert.equal(await page.locator("#install .install-request").isHidden(), true, "the hero opens on a command, not the request form");
   assert.equal(await page.locator(".beta, #testflight").count(), 0, "the landing carries no separate TestFlight band");
   assert.equal(await page.locator(".tour").count(), 1, "one product tour");
   assert.equal(await page.locator("body > header").count(), 1, "the landing carries one top bar");
   assert.deepEqual(
-    await page.locator("body > header nav[aria-label='Primary navigation']").getByRole("link").allInnerTexts(),
-    ["phux", "Docs", "Try", "GitHub\nSource ↗"],
+    await page.locator("body > header nav[aria-label='Primary navigation']").getByRole("link").evaluateAll(links => links.map(link => link.getAttribute("aria-label") ?? (link as HTMLElement).innerText)),
+    ["phux", "Docs", "GitHub — phux source code"],
     "the top bar carries a recognizable GitHub source badge",
   );
   assert.equal(await page.locator(".tour-distant-host").count(), 3, "restrained background hosts");
+  await page.locator("#connection-details > summary").click();
   const entry = page.getByRole("link", { name: "Open demo", exact: true });
   await page.locator(".tour").scrollIntoViewIfNeeded();
   await page.locator("astro-island:not([ssr]) .tour-entry").waitFor();
@@ -163,11 +168,14 @@ try {
   assert.ok(await request.getByRole("button", { name: "iPhone instead" }).isVisible(), "the switch offers the way back");
   for (const width of [320, 390, 768, 1280]) {
     await page.setViewportSize({ width, height: width < 600 ? 740 : 900 });
+    await page.locator(".install-options").evaluate((node: HTMLDetailsElement) => { node.open = false; });
     await page.evaluate(() => window.scrollTo(0, 0));
     const preview = (await page.locator(".client-comparison").boundingBox())!;
-    assert.ok(preview.y < 340 && preview.y + preview.height < (width < 600 ? 540 : 850), `the entire comparison is in the first screen at ${width}px`);
+    assert.ok(preview.y < (width < 600 ? 620 : 650), `the real product begins within the first screen at ${width}px`);
     const downloadBox = (await page.locator(".download-primary").boundingBox())!;
-    assert.ok(downloadBox.y + downloadBox.height < (width < 600 ? 650 : 900), "the primary download follows the reveal within the first screen");
+    assert.ok(downloadBox.y + downloadBox.height < preview.y, "the primary download is visible before the reveal");
+    assert.ok(downloadBox.y + downloadBox.height < (width < 600 ? 500 : 600), "install is reachable without scrolling");
+    await page.locator(".install-options > summary").click();
     for (const name of ["desktop", "cli"]) {
       await target(name).click();
       assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `no overflow with ${name} at ${width}px`);
@@ -175,6 +183,8 @@ try {
     assert.ok(await page.locator("#install code").evaluate((code) => code.scrollWidth <= code.clientWidth), `full install command readable at ${width}px`);
     assert.equal(await page.locator("#beta-note").innerText(), "", "changing install targets clears unrelated signup/copy feedback");
     await page.locator("#install-command").evaluate(node => Promise.all(node.getAnimations().map(animation => animation.finished)));
+    await page.locator(".install-options > summary").click();
+    await page.evaluate(() => window.scrollTo(0, 0));
     await page.screenshot({ path: `${artifacts}/home-${width}.png` });
   }
   await page.getByRole("link", { name: "Open demo", exact: true }).click();
@@ -227,30 +237,8 @@ try {
   await verifyHomeAuthReturn(page, base);
   assert.deepEqual(errors, [], "no browser exceptions");
   await context.close();
-  const stillContext = await browser.newContext({ reducedMotion: "reduce" });
-  const stillPage = await stillContext.newPage();
-  await stillPage.goto(`${base}/?hero=classic`);
-  await stillPage.locator(".tour").scrollIntoViewIfNeeded();
-  await stillPage.locator("astro-island:not([ssr]) .tour").waitFor();
-  assert.equal(await stillPage.locator(".tour-play").count(), 0, "reduced motion does not autoplay");
-  assert.equal(await stillPage.locator(".tour").getAttribute("data-playing"), "false");
-  assert.ok(await stillPage.locator(".tour-summary").textContent(), "the illustration has a readable explanation");
-  assert.match(await stillPage.locator(".tour-terminal").innerText(), /Finished/, "reduced motion shows the settled chapter");
-  await stillContext.close();
-  const staticContext = await browser.newContext({ javaScriptEnabled: false });
-  const staticPage = await staticContext.newPage();
-  await staticPage.goto(base);
-  assert.equal((await staticPage.getByRole("heading", { level: 1 }).innerText()).trim(), "Your agents.\nYour command center.");
-  await staticPage.locator(".install-options > summary").click();
-  assert.ok(await staticPage.locator("#install code").isVisible());
-  assert.equal(await staticPage.getByRole("slider").count(), 0, "no-JS does not offer an inert slider");
-  assert.ok(await staticPage.locator(".client-tui").isVisible() && await staticPage.locator(".client-gui").isVisible(), "no-JS shows both static client previews");
-  assert.equal(await staticPage.locator("iframe").count(), 0, "no-JS never downloads the live app");
-  assert.equal(await staticPage.getByRole("link", { name: "Open demo", exact: true }).getAttribute("href"), "/embed");
-  assert.match(await staticPage.locator(".tour-terminal").innerText(), /Finished/, "no-JS tour shows a settled scene");
-  assert.equal(await staticPage.locator(".tour-lines > span").first().evaluate((node) => getComputedStyle(node).opacity), "1", "static output stays fully readable");
-  await staticContext.close();
-  console.log(`PASS home: real workspace captures, pointer/touch/keyboard reveal and enlargement, first-fold download, lazy workspace lifecycle, install/copy/beta, tour chapters/pause/focus, glass shell auth/failure recovery, mobile/tablet/desktop, reduced motion, no-JS, idle resource budget. Screenshots: ${artifacts}`);
+  await verifyStaticHome(browser, base);
+  console.log(`PASS home: real workspace captures, pointer/touch/keyboard reveal and enlargement, first-fold install, optional walkthrough, lazy workspace lifecycle, install/copy/beta, tour chapters/pause/focus, glass shell auth/failure recovery, mobile/tablet/desktop, reduced motion, no-JS, idle resource budget. Screenshots: ${artifacts}`);
 } finally {
   await browser.close();
   server.stop(true);

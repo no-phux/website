@@ -19,16 +19,16 @@ const history = Object.keys(releases.releases).sort((a, b) =>
     </header>
 
     <section class="previews" aria-label="Brand artwork">
-      <figure><img src="/favicon.svg" alt="PHUX Sculptural Fox mark" width="192" height="192" /><figcaption>Website mark</figcaption></figure>
-      <figure><img src="/brand/images/desktop.svg" alt="PHUX Sculptural Fox desktop icon" width="192" height="192" /><figcaption>Desktop icon</figcaption></figure>
-      <figure><img src="/brand/images/mobile.png" alt="PHUX Sculptural Fox mobile icon" width="192" height="192" /><figcaption>Mobile icon</figcaption></figure>
-      <figure class="wordmark"><img src="/brand/images/wordmark.svg" alt="PHUX documentation wordmark" width="480" height="130" /><figcaption>Documentation wordmark</figcaption></figure>
+      <figure><img src={`/favicon.svg?v=${version}`} alt="PHUX Sculptural Fox website mark" width="192" height="192" /><figcaption>Website mark</figcaption></figure>
+      <figure><img src={`/brand/images/desktop.svg?v=${version}`} alt="PHUX Sculptural Fox desktop icon" width="192" height="192" /><figcaption>Desktop icon</figcaption></figure>
+      <figure><img src={`/brand/images/mobile.png?v=${version}`} alt="PHUX Sculptural Fox mobile icon" width="192" height="192" /><figcaption>Mobile icon</figcaption></figure>
+      <figure class="wordmark"><img src={`/brand/images/wordmark.svg?v=${version}`} alt="PHUX documentation wordmark" width="480" height="130" /><figcaption>Documentation wordmark</figcaption></figure>
     </section>
 
     <section class="previews" aria-label="Standalone fox variants">
-      <figure><img src="/brand/images/fox.svg" alt="Sculptural Fox in titanium" width="192" height="192" /><figcaption>Titanium</figcaption></figure>
-      <figure class="dark-surface"><img src="/brand/images/fox-light.svg" alt="Light monochrome fox" width="192" height="192" /><figcaption>On graphite</figcaption></figure>
-      <figure class="light-surface"><img src="/brand/images/fox-dark.svg" alt="Dark monochrome fox" width="192" height="192" /><figcaption>On warm stone</figcaption></figure>
+      <figure><img src={`/brand/images/fox.svg?v=${version}`} alt="Sculptural Fox in titanium" width="192" height="192" /><figcaption>Titanium</figcaption></figure>
+      <figure class="dark-surface"><img src={`/brand/images/fox-light.svg?v=${version}`} alt="Light monochrome fox" width="192" height="192" /><figcaption>On graphite</figcaption></figure>
+      <figure class="light-surface"><img src={`/brand/images/fox-dark.svg?v=${version}`} alt="Dark monochrome fox" width="192" height="192" /><figcaption>On warm stone</figcaption></figure>
     </section>
 
     <section aria-labelledby="download-title">

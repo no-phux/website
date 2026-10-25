@@ -61,22 +61,22 @@ const clients = [
   dialog.addEventListener("click", event => { if (event.target === dialog) dialog.close(); });
 </script>
 <style>
-  .client-comparison { width: min(100%, 900px); margin: 24px auto 20px; text-align: left; }
-  .comparison-stage { position: relative; aspect-ratio: 3088 / 1740; overflow: hidden; isolation: isolate; border: 1px solid #c2d6e32a; border-radius: 12px; background: #080d10; box-shadow: 0 20px 64px #0004; }
+  .client-comparison { width: 100%; margin: 0; text-align: left; }
+  .comparison-stage { position: relative; aspect-ratio: 3088 / 1740; overflow: hidden; isolation: isolate; border: 1px solid #c8d0c038; border-radius: 16px; background: #080d10; box-shadow: 0 1px #f4efe616 inset, 0 24px 100px #0005; }
   .client-layer { position: absolute; inset: 0; display: block; cursor: zoom-in; }
   .client-layer img { display: block; width: 100%; height: 100%; object-fit: contain; }
   .client-gui { clip-path: inset(0 0 0 calc(100% - var(--reveal))); }
-  .comparison-divider { position: absolute; inset: 0 auto 0 calc(100% - var(--reveal)); width: 1px; background: #d3e9f3; z-index: 2; pointer-events: none; }
-  .comparison-divider > span { position: absolute; left: 0; top: 50%; display: grid; place-items: center; transform: translate(-50%, -50%); width: 40px; height: 40px; border: 1px solid #e0f0f7aa; border-radius: 50%; background: #d3e9f3; box-shadow: 0 3px 24px #0005; color: #172631; font: 600 15px var(--font-reading); }
+  .comparison-divider { position: absolute; inset: 0 auto 0 calc(100% - var(--reveal)); width: 1px; background: #e7e2da; z-index: 2; pointer-events: none; }
+  .comparison-divider > span { position: absolute; left: 0; top: 50%; display: grid; place-items: center; transform: translate(-50%, -50%); width: 40px; height: 40px; border: 1px solid #f4efe6aa; border-radius: 50%; background: #e7e2da; box-shadow: 0 3px 24px #0007; color: #171a1e; font: 600 15px var(--font-reading); }
   .comparison-range { appearance: none; -webkit-appearance: none; position: absolute; z-index: 3; inset: calc(50% - 22px) -22px auto; width: calc(100% + 44px); height: 44px; margin: 0; background: transparent; cursor: ew-resize; direction: rtl; touch-action: pan-y; }
   .comparison-range::-webkit-slider-thumb { appearance: none; width: 44px; height: 44px; background: transparent; }
   .comparison-range::-moz-range-thumb { width: 44px; height: 44px; background: transparent; border: 0; }
   .comparison-range:focus-visible { outline: none; }
-  .comparison-stage:has(.comparison-range:focus-visible) .comparison-divider > span { outline: 2px solid #d3e9f3; outline-offset: 4px; }
+  .comparison-stage:has(.comparison-range:focus-visible) .comparison-divider > span { outline: 2px solid #e7e2da; outline-offset: 4px; }
   figcaption { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-top: 4px; }
-  figcaption button { min-height: 44px; padding: 0 4px; border: 0; background: none; color: #aebbc2; font: 12px var(--font-reading); cursor: pointer; }
+  figcaption button { min-height: 44px; padding: 0 4px; border: 0; background: none; color: #a3afa5; font: 12px var(--font-reading); cursor: pointer; }
   figcaption button[aria-pressed=true] { color: #ededee; text-decoration: underline; text-underline-offset: 4px; }
-  .comparison-hint { color: #aebbc2; font-size: 11px; }
+  .comparison-hint { color: #8a978d; font-size: 11px; }
   .product-image { width: min(1600px, calc(100vw - 32px)); max-width: none; max-height: calc(100dvh - 32px); padding: 44px 12px 12px; border: 1px solid #c2d6e32a; border-radius: 14px; background: #101517; color: #eee; }
   .product-image::backdrop { background: #000d; }
   .product-image img { display: block; max-width: 100%; max-height: calc(100dvh - 104px); margin: auto; object-fit: contain; }

@@ -2,6 +2,7 @@
 // Shared <head> contents — BaseLayout and DocsLayout both render this so
 // canonical/OG/Twitter behavior can't drift between the landing and the docs.
 import { SITE } from "../lib/site";
+import brand from "../../brand.lock.json";
 
 interface Props {
   title: string;
@@ -23,7 +24,7 @@ const path =
   "/";
 const canonical = new URL(path, origin).href;
 const previewIdentity = encodeURIComponent(
-  `${SITE.name}|${SITE.category}|${SITE.tagline}|${SITE.previewArtwork}`,
+  `${SITE.name}|${SITE.category}|${SITE.tagline}|${SITE.previewArtwork}|${brand.version}`,
 );
 const ogUrl = new URL(image ?? "/og.png", image ? origin : SITE.url);
 ogUrl.searchParams.set("v", previewIdentity);
@@ -57,5 +58,5 @@ const ogAlt = image ? title : `${SITE.name}: ${SITE.tagline}`;
     <meta name="theme-color" content="#121311" media="(prefers-color-scheme: dark)" />
   </>
 ) : <meta name="theme-color" content="#07080b" />}
-<link rel="icon" href={`/favicon.svg?v=${SITE.previewArtwork}`} type="image/svg+xml" />
+<link rel="icon" href={`/favicon.svg?v=${brand.version}`} type="image/svg+xml" />
 <link rel="sitemap" href="/sitemap-index.xml" />
