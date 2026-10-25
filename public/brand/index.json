@@ -7,6 +7,10 @@
     "1.0.1": {
       "sha256": "d1982daff3c2d2599423937747f680fc099a54e4125e97fb12a21b24a3b9038d",
       "source_revision": "903389081bf5849b17acc53b59c7b3c100964bbe"
+    },
+    "1.1.1": {
+      "sha256": "b85a088ad0f000d8c2f0b383ad8608095f451b1bf73a97eacf3fc205abbb7097",
+      "source_revision": "ccff7cfa804acec3152f3b8d6afac3a3269aad96"
     }
   },
   "schema": 1

@@ -35,7 +35,7 @@ const navigation = minimal ? [
     <a class="skip" href="#main">Skip to content</a>
     <header class="site-frame">
       <nav class="nav" aria-label="Primary navigation">
-        <a class="brand" href="/">{SITE.name}</a>
+        <a class="brand" href="/"><img class="brand-fox" src="/favicon.svg" alt="" width="32" height="32" />{SITE.name}</a>
         <div class="links">
           {
             navigation.map((item) => (
@@ -78,7 +78,7 @@ const navigation = minimal ? [
         </div>
       ) : <><div class="foot">
         <div class="foot-brand">
-          <a class="brand" href="/">{SITE.name}</a>
+          <a class="brand" href="/"><img class="brand-fox" src="/favicon.svg" alt="" width="32" height="32" />{SITE.name}</a>
           <p>{SITE.category}</p>
         </div>
         <nav class="foot-col" aria-label="Product">
