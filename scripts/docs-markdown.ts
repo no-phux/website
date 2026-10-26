@@ -59,6 +59,43 @@ function presentBody(body: string): string {
   return stripSourceLead(body);
 }
 
+const WINDOWS_TRUTH =
+  "On Windows today, the CLI and TUI run under WSL 2. The native desktop build is not published yet.";
+
+/**
+ * Some product docs offer a Windows desktop download. The native client
+ * exists and is unpublished, so the site states that limit instead.
+ */
+function correctUnpublishedWindowsDesktop(body: string, repoPath: string): string {
+  if (repoPath === "docs/install.md") {
+    return body
+      .replace(
+        "Windows uses these Linux CLI/server builds through [WSL](#windows-wsl),\nincluding from PowerShell. The [Windows desktop](../clients/desktop/README.md#windows)\nis native, with its coordinator in WSL. There is no native Windows coordinator\nor Intel Mac build.",
+        `${WINDOWS_TRUTH} See [Windows (WSL)](#windows-wsl). There is no Intel Mac build.`,
+      )
+      .replace(
+        "The terminal UI runs in WSL; the native Windows desktop\nconnects to the same coordinator.",
+        "The terminal UI runs in WSL.",
+      )
+      .replace(
+        " Neither step removes your distribution. For a native window,\nsee [Windows Desktop](../clients/desktop/README.md#windows); WSLg is not required.",
+        " Neither step removes your distribution.",
+      );
+  }
+  if (repoPath === "docs/clients.md") {
+    return body
+      .replace(
+        "Phux Desktop is a native app for macOS 26 or later on Apple silicon,\nLinux on x86_64 or arm64 with Vulkan, and Windows x64 with a WSL 2 server.",
+        `Phux Desktop is a native app for macOS 26 or later on Apple silicon and Linux on x86_64 or arm64 with Vulkan. ${WINDOWS_TRUTH}`,
+      )
+      .replace(
+        "\nThe [Windows app](../clients/desktop/README.md#windows) uses native Direct3D\nrendering, input and clipboard; shells and agents stay in WSL. Its desktop\nupdates use the Windows installer. WSLg is not required. The local Changes\npanel and external Unix developer socket are not available on Windows.\n",
+        "\n",
+      );
+  }
+  return body;
+}
+
 export function yamlString(s: string): string {
   // Always quote; escape backslashes and double-quotes for YAML double-quoted.
   return `"${s.replace(/\\/g, "\\\\").replace(/"/g, '\\"')}"`;
@@ -173,6 +210,7 @@ export function createPageRenderer(entries: Entry[], revision: string, versions:
   const rewriteLinks = createLinkRewriter(entries, revision);
   return function renderSourcePage(raw: string, entry: Entry): string {
     const { body, title, summary, stability } = pageMetadata(raw, entry);
+    const published = correctUnpublishedWindowsDesktop(body, entry.repoPath);
     const fm = [
       "---",
       `title: ${yamlString(title)}`,
@@ -188,6 +226,6 @@ export function createPageRenderer(entries: Entry[], revision: string, versions:
       "---",
       "",
     ].join("\n");
-    return fm + rewriteLinks(presentBody(body), entry.repoPath);
+    return fm + rewriteLinks(presentBody(published), entry.repoPath);
   };
 }

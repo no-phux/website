@@ -15,6 +15,7 @@ const description = "See phux in action. Short recordings of real terminal workf
       <p class="kicker">In the terminal</p>
       <h1>Demos</h1>
       <p class="lede">{description}</p>
+      <p class="follow"><a href="https://x.com/phall249" target="_blank" rel="me noopener">Follow @phall249 on X</a></p>
     </header>
 
     {latest ? (
@@ -69,6 +70,16 @@ const description = "See phux in action. Short recordings of real terminal workf
     font-size: 18px;
     line-height: 1.65;
     color: var(--color-muted);
+  }
+  .follow {
+    margin: 16px 0 0;
+  }
+  .follow a {
+    color: var(--color-dim);
+    text-decoration: none;
+  }
+  .follow a:hover {
+    color: var(--color-fg);
   }
   .earlier {
     margin-top: 48px;
