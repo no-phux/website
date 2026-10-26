@@ -16,14 +16,15 @@ const installs = installTargets;
   <div class="home">
     <section class="hero" aria-labelledby="product-name">
       <div class="hero-intro">
-        <h1 id="product-name">Run the<br /><span>whole show.</span></h1>
+        <h1 id="product-name">phux</h1>
         <div class="hero-decision">
-          <p class="hero-description">Your agents, shells, and machines.<br />One workspace. You in command.</p>
+          <p class="hero-description">A terminal multiplexer whose server you can drive from code.</p>
+          <p class="hero-body">Shells run in a background server. Attach from the terminal UI, the Mac app, or a script: every action is also a command with JSON output and an exit code. phux tracks which panes run a coding agent and whether it is waiting on you.</p>
           <div class="download-actions">
-            <a class="download-primary" href={desktopDownload}>Download Phux for Mac <span aria-hidden="true">↓</span></a>
+            <a class="download-primary" href={desktopDownload}>Download for Mac <span aria-hidden="true">↓</span></a>
             <a class="try-link" href="#live-workspace" aria-label="Try the live workspace">Try it first <span aria-hidden="true">↗</span></a>
           </div>
-          <p class="download-note">Apple silicon · Open source · No account</p>
+          <p class="download-note">Apple silicon · macOS 26 or later · Apache-2.0 · No account</p>
       <details class="install-options" id="install-options"><summary>CLI, Linux &amp; mobile</summary>
       <div class="install" id="install" data-install aria-label="Install phux">
         <div class="install-head">
@@ -46,7 +47,7 @@ const installs = installTargets;
               <span class="install-prompt" aria-hidden="true">$</span>
               <code id="install-command">{cliInstall}</code>
             </span>
-            <a class="install-download" id="install-download" href={desktopDownload} hidden>Download Phux for Mac ↓</a>
+            <a class="install-download" id="install-download" href={desktopDownload} hidden>Download for Mac ↓</a>
             <button type="button" class="install-copy" data-copy={cliInstall} aria-label="Copy install command">Copy</button>
           </div>
           <form class="install-request" id="beta-form" hidden>
@@ -85,24 +86,24 @@ const installs = installTargets;
       <ClientComparison />
     </section>
 
-    <section class="workflow-proof" aria-label="Built for the way you work">
+    <section class="workflow-proof" aria-label="What phux does">
       <a href={docsHref("/agents")}>
         <svg class="proof-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="9" cy="8" r="3" /><path d="M3 20v-2a6 6 0 0 1 12 0v2M17 5a3 3 0 0 1 0 6M18 14a5 5 0 0 1 3 4v2" /></svg>
-        <h2>More agents.<br />Less babysitting.</h2>
-        <p>See who’s working, who’s waiting, and where you’re needed.</p>
-        <span class="proof-link">Meet your command center <span aria-hidden="true">↗</span></span>
+        <h2>Agent status per pane.</h2>
+        <p>phux knows which pane runs Claude Code, pi, Oh My Pi, OpenCode or Grok, and whether it is working, idle or blocked on you.</p>
+        <span class="proof-link">Coding agents <span aria-hidden="true">↗</span></span>
       </a>
       <a href={docsHref("/remote")}>
         <svg class="proof-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="3" y="4" width="18" height="13" rx="2" /><path d="M8 21h8M12 17v4" /></svg>
-        <h2>Your machines.<br />Within reach.</h2>
-        <p>Bring local and remote work into the same workspace.</p>
-        <span class="proof-link">Connect your machines <span aria-hidden="true">↗</span></span>
+        <h2>Remote machines.</h2>
+        <p><code>phux host add me@mini</code> adds another machine's server. No account.</p>
+        <span class="proof-link">Remote machines <span aria-hidden="true">↗</span></span>
       </a>
       <a href={docsHref("/clients")}>
         <svg class="proof-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="3" y="4" width="14" height="12" rx="2" /><path d="M7 16v2a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2h-2" /></svg>
-        <h2>Switch the view.<br />Keep the work.</h2>
-        <p>Leave a client. Your agents and shells keep running on the server.</p>
-        <span class="proof-link">Choose your view <span aria-hidden="true">↗</span></span>
+        <h2>Detach and reattach.</h2>
+        <p>Close the TUI or the app; shells and agents keep running on the server. A crash or reboot ends them.</p>
+        <span class="proof-link">Clients <span aria-hidden="true">↗</span></span>
       </a>
     </section>
   </div>
@@ -110,9 +111,10 @@ const installs = installTargets;
   <LiveWorkspaceSection />
 
   <section class="closing home" aria-labelledby="closing-title">
-    <div class="closing-copy"><h2 id="closing-title">A little more command.<br />A lot less chaos.</h2><p>Make room for the work you actually want to do.</p>
-      <a class="download-final" href={desktopDownload}>Get Phux for Mac <span aria-hidden="true">↓</span></a>
-      <a class="closing-platforms" href={docsHref("/installation")}>CLI &amp; other platforms ↗</a>
+    <div class="closing-copy">
+      <h2 id="closing-title">Install</h2>
+      <p class="closing-command"><span class="install-prompt" aria-hidden="true">$</span> <code>{cliInstall}</code></p>
+      <a class="download-final" href={desktopDownload}>Download for Mac <span aria-hidden="true">↓</span></a>
     </div>
     <img class="closing-fox" src={`/brand/images/fox.svg?v=${brand.version}`} width="340" height="340" alt="" aria-hidden="true" loading="lazy" />
   </section>
@@ -175,16 +177,18 @@ const installs = installTargets;
 <style>
   .home { width: min(100%, 1240px); margin-inline: auto; padding-inline: 40px; box-sizing: border-box; }
   .hero { padding-top: 48px; }
-  .hero-intro { display: grid; grid-template-columns: 1.25fr 1fr; align-items: center; gap: 64px; margin-bottom: 40px; }
-  h1 { margin: 0; color: #e7e2da; font-size: clamp(54px, 6.5vw, 88px); line-height: .99; font-weight: 450; letter-spacing: -.065em; }
+  .hero-intro { display: grid; grid-template-columns: 1.25fr 1fr; align-items: start; gap: 64px; margin-bottom: 40px; }
+  h1 { margin: 0 0 14px; color: #e7e2da; font-size: clamp(54px, 6.5vw, 88px); line-height: .99; font-weight: 450; letter-spacing: -.065em; }
   h1 span { font-weight: 650; }
-  .hero-description { margin: 0 0 22px; color: #bdc2be; font-size: clamp(16px, 1.5vw, 19px); line-height: 1.6; letter-spacing: -.015em; }
+  .hero-description { margin: 0 0 12px; color: #bdc2be; font-size: clamp(16px, 1.5vw, 19px); line-height: 1.45; letter-spacing: -.015em; }
+  .hero-body { margin: 0 0 18px; max-width: 62ch; color: #9ca79f; font-size: 15px; line-height: 1.5; }
   .download-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 12px 20px; }
   .download-primary, .download-final { display: inline-flex; align-items: center; justify-content: center; gap: 28px; min-height: 56px; padding: 0 24px; border: 1px solid #efeadf; border-radius: 8px; background: #e7e2da; color: #171a1e; font-size: 14px; font-weight: 650; line-height: 1.2; box-shadow: 0 1px #fff8 inset, 0 5px 20px #0003; transition: background 160ms, transform 160ms, box-shadow 160ms; }
   .download-primary:hover, .download-final:hover { background: #fffaf2; color: #171a1e; transform: translateY(-1px); box-shadow: 0 1px #fff inset, 0 7px 28px #0005; }
   .download-primary > span, .download-final > span { font-size: 20px; font-weight: 400; }
   .try-link { display: inline-flex; align-items: center; gap: 12px; min-height: 44px; color: #adb5b0; font-size: 13px; }
   .try-link:hover { color: #f0ebe3; }
+  .closing-command code { color: #dce4dc; font-size: 11px; overflow-wrap: anywhere; }
   .download-note { margin: 12px 0 0; color: #8d9692; font-size: 11px; letter-spacing: .01em; }
   .install-options { margin-top: 8px; }
   .install-options > summary { width: fit-content; min-height: 44px; display: flex; align-items: center; gap: 10px; color: #aab2ad; font-size: 12px; cursor: pointer; list-style: none; }
@@ -217,12 +221,13 @@ const installs = installTargets;
   .workflow-proof > a { display: flex; flex-direction: column; align-items: start; color: inherit; }
   .proof-icon { display: block; width: 38px; height: 38px; padding: 8px; margin-bottom: 24px; border: 1px solid #c8d0c025; border-radius: 10px; background: #c8d0c006; color: #c7d8cb; }
   .workflow-proof h2 { margin: 0; font-size: clamp(22px, 2.2vw, 29px); font-weight: 500; line-height: 1.2; letter-spacing: -.04em; color: #e7e2da; }
-  .workflow-proof p { margin: 16px 0 20px; max-width: 30ch; color: #9ca79f; font-size: 14px; line-height: 1.7; }
+  .workflow-proof p { margin: 16px 0 20px; max-width: 42ch; color: #9ca79f; font-size: 14px; line-height: 1.7; }
+  .workflow-proof code { color: #dce4dc; font-size: 12px; }
   .proof-link { margin-top: auto; display: inline-flex; align-items: center; gap: 18px; min-height: 44px; color: #becfc2; font-size: 12px; }
   .workflow-proof a:hover .proof-link { color: #f0ebe3; }
   .closing { display: flex; align-items: center; justify-content: space-between; gap: 40px; margin-top: 100px; padding-block: 62px; border-top: 1px solid #c8d0c025; border-bottom: 1px solid #c8d0c025; }
   .closing h2 { margin: 0; color: #e7e2da; font-size: clamp(32px, 4vw, 52px); line-height: 1.1; font-weight: 500; letter-spacing: -.05em; }
-  .closing p { margin: 20px 0 28px; color: #9ca79f; font-size: 14px; }
+  .closing-command { display: flex; gap: 8px; align-items: baseline; margin: 18px 0 22px; color: #dce4dc; font-size: 13px; line-height: 1.5; }
   .closing-platforms { display: inline-flex; align-items: center; min-height: 44px; margin-left: 24px; color: #a8b8ad; font-size: 12px; }
   .closing-fox { flex: none; width: 280px; height: 280px; object-fit: contain; }
   .connection-details { margin-top: 28px; margin-bottom: 48px; }
@@ -245,9 +250,11 @@ const installs = installTargets;
   @media (max-width: 650px) {
     .home { padding-inline: 20px; }
     .hero { padding-top: 26px; }
-    .hero-intro { grid-template-columns: 1fr; gap: 24px; margin-bottom: 28px; }
+    .hero-intro { grid-template-columns: 1fr; gap: 0; margin-bottom: 28px; }
     h1 { font-size: clamp(52px, 11vw, 70px); }
-    .hero-description { margin-bottom: 18px; font-size: 16px; }
+    .hero-description { margin-bottom: 10px; font-size: 16px; }
+    .hero-body { margin-bottom: 14px; font-size: 14px; line-height: 1.45; }
+    h1 { margin-bottom: 10px; }
     .download-primary { min-height: 52px; gap: 22px; padding-inline: 20px; }
     .download-note { margin-top: 10px; }
     .workflow-proof { grid-template-columns: 1fr; gap: 32px; margin-top: 48px; padding-top: 32px; }

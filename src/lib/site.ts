@@ -1,6 +1,8 @@
 // Public identity lives here. Commands, package names and protocol identifiers
 // are separate contracts; changing the display name does not rename them.
 const name = "phux";
+// README line 3 of no-phux/phux. The landing title, description, and share card use this sentence.
+const oneLiner = "A terminal multiplexer whose server you can drive from code.";
 
 export const SITE = {
   name,
@@ -9,9 +11,8 @@ export const SITE = {
   docsDomain: "docs.phux.sh",
   docsUrl: "https://docs.phux.sh",
   category: "Programmable terminal runtime",
-  tagline: "Run the whole show.",
-  description:
-    `${name} brings agents, shells, and machines into one programmable workspace. See what needs you, keep work running, and take control from the TUI, desktop, or CLI.`,
+  tagline: oneLiner,
+  description: oneLiner,
   github: "https://github.com/no-phux/phux",
   // One switch for the visual system. Mode tokens live in global.css.
   designMode: "terminal",

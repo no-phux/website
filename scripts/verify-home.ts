@@ -50,7 +50,15 @@ try {
     });
   });
   await page.goto(`${base}/`);
-  assert.equal((await page.getByRole("heading", { level: 1 }).innerText()).trim(), "Run the\nwhole show.");
+  assert.equal((await page.getByRole("heading", { level: 1 }).innerText()).trim(), "phux");
+  assert.equal((await page.locator(".hero-description").innerText()).trim(), "A terminal multiplexer whose server you can drive from code.");
+  assert.match(await page.locator(".hero-body").innerText(), /Shells run in a background server/);
+  assert.equal(await page.title(), "phux — A terminal multiplexer whose server you can drive from code.");
+  assert.equal(await page.locator('meta[name="description"]').getAttribute("content"), "A terminal multiplexer whose server you can drive from code.");
+  assert.equal(await page.locator('meta[property="og:description"]').getAttribute("content"), "A terminal multiplexer whose server you can drive from code.");
+  assert.equal(await page.locator('meta[name="twitter:description"]').getAttribute("content"), "A terminal multiplexer whose server you can drive from code.");
+  assert.equal((await page.locator(".download-note").innerText()).trim(), "Apple silicon · macOS 26 or later · Apache-2.0 · No account");
+  assert.equal(await page.locator(".cli-requirement").count(), 0);
   assert.equal(await page.locator("#home-light iframe").count(), 0, "no live app exists before scrolling");
   assert.ok(await page.locator(".client-comparison").isVisible(), "real product screenshots lead the page");
   assert.equal(await page.locator(".download-primary").getAttribute("href"), "/download/desktop", "the primary action downloads the actual desktop release");
