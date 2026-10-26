@@ -137,7 +137,7 @@ try {
   assert.ok(await download.isVisible(), "hover swaps to the desktop download");
   assert.equal(await command.isHidden(), true, "Desktop leads with the download, not a command");
   assert.equal(await download.getAttribute("href"), "/download/desktop", "the download is the worker's stable Mac archive redirect");
-  assert.equal((await page.locator("#install-note").innerText()).trim(), "First open: macOS asks to confirm an app downloaded from the internet. Choose Open.", "the first-open line stays until a real Mac confirms it");
+  assert.equal((await page.locator("#install-note").innerText()).trim(), "First open: macOS asks to confirm an app downloaded from the internet. Choose Open.", "the notarized, stapled desktop asks to confirm an app downloaded from the internet");
   assert.equal(await page.locator(".linux-desktop-note").count(), 0);
   await target("mobile").click();
   assert.equal(await target("mobile").getAttribute("aria-pressed"), "true", "the clicked target is pressed");
