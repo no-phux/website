@@ -53,6 +53,11 @@ try {
   assert.equal((await page.getByRole("heading", { level: 1 }).innerText()).trim(), "phux");
   assert.equal((await page.locator(".hero-description").innerText()).trim(), "A terminal multiplexer whose server you can drive from code.");
   assert.match(await page.locator(".hero-body").innerText(), /Shells run in a background server/);
+  assert.match(await page.locator(".hero-body").innerText(), /the desktop app/);
+  assert.equal(await page.locator(".try-link").getAttribute("aria-label"), "Open the browser demo");
+  assert.equal((await page.locator("#workspace-title").innerText()).trim(), "Browser demo");
+  assert.equal((await page.locator(".workspace-heading p").innerText()).trim(), "A disposable phux shell in your browser.");
+  assert.equal((await page.locator(".closing-platforms").innerText()).trim(), "Linux and other platforms ↗");
   assert.equal(await page.title(), "phux — A terminal multiplexer whose server you can drive from code.");
   assert.equal(await page.locator('meta[name="description"]').getAttribute("content"), "A terminal multiplexer whose server you can drive from code.");
   assert.equal(await page.locator('meta[property="og:description"]').getAttribute("content"), "A terminal multiplexer whose server you can drive from code.");
@@ -132,8 +137,8 @@ try {
   assert.ok(await download.isVisible(), "hover swaps to the desktop download");
   assert.equal(await command.isHidden(), true, "Desktop leads with the download, not a command");
   assert.equal(await download.getAttribute("href"), "/download/desktop", "the download is the worker's stable Mac archive redirect");
-  assert.equal((await page.locator("#install-note").innerText()).trim(), "First open: System Settings → Privacy & Security → Open Anyway.", "the Gatekeeper line stays until a real Mac confirms it");
-  assert.equal((await page.locator(".linux-desktop-note").innerText()).trim(), "Linux desktop needs the phux CLI: curl -fsSL https://phux.sh/install | sh", "Linux desktop names the CLI it still needs");
+  assert.equal((await page.locator("#install-note").innerText()).trim(), "First open: macOS asks to confirm an app downloaded from the internet. Choose Open.", "the first-open line stays until a real Mac confirms it");
+  assert.equal(await page.locator(".linux-desktop-note").count(), 0);
   await target("mobile").click();
   assert.equal(await target("mobile").getAttribute("aria-pressed"), "true", "the clicked target is pressed");
   assert.ok(await request.isVisible(), "Mobile asks for an address instead of printing a command");
@@ -242,7 +247,7 @@ try {
   await page.waitForFunction(() => !document.querySelector("#home-light iframe"));
   await page.waitForTimeout(250);
   assert.equal(await page.locator("#home-light iframe").count(), 0, "scrolling away releases the iframe, GPU and disposable connection");
-  await page.getByRole("link", { name: "Try the live workspace" }).click();
+  await page.getByRole("link", { name: "Open the browser demo", exact: true }).click();
   await page.locator("#home-light iframe").waitFor();
   await page.frameLocator("#home-light iframe").locator(".install-hook").waitFor();
   assert.equal(await page.locator("#home-light iframe").count(), 1, "returning creates exactly one fresh workspace");

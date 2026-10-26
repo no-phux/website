@@ -5,7 +5,7 @@ import HeroDemo from "../components/HeroDemo";
 import ClientComparison from "../components/ClientComparison.astro";
 import LiveWorkspaceSection from "../components/LiveWorkspaceSection.astro";
 import { SITE, docsHref } from "../lib/site";
-import { cliInstall, desktopDownload, desktopFirstOpen, desktopInstall, installTargets, linuxDesktopCli } from "../lib/install";
+import { cliInstall, desktopDownload, desktopFirstOpen, desktopInstall, installTargets } from "../lib/install";
 import release from "../lib/release.json";
 import brand from "../../brand.lock.json";
 const installs = installTargets;
@@ -19,10 +19,10 @@ const installs = installTargets;
         <h1 id="product-name">phux</h1>
         <div class="hero-decision">
           <p class="hero-description">A terminal multiplexer whose server you can drive from code.</p>
-          <p class="hero-body">Shells run in a background server. Attach from the terminal UI, the Mac app, or a script: every action is also a command with JSON output and an exit code. phux tracks which panes run a coding agent and whether it is waiting on you.</p>
+          <p class="hero-body">Shells run in a background server. Attach from the terminal UI, the desktop app, or a script: every action is also a command with JSON output and an exit code. phux tracks which panes run a coding agent and whether it is waiting on you.</p>
           <div class="download-actions">
             <a class="download-primary" href={desktopDownload}>Download for Mac <span aria-hidden="true">↓</span></a>
-            <a class="try-link" href="#live-workspace" aria-label="Try the live workspace">Try it first <span aria-hidden="true">↗</span></a>
+            <a class="try-link" href="#live-workspace" aria-label="Open the browser demo">Try it first <span aria-hidden="true">↗</span></a>
           </div>
           <p class="download-note">Apple silicon · macOS 26 or later · Apache-2.0 · No account</p>
       <details class="install-options" id="install-options"><summary>CLI, Linux &amp; mobile</summary>
@@ -73,7 +73,6 @@ const installs = installTargets;
         </div>
         <span class="install-rule" aria-hidden="true"></span>
         <p class="install-note" id="install-note">{installs[0].note}</p>
-        <p class="linux-desktop-note">{linuxDesktopCli}</p>
         <p class="copy-status" id="beta-note" role="status" aria-live="polite"></p>
       </div>
         <p class="release-links">
@@ -116,6 +115,7 @@ const installs = installTargets;
       <h2 id="closing-title">Install</h2>
       <p class="closing-command"><span class="install-prompt" aria-hidden="true">$</span> <code>{cliInstall}</code></p>
       <a class="download-final" href={desktopDownload}>Download for Mac <span aria-hidden="true">↓</span></a>
+      <a class="closing-platforms" href={docsHref("/installation")}>Linux and other platforms ↗</a>
     </div>
     <img class="closing-fox" src={`/brand/images/fox.svg?v=${brand.version}`} width="340" height="340" alt="" aria-hidden="true" loading="lazy" />
   </section>
@@ -215,7 +215,6 @@ const installs = installTargets;
   .install-request .install-phone { min-height: 44px; padding: 0; border: 0; background: none; color: #a1aca4; font-size: 11px; }
   .install-request .install-trap { position: absolute; left: -10000px; width: 1px; height: 1px; opacity: 0; }
   .install-note { min-height: 3.2em; margin: 10px 0 0; color: #919e95; font-size: 11px; line-height: 1.6; }
-  .linux-desktop-note { margin: 4px 0 0; color: #919e95; font-size: 11px; line-height: 1.6; overflow-wrap: anywhere; }
   .copy-status { min-height: 20px; margin: 3px 0 0; color: #c3d6c6; font-size: 11px; }
   .release-links { display: flex; flex-wrap: wrap; gap: 4px 14px; margin: 10px 0 0; color: #8f9c92; font-size: 10px; }
   .release-links a { display: inline-flex; align-items: center; min-height: 32px; }
