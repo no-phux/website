@@ -31,9 +31,9 @@ export function pageTitle(topic: string): string {
 // Shared by the visible docs landing and its searchable Markdown representation.
 export const OVERVIEW = {
   title: "Overview",
-  summary: "Detach without stopping your shell. Return to it, or let an agent inspect it.",
+  summary: "A terminal multiplexer whose server you can drive from code.",
   pitch: {
-    headline: "Leave the view. Keep the shell.",
+    headline: "Try it",
     text:
       "A background server owns the terminal. The TUI, desktop, and agents connect to it.",
   },

@@ -246,7 +246,8 @@ try {
   page.on("pageerror", (error) => errors.push(error.message));
   await verifyPageCopy(page, base, "/overview");
   assert.equal(await page.locator(".overview-first-run-steps li").count(), 3);
-  assert.ok(await page.getByRole("heading", { name: "Try it", exact: true }).isVisible());
+  assert.equal(await page.getByRole("heading", { name: "Try it", exact: true }).count(), 2);
+  assert.ok(await page.getByText("A terminal multiplexer whose server you can drive from code.", { exact: true }).isVisible());
   assert.ok(await page.getByText("A server crash or reboot ends it", { exact: false }).isVisible());
   assert.ok(await page.getByText("Sessions own resources. Arrangements place them. Views show them.", { exact: false }).isVisible());
   await page.getByRole("button", { name: "Copy agent prompt" }).click();
@@ -299,7 +300,7 @@ try {
   const staticContext = await browser.newContext({ javaScriptEnabled: false });
   const staticPage = await staticContext.newPage();
   await staticPage.goto(`${base}/overview`);
-  assert.ok(await staticPage.getByRole("heading", { name: "Try it", exact: true }).isVisible());
+  assert.equal(await staticPage.getByRole("heading", { name: "Try it", exact: true }).count(), 2);
   assert.ok(await staticPage.locator(".agent-prompt pre").isVisible());
   assert.equal(await staticPage.getByRole("link", { name: "View as Markdown" }).getAttribute("href"), "/overview.md");
   const markdown = await staticContext.request.get(`${base}/overview.md`);
