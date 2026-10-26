@@ -7,6 +7,8 @@ import { SITE } from "./site";
 
 export const cliInstall = "curl -fsSL https://phux.sh/install | sh";
 export const desktopInstall = "curl -fsSL https://phux.sh/install-desktop | sh";
+/** The Linux desktop build does not bundle the CLI the way the Mac app does. */
+export const linuxDesktopCli = "Linux desktop needs the phux CLI: curl -fsSL https://phux.sh/install | sh";
 export const installScriptSource = `${SITE.github}/blob/main/scripts/install.sh`;
 
 export type InstallTarget = { id: "cli" | "desktop" | "mobile"; label: string; command: string; note: string };
@@ -17,14 +19,14 @@ export type InstallTarget = { id: "cli" | "desktop" | "mobile"; label: string; c
  */
 export const installTargets: InstallTarget[] = [
   { id: "cli", label: "CLI", command: cliInstall, note: "macOS and Linux · installs phux and phux-mcp" },
-  { id: "desktop", label: "Desktop", command: desktopInstall, note: "Apple-silicon Mac · or install from a terminal on macOS or Linux" },
+  { id: "desktop", label: "Desktop", command: desktopInstall, note: `Apple-silicon Mac · or install from a terminal on macOS or Linux. ${linuxDesktopCli}` },
   { id: "mobile", label: "Mobile", command: "", note: "No install: open the demo, press Enter, scan the QR, then drive the shell from your phone. Beta: TestFlight on iPhone, Google Play testing on Android." },
 ];
 
 /** The stable Apple-silicon Desktop archive; the site worker resolves it per click (host/download.ts). */
 export const desktopDownload = "/download/desktop";
 
-/** Desktop releases are ad-hoc signed, not notarized, so a browser download meets Gatekeeper once. */
+/** Left unchanged until a real Mac confirms whether Gatekeeper still shows this path. */
 export const desktopFirstOpen = "First open: System Settings → Privacy & Security → Open Anyway.";
 
 /** The same installer, told to print its plan and install nothing. */

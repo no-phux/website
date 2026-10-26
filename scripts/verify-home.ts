@@ -132,6 +132,8 @@ try {
   assert.ok(await download.isVisible(), "hover swaps to the desktop download");
   assert.equal(await command.isHidden(), true, "Desktop leads with the download, not a command");
   assert.equal(await download.getAttribute("href"), "/download/desktop", "the download is the worker's stable Mac archive redirect");
+  assert.equal((await page.locator("#install-note").innerText()).trim(), "First open: System Settings → Privacy & Security → Open Anyway.", "the Gatekeeper line stays until a real Mac confirms it");
+  assert.equal((await page.locator(".linux-desktop-note").innerText()).trim(), "Linux desktop needs the phux CLI: curl -fsSL https://phux.sh/install | sh", "Linux desktop names the CLI it still needs");
   await target("mobile").click();
   assert.equal(await target("mobile").getAttribute("aria-pressed"), "true", "the clicked target is pressed");
   assert.ok(await request.isVisible(), "Mobile asks for an address instead of printing a command");
@@ -210,6 +212,11 @@ try {
   assert.equal(beta.payload?.email, "more@example.com", "/more still posts the TestFlight request");
   assert.ok(await page.locator("#beta form").isVisible(), "release signup is preserved");
   assert.equal(await page.locator("[data-copy]").count(), 2, "alternate installers preserved");
+  const macDesktop = await page.locator(".desktop-install p").innerText();
+  assert.match(macDesktop, /macOS 26 or later/);
+  assert.match(macDesktop, /The app includes the phux CLI and server/);
+  assert.match(macDesktop, /Developer ID signed and Apple-notarized/);
+  assert.doesNotMatch(macDesktop, /macOS 27|ad-hoc|not Apple-notarized|Homebrew/i);
   await page.goto(`${base}/privacy`);
   assert.equal(await page.getByRole("link", { name: "join the beta" }).getAttribute("href"), "/more#beta");
   assert.equal(await page.getByRole("link", { name: "request access to phux for iPhone" }).getAttribute("href"), "/more#testflight");

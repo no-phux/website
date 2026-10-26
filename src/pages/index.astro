@@ -5,7 +5,7 @@ import HeroDemo from "../components/HeroDemo";
 import ClientComparison from "../components/ClientComparison.astro";
 import LiveWorkspaceSection from "../components/LiveWorkspaceSection.astro";
 import { SITE, docsHref } from "../lib/site";
-import { cliInstall, desktopDownload, desktopFirstOpen, desktopInstall, installTargets } from "../lib/install";
+import { cliInstall, desktopDownload, desktopFirstOpen, desktopInstall, installTargets, linuxDesktopCli } from "../lib/install";
 import release from "../lib/release.json";
 import brand from "../../brand.lock.json";
 const installs = installTargets;
@@ -73,6 +73,7 @@ const installs = installTargets;
         </div>
         <span class="install-rule" aria-hidden="true"></span>
         <p class="install-note" id="install-note">{installs[0].note}</p>
+        <p class="linux-desktop-note">{linuxDesktopCli}</p>
         <p class="copy-status" id="beta-note" role="status" aria-live="polite"></p>
       </div>
         <p class="release-links">
@@ -214,7 +215,8 @@ const installs = installTargets;
   .install-request .install-phone { min-height: 44px; padding: 0; border: 0; background: none; color: #a1aca4; font-size: 11px; }
   .install-request .install-trap { position: absolute; left: -10000px; width: 1px; height: 1px; opacity: 0; }
   .install-note { min-height: 3.2em; margin: 10px 0 0; color: #919e95; font-size: 11px; line-height: 1.6; }
-  .copy-status { min-height: 1.6em; margin: 3px 0 0; color: #c3d6c6; font-size: 11px; }
+  .linux-desktop-note { margin: 4px 0 0; color: #919e95; font-size: 11px; line-height: 1.6; overflow-wrap: anywhere; }
+  .copy-status { min-height: 20px; margin: 3px 0 0; color: #c3d6c6; font-size: 11px; }
   .release-links { display: flex; flex-wrap: wrap; gap: 4px 14px; margin: 10px 0 0; color: #8f9c92; font-size: 10px; }
   .release-links a { display: inline-flex; align-items: center; min-height: 32px; }
   .workflow-proof { display: grid; grid-template-columns: repeat(3, 1fr); gap: 48px; margin: 72px 0 0; padding: 48px 0 8px; border-top: 1px solid #bccbc01f; }

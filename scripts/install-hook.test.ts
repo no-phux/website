@@ -1,13 +1,16 @@
 import { expect, test } from "bun:test";
 import { advanceMoment } from "../src/components/prototype/vgpu/live/install-hook";
 import { detectPhone, requestedNote } from "../src/lib/beta";
-import { cliInstall, desktopInstall, dryRun, installTargets } from "../src/lib/install";
+import { cliInstall, desktopFirstOpen, desktopInstall, dryRun, installTargets, linuxDesktopCli } from "../src/lib/install";
 
 test("the dry run is the same installer told to install nothing",()=>{
   expect(dryRun(cliInstall)).toBe("curl -fsSL https://phux.sh/install | sh -s -- --dry-run");
   expect(dryRun(desktopInstall)).toBe("curl -fsSL https://phux.sh/install-desktop | sh -s -- --dry-run");
   expect(dryRun("")).toBe("");
   expect(installTargets.map(t=>t.id)).toEqual(["cli","desktop","mobile"]);
+  expect(linuxDesktopCli).toBe("Linux desktop needs the phux CLI: curl -fsSL https://phux.sh/install | sh");
+  expect(installTargets.find(t=>t.id==="desktop")?.note).toContain(linuxDesktopCli);
+  expect(desktopFirstOpen).toBe("First open: System Settings → Privacy & Security → Open Anyway.");
 });
 test("the visitor's phone is detected, and a computer has none",()=>{
   expect(detectPhone({userAgent:"Mozilla/5.0 (Linux; Android 15; Pixel 9) AppleWebKit/537.36 Chrome/141 Mobile Safari/537.36"})).toBe("android");
