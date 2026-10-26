@@ -33,7 +33,6 @@ export const OVERVIEW = {
   title: "Overview",
   summary: "A terminal multiplexer whose server you can drive from code.",
   pitch: {
-    headline: "Try it",
     text:
       "A background server owns the terminal. The TUI, desktop, and agents connect to it.",
   },

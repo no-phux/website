@@ -126,8 +126,6 @@ async function writeOverviewPage(outDir: string, versions: Versions, siteRevisio
 
 ${summary}
 
-## ${pitch.headline}
-
 ${pitch.text}
 
 [Install phux](/installation) · [Try in your browser](${SITE.url}/embed) · [Use an agent](#use-an-agent)

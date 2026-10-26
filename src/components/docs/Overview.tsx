@@ -5,8 +5,7 @@ export function OverviewBody() {
   const { pitch } = OVERVIEW;
   return (
     <div className="docs-overview">
-      <section className="overview-pitch" aria-labelledby="try-it">
-        <h2 id="try-it">{pitch.headline}</h2>
+      <section className="overview-pitch">
         <p>{pitch.text}</p>
       </section>
 
@@ -16,9 +15,9 @@ export function OverviewBody() {
         <a href="#use-an-agent">Use with an agent <span aria-hidden="true">↓</span></a>
       </div>
 
-      <section className="overview-first-run" aria-labelledby="try-it-1">
+      <section className="overview-first-run" aria-labelledby="try-it">
         <div className="overview-first-run-heading">
-          <h2 id="try-it-1">Try it</h2>
+          <h2 id="try-it">Try it</h2>
           <a href="/getting-started">Full quickstart →</a>
         </div>
         <ol className="overview-first-run-steps">
