@@ -77,6 +77,19 @@ describe("markdown negotiation", () => {
     expect(response.headers.get("content-type")).toBe("application/x-sh");
   });
 
+  test("docs.phux.sh/quickstart redirects before assets are fetched", async () => {
+    const response = await handler.fetch(
+      new Request("https://docs.phux.sh/quickstart?from=search", {
+        headers: { accept: "text/html" },
+      }),
+      { ASSETS: { fetch: async () => { throw new Error("quickstart must not fetch assets"); } } },
+    );
+    expect(response.status).toBe(301);
+    expect(response.headers.get("location")).toBe(
+      "https://docs.phux.sh/getting-started?from=search",
+    );
+  });
+
   test("host redirects still fire before negotiation", async () => {
     const request = new Request("https://phux.sh/docs", {
       headers: { accept: "text/markdown" },
