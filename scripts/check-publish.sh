@@ -45,8 +45,13 @@ require .github/workflows/site-deploy.yml 'if [ "$shebang" != '"'"'#!/bin/sh'"'"
 require src/lib/install.ts 'install-desktop | sh'
 require src/lib/install.ts 'id: "mobile", label: "Mobile", command: ""'
 require src/pages/index.astro 'installTargets'
-require src/pages/index.astro 'class="install-request" id="beta-form"'
-require src/pages/index.astro 'wireBetaRequest('
+require src/lib/home-platform.ts 'macOS, Linux, Windows via WSL 2'
+# Phone apps stay off the homepage until they are public. The request form lives on /more.
+forbid src/pages/index.astro 'class="install-request" id="beta-form"'
+forbid src/pages/index.astro 'wireBetaRequest('
+forbid src/pages/index.astro 'iPhone'
+forbid src/pages/index.astro 'Android'
+forbid src/pages/index.astro 'TestFlight'
 forbid src/pages/index.astro '-s -- --channel next'
 forbid src/lib/install.ts '-s -- --channel next'
 
