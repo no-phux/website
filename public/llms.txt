@@ -64,9 +64,13 @@ npx skills add no-phux/skills                    # agent skills
 - [Performance](https://docs.phux.sh/performance): measurements published with the comparison.
 - [Use phux as an agent](https://docs.phux.sh/agent-quickstart): install phux and drive sessions from code.
 - [Run coding agents](https://docs.phux.sh/agents): choose an integration and verify it works.
+- [See which coding agent is waiting on you](https://docs.phux.sh/agent-waiting): list each pane's agent state, and wait until one is blocked.
+- [Run a command in a pane](https://docs.phux.sh/pane-command): run a shell command and read its output and exit code.
+- [Give your agent a terminal over MCP](https://docs.phux.sh/terminal-mcp): local stdio MCP tools for the phux server on this machine.
 - [ACP-owned sessions](https://docs.phux.sh/acp): provider readiness, typed commands, human permissions, and uncertain outcomes.
 - [Terminal MCP adapter](https://docs.phux.sh/agents): connect to your running local phux server, not the hosted docs service.
 - [Remote access](https://docs.phux.sh/remote): connect machines and repair connections.
+- [Attach to phux on another machine over Tailscale](https://docs.phux.sh/tailscale): list tailnet machines and attach to a phux server on one.
 - [Clients](https://docs.phux.sh/clients): TUI, desktop, web, and native consumer paths.
 - [Embedding](https://docs.phux.sh/embedding): supported runtime ownership and renderer integration.
 - [Troubleshoot](https://docs.phux.sh/troubleshooting): diagnostics, persistence boundaries, and recovery.

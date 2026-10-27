@@ -4,6 +4,7 @@ import { dirname, join } from "node:path";
 import { AGENT_START, OVERVIEW, SITE } from "../src/lib/site";
 import { GROUPS, type Entry } from "./docs-catalog";
 import { createPageRenderer, yamlString, type Versions } from "./docs-markdown";
+import { loadSitePages, SITE_PAGE_CATALOG } from "./site-pages";
 
 const FOLDER_TITLES: Record<string, string> = {
   reference: "Reference",
@@ -57,7 +58,10 @@ type NavItem = { name: string; group: Entry["group"]; order: number };
 
 /** Flat pages as themselves; a top-level folder once, as `...folder`, at its first entry. */
 function navItems(entries: Entry[], prefixes: Set<string>): NavItem[] {
-  const items: NavItem[] = [OVERVIEW_ITEM];
+  const items: NavItem[] = [
+    OVERVIEW_ITEM,
+    ...SITE_PAGE_CATALOG.map(({ slug, group, order }) => ({ name: slug, group, order })),
+  ];
   const folders = new Set<string>();
   for (const { slug, group, order } of entries) {
     const top = slug.split("/")[0]!;
@@ -116,8 +120,33 @@ export async function writeDocumentation(outDir: string, entries: Entry[], revis
   const render = createPageRenderer(entries, revision, versions);
   const result = await writeSourcePages(outDir, entries, prefixes, render);
   result.written += await writeOverviewPage(outDir, versions, siteRevision);
+  result.written += await writeSitePages(outDir, versions, siteRevision);
   await writeNavigation(outDir, entries, prefixes);
   return result;
+}
+
+async function writeSitePages(outDir: string, versions: Versions, siteRevision: string): Promise<number> {
+  const pages = await loadSitePages();
+  for (const page of pages) {
+    const fm = [
+      "---",
+      `title: ${yamlString(page.title)}`,
+      `summary: ${yamlString(page.summary)}`,
+      `description: ${yamlString(page.description)}`,
+      `group: ${yamlString(GROUPS[page.group])}`,
+      `order: ${page.order}`,
+      `sourcePath: ${yamlString(`src/site-docs/${page.file}`)}`,
+      `sourceBase: ${yamlString("https://github.com/no-phux/website")}`,
+      `sourceRevision: ${yamlString(siteRevision)}`,
+      `protocolVersion: ${yamlString(versions.protocolVersion)}`,
+      `projectVersion: ${yamlString(versions.projectVersion)}`,
+      `stability: ${yamlString("stable")}`,
+      "---",
+      "",
+    ].join("\n");
+    await writeFile(join(outDir, `${page.slug}.md`), fm + page.body, "utf8");
+  }
+  return pages.length;
 }
 
 async function writeOverviewPage(outDir: string, versions: Versions, siteRevision: string): Promise<number> {

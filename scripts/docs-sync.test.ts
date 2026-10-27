@@ -65,9 +65,12 @@ describe("documentation discovery interface", () => {
     });
     const out = join(root, "out");
     await mkdir(out);
-    expect(await writeDocumentation(out, entries, revision, versions, siteRevision)).toEqual({ written: 5, failed: [] });
+    expect(await writeDocumentation(out, entries, revision, versions, siteRevision)).toEqual({ written: 9, failed: [] });
     expect((await metadata(out)).pages).toEqual([
-      "---Get started---", "overview", "---Build for phux---", "program-protocol", "program-sequences", "host-services",
+      "---Get started---", "overview",
+      "---Automate---", "pane-command", "agent-waiting", "terminal-mcp",
+      "---Machines and clients---", "tailscale",
+      "---Build for phux---", "program-protocol", "program-sequences", "host-services",
       "---Work on phux---", "protocol",
     ]);
     const guide = await readFile(join(out, "host-services.md"), "utf8");
@@ -86,9 +89,11 @@ describe("documentation discovery interface", () => {
     expect(excluded).toEqual([]);
     const out = join(root, "out");
     await mkdir(out);
-    expect(await writeDocumentation(out, entries, revision, versions, siteRevision)).toEqual({ written: 4, failed: [] });
+    expect(await writeDocumentation(out, entries, revision, versions, siteRevision)).toEqual({ written: 8, failed: [] });
     expect((await metadata(out)).pages).toEqual([
       "---Get started---", "overview", "---Customize---", "plugins", "distros", "projects",
+      "---Automate---", "pane-command", "agent-waiting", "terminal-mcp",
+      "---Machines and clients---", "tailscale",
     ]);
     expect(await readFile(join(out, "plugins.md"), "utf8")).toContain("[Distributions](/distros)");
     const guide = await readFile(join(out, "distros.md"), "utf8");
@@ -114,11 +119,12 @@ describe("documentation discovery interface", () => {
     expect(excluded).toEqual([]);
     const out = join(root, "out");
     await mkdir(out);
-    expect(await writeDocumentation(out, entries, revision, versions, siteRevision)).toEqual({ written: 12, failed: [] });
+    expect(await writeDocumentation(out, entries, revision, versions, siteRevision)).toEqual({ written: 16, failed: [] });
     expect((await metadata(out)).pages).toEqual([
       "---Get started---", "overview", "getting-started", "---Customize---",
       "config", "keys", "tmux-import", "themes", "status-bar", "hooks", "plugins", "distros", "projects",
-      "---Automate---", "scripting",
+      "---Automate---", "pane-command", "scripting", "agent-waiting", "terminal-mcp",
+      "---Machines and clients---", "tailscale",
     ]);
     expect(await readFile(join(out, "keys.md"), "utf8")).toContain("[tmux importer guide](/tmux-import)");
     expect(await readFile(join(out, "getting-started.md"), "utf8")).toContain("[Bring your tmux keys to phux](/tmux-import)");
@@ -171,7 +177,7 @@ describe("documentation discovery interface", () => {
     expect(excluded).toContain("docs/substrate.md (denylist)");
     const out = join(root, "out");
     await mkdir(out);
-    expect(await writeDocumentation(out, entries, revision, versions, siteRevision)).toEqual({ written: 3, failed: [] });
+    expect(await writeDocumentation(out, entries, revision, versions, siteRevision)).toEqual({ written: 7, failed: [] });
     const architecture = await readFile(join(out, "architecture.md"), "utf8");
     expect(architecture).toContain("See the record and [remote](/remote).");
     expect(architecture).not.toMatch(/substrate\.md|\/substrate/);
@@ -268,25 +274,34 @@ describe("collection output interface", () => {
     const { entries } = await discover(docs);
     const out = join(root, "out");
     await mkdir(out);
-    expect(await writeDocumentation(out, entries, revision, versions, siteRevision)).toEqual({ written: 8, failed: [] });
+    expect(await writeDocumentation(out, entries, revision, versions, siteRevision)).toEqual({ written: 12, failed: [] });
     expect(await readFile(join(out, "config.md"), "utf8")).toContain('sourcePath: "docs/config.md"');
     expect(await readFile(join(out, "reference/index.md"), "utf8")).toContain('sourcePath: "docs/reference/README.md"');
     expect(await metadata(out, "reference")).toEqual({ title: "Reference", pages: ["index", "cli", "config", "zebra"] });
     // One flat list from the catalog: the overview leads, the all-docs map closes Get started.
     expect(await metadata(out)).toEqual({
-      pages: ["---Get started---", "overview", "installation", "docs", "---Customize---", "config", "---Reference---", "...reference"],
+      pages: [
+        "---Get started---", "overview", "installation", "docs", "---Customize---", "config",
+        "---Automate---", "pane-command", "agent-waiting", "terminal-mcp",
+        "---Machines and clients---", "tailscale",
+        "---Reference---", "...reference",
+      ],
     });
     const overview = await readFile(join(out, "overview.md"), "utf8");
     expect(overview).toContain(`sourcePath: "src/pages/overview.astro"\nsourceBase: "https://github.com/no-phux/website"\nsourceRevision: "${siteRevision}"`);
     expect(overview).toContain('protocolVersion: "1.2.3"\nprojectVersion: "0.4.5"');
     expect(overview).toContain("[Install phux](/installation)");
+    const waiting = await readFile(join(out, "agent-waiting.md"), "utf8");
+    expect(waiting).toContain('sourcePath: "src/site-docs/agent-waiting.md"\nsourceBase: "https://github.com/no-phux/website"');
+    expect(waiting).toContain(`sourceRevision: "${siteRevision}"`);
+    expect(waiting.split("---").at(-1) ?? "").not.toMatch(/^# /m);
   });
 
   test("reports an unreadable source without masking write errors or dropping the overview", async () => {
     const out = join(root, "out");
     await mkdir(out);
     const missing = { ...entry, abs: join(root, "missing.md") };
-    expect(await writeDocumentation(out, [missing], revision, versions, siteRevision)).toEqual({ written: 1, failed: ["docs/clients.md"] });
+    expect(await writeDocumentation(out, [missing], revision, versions, siteRevision)).toEqual({ written: 5, failed: ["docs/clients.md"] });
     expect(warning).toHaveBeenCalledWith("  fail (read):    docs/clients.md");
     const notDirectory = join(root, "not-a-directory");
     await writeFile(notDirectory, "occupied");
