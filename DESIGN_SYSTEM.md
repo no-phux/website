@@ -83,7 +83,7 @@ The primary install action follows the visitor's OS, not viewport width. The
 no-JavaScript platform line is exactly `macOS, Linux, Windows via WSL 2`.
 macOS keeps the Mac download; Linux opens the CLI installer; Windows leads to
 the WSL 2 instructions. Phone browsers get that same line and the installation
-guide. The homepage names no phone app. The closing action follows the same
+guide. The homepage does not name a phone. The closing action follows the same
 selection, and hides the desktop shell command on Windows and on phone browsers.
 Static/no-JavaScript HTML uses a real installation-guide link rather than guessing
 a Mac download; detection is client-side only, with no stored device profile or
@@ -123,16 +123,6 @@ covering or blurring the product. Chapter headings and client emphasis follow
 the story; output enters briefly rather than flashing. Opening the live shell
 suspends the illustration, and closing it resumes the same position. `/more` retains its opt-in, pausable,
 scrubbable explainer.
-
-The live shell's dialog offers one more thing: **Pair your phone**, a single line
-that expands into a QR (a white tile, the only light surface in the dialog) with
-the status beneath it. The phone opens `/phone#CODE` — a page that is a terminal
-and almost nothing else — and lands in the same shell, thumb key bar included, in
-about a second. The link is single-use and expires with the session; the pairing
-code never appears in a URL the site's own logs would keep. While a phone is
-attached the shared shell follows the newest screen's size, which is the tmux
-rule and the honest reading of "one shell, two screens"; the pairing line says
-"Phone linked" so the beat is visible on the big screen.
 
 The hosted `/embed` shell and live dialog share ice-blue neutral glass tokens,
 a single rounded frame, a subtle edge and inset highlight, and an opaque readable

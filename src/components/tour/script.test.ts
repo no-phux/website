@@ -1,8 +1,10 @@
+import { readFileSync } from "node:fs";
 import { describe, expect, test } from "bun:test";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
+import HeroDemo from "../HeroDemo";
 import Tour from "./Tour";
-import { CHAPTERS, QUICK_RATE, SIGNAL_SECONDS, advanceTour, frameAt, type Playback } from "./script";
+import { CHAPTERS, QUICK_RATE, SIGNAL_SECONDS, advanceTour, frameAt, illustratedCopy, type Playback } from "./script";
 
 describe("landing tour", () => {
   test("settled frames are deterministic and have no travelling signals", () => {
@@ -72,5 +74,16 @@ describe("landing tour", () => {
     expect(html).not.toContain("Agents work in the open");
     expect(html).not.toContain("Scripted illustration");
     expect(html).not.toContain('class="tour-bar"');
+  });
+
+  test("illustrated and hero-demo copy does not name a phone", () => {
+    const rendered = [
+      renderToStaticMarkup(createElement(Tour)),
+      renderToStaticMarkup(createElement(HeroDemo)),
+    ].join("\n").replace(/<[^>]*>/g, " ");
+    expect(rendered).not.toMatch(/phone/i);
+    expect(illustratedCopy()).not.toMatch(/phone/i);
+    const hero = readFileSync(new URL("../HeroDemo.tsx", import.meta.url), "utf8");
+    expect(hero).not.toMatch(/phone/i);
   });
 });

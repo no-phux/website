@@ -37,16 +37,14 @@ mode=native → PhuxSessionContainer (src/native-session.ts), one random instanc
 
 The hosted shell is one session with several views, which is the product's own
 model: `ATTACH`/`ATTACHED`/`ATTACH_READY` carry a client-chosen correlation id and
-the server allocates a client id per attachment. The landing's dialog hands the
-view that opened the session one **attach code**; a phone scans it, opens
-`https://phux.sh/phone#CODE`, and attaches to the *same* session — no install, no
-sign-in, nothing to press.
+the server allocates a client id per attachment. The view that opened the
+session receives one **attach code**. A second view opens
+`https://phux.sh/phone#CODE` and attaches to the *same* session — no install, no
+sign-in, nothing to press. The homepage dialog does not offer that code.
 
 The demo shell opens with `phux pair` already at the prompt. Running it prints
 the code as a QR **inside the terminal**, rendered by the edge shell from the
-link the Worker minted, then the same `/phone#CODE` link. That is the main demo
-path: press Enter, scan, and the phone is in the same shell. The dialog's Pair
-panel remains the copy/status surface.
+link the Worker minted, then the same `/phone#CODE` link.
 
 - The code is minted by the session DO, delivered only in that view's session
   envelope, and is a signed `scope: "attach"` token (src/token.ts). It cannot open

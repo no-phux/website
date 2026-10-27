@@ -407,12 +407,7 @@ export default function Tour({ prepare, suspended = false }: { prepare?: () => v
             <span className="tour-open">Open demo</span>
           </a>
         </div>
-        <p className="tour-summary">{[
-          "Attach from any client. The same terminals, the same output.",
-          "See which agent needs you, wherever you are working.",
-          "Close a client. The server keeps the terminals running.",
-          "Reach another machine without moving your workspace.",
-        ][position.chapter]}</p>
+        <p className="tour-summary">{chapter.text}</p>
         <div className="tour-controls">
           <div className="tour-chapters" role="group" aria-label="Tour chapters">
             {CHAPTERS.map((item, index) => (
