@@ -79,19 +79,15 @@ to center on pointer exit. Reduced motion, hidden tabs and offscreen art settle
 to a static pose. No WebGL, animation loop at rest or extra framework is needed.
 On phones the fox sits below the download, above the real product comparison.
 
-The primary install action follows the visitor's OS, not viewport width. iPhone,
-iPad (including desktop-mode iPadOS), and Android lead with their own beta-access
-action. iOS uses a normal `/download/ios` navigation into the enabled public
-TestFlight group, without asking for an email or reading an Apple account.
-Android opens its access choices without focusing an input. Email invitations are
-an explicit, styled disclosure: email AutoFill, no autocapitalization, a Send key,
-and a visual-viewport adjustment that keeps the focused form above the keyboard.
-The same choices appear on `/more` and in the hosted workspace. macOS keeps the Mac download; Linux opens the CLI installer;
-Windows leads to the WSL2 instructions, without claiming a native Windows app.
-The closing action follows the same selection, and hides desktop shell commands
-on phones and Windows. All platforms remain available. Static/no-JavaScript HTML
-uses a real installation-guide link rather than guessing a Mac download; detection
-is client-side only, with no stored device profile or device-dependent edge cache.
+The primary install action follows the visitor's OS, not viewport width. The
+no-JavaScript platform line is exactly `macOS, Linux, Windows via WSL 2`.
+macOS keeps the Mac download; Linux opens the CLI installer; Windows leads to
+the WSL 2 instructions. Phone browsers get that same line and the installation
+guide. The homepage names no phone app. The closing action follows the same
+selection, and hides the desktop shell command on Windows and on phone browsers.
+Static/no-JavaScript HTML uses a real installation-guide link rather than guessing
+a Mac download; detection is client-side only, with no stored device profile or
+device-dependent edge cache.
 
 The landing carries a short top bar: mark and typeset wordmark, Docs, and a recognizable
 GitHub source badge (local SVG, no third-party badge request or invented star count).
@@ -103,8 +99,8 @@ Use a native range input for pointer, touch and keyboard, plus full-client short
 Without JavaScript, show both previews and hide the inert controls.
 
 The install targets, command, and copy action float as type on the canvas — no
-card, panel, or fill behind them, and hover changes color rather than background. The three targets are CLI, Desktop, and Mobile; Mobile swaps the
-command line for native TestFlight access and an optional email invitation, so
+card, panel, or fill behind them, and hover changes color rather than background. The targets are CLI and Desktop. Desktop swaps the
+command line for the Mac download inside the same reserved slot, so
 the landing carries no separate beta band. The quiet footer keeps Demos, More,
 Privacy, and Support instead of repeating the top bar. The landing canvas is
 `#0b0b0d`, with `#ededee` text and neutral accents.

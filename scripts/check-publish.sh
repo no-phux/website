@@ -49,6 +49,10 @@ require src/pages/index.astro '<MobileAccessForm'
 require src/components/MobileAccessForm.astro 'id="beta-form"'
 require src/components/MobileAccessForm.astro 'href={iosDownload}'
 require src/pages/index.astro 'wireBetaRequest('
+# The homepage install switcher names only shipped platforms.
+forbid src/pages/index.astro 'iPhone'
+forbid src/pages/index.astro 'Android'
+forbid src/pages/index.astro 'TestFlight' 
 forbid src/pages/index.astro '-s -- --channel next'
 forbid src/lib/install.ts '-s -- --channel next'
 
