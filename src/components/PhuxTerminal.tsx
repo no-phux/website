@@ -42,8 +42,6 @@ interface Props {
   focusOnStart?: boolean;
   statusParentOrigin?: string;
   headerActions?: ReactNode;
-  /** Session envelope, or null when stopped so hosts retire pairing links. */
-  onSession?: (session: SessionView | null) => void;
 }
 
 interface Identity {
@@ -149,7 +147,6 @@ export default function PhuxTerminal({
   focusOnStart = false,
   statusParentOrigin,
   headerActions,
-  onSession,
 }: Props) {
   const canvasPrefix = `phux-term-${useId().replace(/[:]/g, "")}`;
   const canvasHost = useRef<HTMLDivElement | null>(null);
@@ -187,7 +184,6 @@ export default function PhuxTerminal({
     attempt.current = null;
     current?.abort.abort();
     current?.client?.close();
-    onSession?.(null);
   }
 
   function paneAction(action: (client: PhuxController) => void) {
@@ -235,7 +231,6 @@ export default function PhuxTerminal({
         ...(event.pair ? { pair: event.pair } : {}),
       };
       setSession(next);
-      onSession?.(next);
       if (statusParentOrigin && window.parent !== window) {
         postEmbedSession(
           window.parent,

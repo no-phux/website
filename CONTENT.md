@@ -161,19 +161,13 @@ shell supports independent split panes with visible controls and keyboard
 shortcuts; the browser interaction contract lives in
 [the web client guide](../consumers/web.md#in-the-page).
 
-The live shell also pairs: the dialog hands out one single-use code, a phone
-opens `/phone#CODE` in its browser, and both screens drive the same session with
-no install and no sign-in. This is the mobile story while the iOS build is in
-TestFlight — the phone's browser is the front door, and the app pairing link
-(Universal Link, `host/pairing.ts`) remains a bonus path rather than a
-requirement. Keep it honest: the shared shell follows the newest screen's size,
-an attached phone reserving nothing, and a spent or stale link failing loudly
-rather than silently serving a different session.
+The homepage does not name a phone. The live dialog does not offer a pairing
+panel, a QR, or a phone link. `/phone` still opens a shell for a link the hosted
+terminal prints; that page is not part of the homepage.
 
 The live dialog suspends the illustrated tour. Closing it or switching runtime
 releases the hosted session, including an in-flight attach; hosted demo sessions
-are intentionally disposable. Stopping a session retires its pairing panel, and
-a replacement session starts with a fresh, collapsed panel.
+are intentionally disposable.
 JavaScript-disabled visitors still see the picture, the standalone-shell link,
 and installation. An empty `PUBLIC_PHUX_DEMO_WS` produces an explicit not-configured state; an unreachable backend gets an
 actionable error and recovery controls. Neither failure disables the

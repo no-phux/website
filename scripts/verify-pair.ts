@@ -5,7 +5,7 @@
  * Before deployment: PHUX_SITE_STATIC_ORIGIN=http://127.0.0.1:4337 bun run verify:pair
  * Substitutes local built HTTP assets only; real WebSockets keep the allowed origin.
  *
- * Drives the real thing: one screen opens the hosted shell, the dialog hands out
+ * Drives the real thing: one screen opens the hosted shell, the shell prints
  * its pairing link, a second (phone-shaped) browser opens that link, and the two
  * screens are proven to be one session — a pane the phone spawns shows up on the
  * desktop, and back. Both contexts talk to the deployed demo Worker, so this is
@@ -132,19 +132,11 @@ try {
   report("desktop: the printed link points at the phone page", link.startsWith(expectedPrefix));
   if (!link.startsWith(expectedPrefix)) throw new Error("no usable pairing link");
   report("desktop: the code rides in the fragment, never the query", !link.includes("?"));
-
-  // The panel remains the copy/status surface, and must agree with the shell.
-  await wide.getByRole("button", { name: /Pair phone/ }).click();
-  const qr = wide.locator(".mux-pair-code svg");
-  await qr.waitFor({ timeout: 10_000 });
-  report("desktop: the pairing panel renders the same code", await qr.isVisible());
   report(
-    "desktop: the panel waits for the phone",
-    /Waiting for your phone/.test(await wide.locator(".mux-pair-state").innerText()),
+    "desktop: the dialog does not offer a pairing control",
+    (await wide.getByRole("button", { name: /Pair phone/ }).count()) === 0 &&
+      (await wide.locator(".mux-pair").count()) === 0,
   );
-  await wide.getByRole("button", { name: /Copy link/ }).click();
-  const panelLink = await wide.evaluate(() => navigator.clipboard.readText());
-  report("desktop: the panel copies the shell's link", panelLink === link);
 
   // The phone: a coarse pointer, a small viewport, no install and no sign-in.
   const phone = await browser.newContext({
@@ -172,14 +164,6 @@ try {
     (await handset.getByRole("button", { name: /Pair phone/ }).count()) === 0,
   );
 
-  report(
-    "desktop: the session reports the phone as linked",
-    await waitFor(
-      async () => /Phone linked/.test(await wide.locator(".mux-pair-toggle").innerText()),
-      "the linked state",
-    ),
-  );
-
   // One session, two screens: what one view types, the other view receives. The
   // panes are per view (each screen keeps its own layout over the shared
   // terminals), so terminal output — not pane count — is what crosses.
@@ -195,17 +179,6 @@ try {
   );
 
   await phone.close();
-  await wide.locator('summary[aria-label="Info & shortcuts"]').click();
-  await wide.getByRole("button", { name: "Release session", exact: true }).click();
-  report("desktop: releasing a session retires its pairing code", await wide.locator(".mux-pair").count() === 0);
-  await wide.getByRole("button", { name: "Launch edge WASM shell", exact: true }).click();
-  await liveTerminal(wide);
-  report("desktop: a new session starts with a collapsed, fresh pairing panel",
-    await wide.getByRole("button", { name: /Pair phone/ }).getAttribute("aria-expanded") === "false");
-  await wide.getByRole("button", { name: /Pair phone/ }).click();
-  await wide.getByRole("button", { name: /Copy link/ }).click();
-  const freshLink = await wide.evaluate(() => navigator.clipboard.readText());
-  report("desktop: the replacement session cannot reuse the spent link", freshLink.startsWith(expectedPrefix) && freshLink !== link);
   await desktop.close();
 } finally {
   await browser.close();

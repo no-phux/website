@@ -25,7 +25,7 @@ export const installActions: Record<InstallPlatform, InstallAction> = {
   mac: { label: "Download for Mac", href: desktopDownload, note: "Apple silicon · macOS 26 or later · Apache-2.0 · No account", icon: "↓" },
   linux: { label: "Install for Linux", href: docsHref("/installation"), note: "Linux · CLI and desktop · Apache-2.0 · No account", icon: "→", target: "cli" },
   windows: { label: "Install with WSL", href: docsHref("/installation"), note: "Windows: use the CLI in WSL2 · No native Windows app yet", icon: "↗" },
-  unknown: { label: "Choose your platform", href: docsHref("/installation"), note: "Mac, Linux, iPhone & Android · All install options", icon: "↗" },
+  unknown: { label: "Choose your platform", href: docsHref("/installation"), note: "macOS, Linux, Windows via WSL 2", icon: "↗" },
 };
 
 /** Shared hero and closing actions; never guess Mac from the viewport width. */

@@ -1,5 +1,10 @@
 import assert from "node:assert/strict";
+import { createElement } from "react";
+import { renderToStaticMarkup } from "react-dom/server";
 import type { Page } from "playwright-core";
+import HeroDemo from "../src/components/HeroDemo";
+import Tour from "../src/components/tour/Tour";
+import { illustratedCopy } from "../src/components/tour/script";
 
 /** Product copy and metadata must agree, including the script-free document. */
 export async function verifyHomeContent(page: Page) {
@@ -17,4 +22,12 @@ export async function verifyHomeContent(page: Page) {
   assert.equal(await page.locator('meta[name="twitter:description"]').getAttribute("content"), "A terminal multiplexer whose server you can drive from code.");
   assert.equal((await page.locator(".download-note").innerText()).trim(), "Apple silicon · macOS 26 or later · Apache-2.0 · No account");
   assert.equal(await page.locator(".cli-requirement").count(), 0);
+  const heroCopy = [
+    await page.locator("body").innerText(),
+    await page.locator(".hero-demo").evaluate((node) => node.textContent ?? ""),
+    renderToStaticMarkup(createElement(Tour)).replace(/<[^>]*>/g, " "),
+    renderToStaticMarkup(createElement(HeroDemo)).replace(/<[^>]*>/g, " "),
+    illustratedCopy(),
+  ].join("\n");
+  assert.doesNotMatch(heroCopy, /phone/i, "the homepage does not name a phone");
 }
