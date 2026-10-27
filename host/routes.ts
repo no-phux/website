@@ -31,6 +31,7 @@ export const DOCS_PREFIXES = [
   "/projects",
   "/scripting",
   "/agents",
+  "/agent-quickstart",
   "/acp",
   "/remote",
   "/clients",
