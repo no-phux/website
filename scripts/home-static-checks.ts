@@ -20,7 +20,8 @@ export async function verifyStaticHome(browser: Browser, base: string) {
   const staticPage = await staticContext.newPage();
   await staticPage.goto(base);
   assert.ok(await staticPage.locator("[data-fox]").isVisible(), "the fox remains visible without JavaScript");
-  assert.equal((await staticPage.getByRole("heading", { level: 1 }).innerText()).trim(), "Run the\nwhole show.");
+  assert.equal((await staticPage.getByRole("heading", { level: 1 }).innerText()).trim(), "phux");
+  assert.equal((await staticPage.locator(".hero-description").innerText()).trim(), "A terminal multiplexer whose server you can drive from code.");
   await staticPage.locator(".install-options > summary").click();
   assert.ok(await staticPage.locator("#install code").isVisible());
   assert.equal(await staticPage.getByRole("slider").count(), 0, "no-JS does not offer an inert slider");

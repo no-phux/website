@@ -11,7 +11,7 @@ import MobileDevicePrivacy from "../components/privacy/MobileDevicePrivacy.astro
 import { SITE } from "../lib/site";
 import "../styles/privacy.css";
 
-const LAST_UPDATED = "2026-10-21";
+const LAST_UPDATED = "2026-10-27";
 const CONTACT = "privacy@phall.io";
 const title = `${SITE.name} — Privacy policy`;
 const description =
@@ -195,8 +195,11 @@ const description =
         <strong>Public aggregate counters.</strong> For each request, the site
         increments hourly counters by user-agent class (for example
         "browser" or a named AI crawler), country, hostname, response status,
-        and type of request. These counters contain no IP addresses, raw user
-        agents, or cookies. They are published live at <a href="/telemetry">/telemetry</a>.
+        and type of request. Page views and installer requests also count an
+        allowlisted <code>ref</code> tag and the referring site reduced to a
+        channel name, never the full address. These counters contain no IP
+        addresses, raw user agents, or cookies. They are published live at
+        <a href="/telemetry">/telemetry</a>.
       </p>
       <p>
         <strong>Private analytics.</strong> Each request is also recorded in a

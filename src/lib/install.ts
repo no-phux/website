@@ -17,15 +17,15 @@ export type InstallTarget = { id: "cli" | "desktop" | "mobile"; label: string; c
  */
 export const installTargets: InstallTarget[] = [
   { id: "cli", label: "CLI", command: cliInstall, note: "macOS and Linux · installs phux and phux-mcp" },
-  { id: "desktop", label: "Desktop", command: desktopInstall, note: "Apple-silicon Mac · or install from a terminal on macOS or Linux" },
+  { id: "desktop", label: "Desktop", command: desktopInstall, note: "Apple-silicon Mac · or install from a terminal on macOS or Linux. Installs the phux CLI too if none is found." },
   { id: "mobile", label: "Mobile", command: "", note: "No install: open the demo, press Enter, scan the QR, then drive the shell from your phone. Beta: TestFlight on iPhone, Google Play testing on Android." },
 ];
 
 /** The stable Apple-silicon Desktop archive; the site worker resolves it per click (host/download.ts). */
 export const desktopDownload = "/download/desktop";
 
-/** Desktop releases are ad-hoc signed, not notarized, so a browser download meets Gatekeeper once. */
-export const desktopFirstOpen = "First open: System Settings → Privacy & Security → Open Anyway.";
+/** Pending a real-Mac check. Delete this line if that Mac shows no confirmation dialog. */
+export const desktopFirstOpen = "First open: macOS asks to confirm an app downloaded from the internet. Choose Open.";
 
 /** The same installer, told to print its plan and install nothing. */
 export function dryRun(command: string) {

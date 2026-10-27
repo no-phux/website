@@ -12,8 +12,7 @@ export const GET: APIRoute = async () => {
   const header = Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630">
     <rect width="1200" height="630" fill="#0c0f11"/>
     <g font-family="Helvetica Neue, Helvetica, Arial, sans-serif">
-      <text x="36" y="136" fill="#e7e2da" font-size="48" font-weight="600" letter-spacing="-2">${xml(SITE.tagline)}</text>
-      <text x="36" y="594" fill="#a6b2a8" font-size="22">Your agents, shells, and machines. One workspace. You in command.</text>
+      <text x="36" y="136" fill="#e7e2da" font-size="30" font-weight="600" letter-spacing="-0.6">${xml(SITE.tagline)}</text>
     </g>
   </svg>`);
   const desktop = resolve("public/product/desktop-workspace.webp");

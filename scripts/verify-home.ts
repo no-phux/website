@@ -6,6 +6,7 @@ import { extname, resolve } from "node:path";
 import { chromium } from "playwright-core";
 import { verifyStaticHome } from "./home-static-checks";
 import { verifyFox } from "./home-fox-checks";
+import { verifyHomeContent } from "./home-content-checks";
 import { verifyClientComparison, verifyHomeAuthReturn, verifyHostedShell, verifyTouchComparison, verifyWorkspaceInstallCopy, verifyWorkspaceResize } from "./home-interaction-checks";
 
 const root = resolve(import.meta.dir, "../dist");
@@ -51,7 +52,7 @@ try {
     });
   });
   await page.goto(`${base}/`);
-  assert.equal((await page.getByRole("heading", { level: 1 }).innerText()).trim(), "Run the\nwhole show.");
+  await verifyHomeContent(page);
   assert.equal(await page.locator("#home-light iframe").count(), 0, "no live app exists before scrolling");
   assert.ok(await page.locator(".client-comparison").isVisible(), "real product screenshots lead the page");
   assert.equal(await page.locator(".download-primary").getAttribute("href"), "/download/desktop", "the primary action downloads the actual desktop release");
@@ -126,6 +127,8 @@ try {
   assert.ok(await download.isVisible(), "hover swaps to the desktop download");
   assert.equal(await command.isHidden(), true, "Desktop leads with the download, not a command");
   assert.equal(await download.getAttribute("href"), "/download/desktop", "the download is the worker's stable Mac archive redirect");
+  assert.equal((await page.locator("#install-note").innerText()).trim(), "First open: macOS asks to confirm an app downloaded from the internet. Choose Open.", "the first-open line stays until a real Mac confirms it");
+  assert.equal(await page.locator(".linux-desktop-note").count(), 0);
   await target("mobile").click();
   assert.equal(await target("mobile").getAttribute("aria-pressed"), "true", "the clicked target is pressed");
   assert.ok(await request.isVisible(), "Mobile asks for an address instead of printing a command");
@@ -204,6 +207,11 @@ try {
   assert.equal(beta.payload?.email, "more@example.com", "/more still posts the TestFlight request");
   assert.ok(await page.locator("#beta form").isVisible(), "release signup is preserved");
   assert.equal(await page.locator("[data-copy]").count(), 2, "alternate installers preserved");
+  const macDesktop = await page.locator(".desktop-install p").innerText();
+  assert.match(macDesktop, /macOS 26 or later/);
+  assert.match(macDesktop, /The app includes the phux CLI and server/);
+  assert.match(macDesktop, /Developer ID signed and Apple-notarized/);
+  assert.doesNotMatch(macDesktop, /macOS 27|ad-hoc|not Apple-notarized|Homebrew/i);
   await page.goto(`${base}/privacy`);
   assert.equal(await page.getByRole("link", { name: "join the beta" }).getAttribute("href"), "/more#beta");
   assert.equal(await page.getByRole("link", { name: "request access to phux for iPhone" }).getAttribute("href"), "/more#testflight");
@@ -229,7 +237,7 @@ try {
   await page.waitForFunction(() => !document.querySelector("#home-light iframe"));
   await page.waitForTimeout(250);
   assert.equal(await page.locator("#home-light iframe").count(), 0, "scrolling away releases the iframe, GPU and disposable connection");
-  await page.getByRole("link", { name: "Try the live workspace" }).click();
+  await page.getByRole("link", { name: "Open the browser demo", exact: true }).click();
   await page.locator("#home-light iframe").waitFor();
   await page.frameLocator("#home-light iframe").locator(".install-hook").waitFor();
   assert.equal(await page.locator("#home-light iframe").count(), 1, "returning creates exactly one fresh workspace");
