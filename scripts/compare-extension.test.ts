@@ -11,6 +11,16 @@ const compare = {
   group: "start" as const,
   order: 5,
 };
+const linked = ["config", "plugins", "scripting", "clients", "concepts", "agents", "remote"].map((slug) => ({
+  ...compare,
+  repoPath: `docs/${slug}.md`,
+  slug,
+}));
+const catalog = [
+  compare,
+  ...linked,
+  { ...compare, repoPath: "docs/install.md", slug: "installation" },
+];
 
 const source = `# phux vs tmux, Herdr, and cmux
 
@@ -26,7 +36,7 @@ Facts were checked on 2026-10-19.
 
 describe("compare page extension", () => {
   test("adds zellij, WezTerm, and an open-source option, and drops the phone-app phrase", () => {
-    const text = createPageRenderer([compare], revision, versions)(source, compare);
+    const text = createPageRenderer(catalog, revision, versions)(source, compare);
     expect(text).toContain("2026-10-19");
     expect(text).toContain("checked on 2026-10-27");
     expect(text).toContain("## Compared with zellij and WezTerm");
@@ -35,6 +45,11 @@ describe("compare page extension", () => {
     expect(text.indexOf("## If you want an open-source option")).toBeLessThan(text.indexOf("\n## Next\n"));
     expect(text.indexOf("| zellij | WezTerm | phux |")).toBeGreaterThan(0);
     expect(text).toContain(`https://github.com/no-phux/phux/blob/${revision}/LICENSE`);
+    expect(text).toContain("[Scripting](/scripting)");
+    expect(text).toContain("[Remote machines](/remote)");
+    expect(text).toContain("[Install](/installation)");
+    expect(text).toContain("[What survives what](/concepts#what-survives-what)");
+    expect(text).not.toContain("github.com/no-phux/phux/tree/");
     expect(text).toContain("Apache-2.0");
     expect(text).toContain("phux does not claim live multi-person session sharing");
     expect(text).toContain("is still a young feature and is evolving rapidly");
