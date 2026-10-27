@@ -7,6 +7,8 @@
 // Google Play testing list. Either way the request also goes through the member
 // pipeline. `website` is the honeypot the Worker drops before doing anything.
 
+import { showMobileChoices, wireEmailViewport } from "./email-viewport";
+
 type BetaResponse = {
   ok?: boolean;
   status?: string;
@@ -58,6 +60,7 @@ function showPhone(form: HTMLFormElement, phone: Phone, toggle: HTMLButtonElemen
   email?.setAttribute("placeholder", copy.placeholder);
   email?.setAttribute("aria-label", copy.field);
   if (toggle) toggle.textContent = `${phones[copy.other].label} instead`;
+  showMobileChoices(form, phone);
 }
 
 /**
@@ -70,23 +73,27 @@ export function wireBetaRequest(
   form: HTMLFormElement | null,
   note: HTMLElement | null,
   toggle: HTMLButtonElement | null = null,
-): void {
+  preferredPhone?: Phone,
+): (() => void) | undefined {
   if (!form) return;
+  const controller = new AbortController();
+  const disposeViewport = wireEmailViewport(form);
   const email = form.elements.namedItem("email") as HTMLInputElement | null;
   const trap = form.elements.namedItem("website") as HTMLInputElement | null;
   const button = form.querySelector<HTMLButtonElement>("button[type=submit]");
 
   if (toggle) {
-    showPhone(form, initialPhone(), toggle);
+    showPhone(form, preferredPhone ?? initialPhone(), toggle);
     toggle.addEventListener("click", () => {
       showPhone(form, phones[phoneOf(form)].other, toggle);
       if (note) note.textContent = "";
-    });
+    }, { signal: controller.signal });
   }
   form.addEventListener("submit", (event) => {
     event.preventDefault();
     void submit(form, email, trap, button, note);
-  });
+  }, { signal: controller.signal });
+  return () => { controller.abort(); disposeViewport(); };
 }
 
 function phoneOf(form: HTMLFormElement): Phone {
@@ -112,6 +119,7 @@ async function submit(
 ): Promise<void> {
   const value = email?.value.trim() ?? "";
   const phone = phoneOf(form);
+  email?.blur();
   if (button) button.disabled = true;
   try {
     const response = await fetch("/api/beta", {
@@ -120,18 +128,19 @@ async function submit(
       body: JSON.stringify({ email: value, website: trap?.value ?? "", platform: phone }),
     });
     const result = (await response.json()) as BetaResponse;
-    if (!result.ok) {
-      if (note) {
-        note.textContent =
-          "Could not request access: " + (result.error ?? "try again.");
-      }
-      return;
-    }
-    if (note) note.textContent = requestedNote(phone, result.status, value);
-    form.reset();
+    finishRequest(result, form, note, phone, value);
   } catch {
     if (note) note.textContent = "Could not connect. Try again.";
   } finally {
     if (button) button.disabled = false;
   }
+}
+
+function finishRequest(result: BetaResponse, form: HTMLFormElement, note: HTMLElement | null, phone: Phone, value: string) {
+  if (!result.ok) {
+    if (note) note.textContent = "Could not request access: " + (result.error ?? "try again.");
+    return;
+  }
+  if (note) note.textContent = requestedNote(phone, result.status, value);
+  form.reset();
 }

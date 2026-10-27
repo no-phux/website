@@ -126,8 +126,9 @@ The landing at `src/pages/index.astro` stays minimal: a short top bar, an
 outcome-led headline with a direct live-demo link, one product tour with its
 sandbox invitation, three capabilities, and the floating CLI / Desktop / Mobile
 install switcher below the tour. Desktop is a download (`/download/desktop`, with the curl
-installer as the alternative); Mobile is the beta request for the visitor's phone (TestFlight on
-iPhone, Google Play testing on Android, iPhone first on a computer); the release-update
+installer as the alternative); Mobile leads with a normal native TestFlight
+handoff on iOS and keeps an email invite as an explicit option. Android requests
+Google Play access; no access action forces open the keyboard. The release-update
 signup lives on `/more`. Add a section only when it replaces one.
 
 `<HeroDemo client:load>` renders the product tour and owns the hosted

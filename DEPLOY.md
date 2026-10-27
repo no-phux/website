@@ -123,6 +123,13 @@ attaches to the same session through `wss://shell.phux.sh/session?attach=CODE`.
 
 ### TestFlight access requests (`/api/beta`)
 
+`/download/ios` reads the same external group's enabled public link with the
+existing ASC credentials, then redirects to Apple. It never enables a link or
+changes distribution. Lookup caching is bounded to 60 seconds; a missing,
+disabled, or failed link falls back to `/more` with optional email access.
+Enable/share the public link in App Store Connect → TestFlight → external group
+to allow joining without email entry. Apple owns acceptance and installation.
+
 The "phux for iPhone" request is the landing's third install target (`Mobile`)
 and the form on `/more`; both post to `/api/beta`
 (`host/testflight.ts`). The Worker adds the address to an external TestFlight

@@ -1,0 +1,24 @@
+---
+import { iosDownload } from "../lib/install";
+---
+<a class="testflight-link" data-testflight-link href={iosDownload}>Open TestFlight <span aria-hidden="true">↗</span></a>
+<details data-email-invite>
+  <summary>Email an invite instead</summary>
+  <form class="install-email-form" id="beta-form" method="post" action="/api/beta">
+    <label class="email-label" for="beta-email">Invitation email</label>
+    <input id="beta-email" type="email" name="email" required autocomplete="email"
+      inputmode="email" enterkeyhint="send" autocapitalize="none" spellcheck="false"
+      placeholder="Apple Account email" aria-label="Email address for the TestFlight invite" />
+    <input class="install-trap" type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true" />
+    <button type="submit" data-invite-submit>Send invitation</button>
+    <button type="button" class="install-phone" id="beta-phone">Android instead</button>
+  </form>
+</details>
+<noscript><p>Email invitations require JavaScript; the TestFlight link works without it.</p></noscript>
+<style>
+  .install-email-form { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  input { min-height: 48px; flex: 1; min-width: 120px; width: 100%; border: 1px solid #c8cfc330; border-radius: 8px; padding: 12px; background: #0d1012; color: #e7e2da; font: 16px var(--font-reading); box-sizing: border-box; }
+  button { min-height: 48px; padding: 8px 14px; border: 1px solid #c8cfc333; border-radius: 8px; background: #262d29; color: #e7e2da; font: 13px var(--font-reading); cursor: pointer; }
+  .install-phone { min-height: 44px; padding: 0; border: 0; background: none; color: #a1aca4; font-size: 12px; }
+  .install-trap { position: absolute; left: -10000px; width: 1px; height: 1px; opacity: 0; }
+</style>

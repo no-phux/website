@@ -4,6 +4,7 @@ import AuthReturn from "../components/AuthReturn.astro";
 import PhuxExplainer from "../components/motion/PhuxExplainer";
 import { SITE, docsHref } from "../lib/site";
 import release from "../lib/release.json";
+import MobileAccessForm from "../components/MobileAccessForm.astro";
 
 const cliInstall = "curl -fsSL https://phux.sh/install | sh";
 const desktopInstall = "curl -fsSL https://phux.sh/install-desktop | sh";
@@ -75,32 +76,12 @@ const FEATURES = [
   </section>
 
   <section class="wrap join">
-    <div id="testflight">
+    <div id="testflight" class="mobile-access" data-mobile-access>
       <h2>phux for your phone</h2>
       <p>Drive the same terminals from your phone. In beta on TestFlight and Google Play.</p>
-      <form class="join-form" id="beta-form">
-        <input
-          type="email"
-          name="email"
-          required
-          autocomplete="email"
-          placeholder="Apple Account email"
-          aria-label="Email address for the TestFlight invite"
-        />
-        <input
-          class="join-trap"
-          type="text"
-          name="website"
-          tabindex="-1"
-          autocomplete="off"
-          aria-hidden="true"
-        />
-        <button type="submit">Request access</button>
-        <p class="join-note" id="beta-note" aria-live="polite">
-          The invite goes to this address.
-        </p>
-        <button type="button" class="join-phone" id="beta-phone">Android instead</button>
-      </form>
+      <p class="access-unavailable" data-testflight-unavailable hidden>TestFlight couldn’t open right now. You can request an email invitation below.</p>
+      <MobileAccessForm />
+      <p class="join-note" id="beta-note" role="status" aria-live="polite"></p>
     </div>
     <div id="beta">
       <h2>Release updates</h2>
@@ -267,10 +248,18 @@ const FEATURES = [
     });
   }
   // Shared with the landing; the inline script above owns the copy/join handlers.
+  const parameters = new URLSearchParams(location.search);
+  const phone = parameters.get("phone");
+  const access = document.querySelector<HTMLElement>("[data-mobile-access]");
+  if (parameters.get("testflight") === "unavailable" && access) {
+    access.dataset.testflightUnavailable = "true";
+    access.querySelector<HTMLElement>("[data-testflight-unavailable]")!.hidden = false;
+  }
   wireBetaRequest(
     document.getElementById("beta-form") as HTMLFormElement | null,
     document.getElementById("beta-note"),
     document.getElementById("beta-phone") as HTMLButtonElement | null,
+    phone === "ios" || phone === "android" ? phone : undefined,
   );
 </script>
 

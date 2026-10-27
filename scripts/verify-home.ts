@@ -2,34 +2,20 @@
 /** Homepage acceptance against built assets; never uses a production server. */
 import assert from "node:assert/strict";
 import { mkdir } from "node:fs/promises";
-import { extname, resolve } from "node:path";
+import { resolve } from "node:path";
 import { chromium } from "playwright-core";
 import { verifyStaticHome } from "./home-static-checks";
 import { verifyFox } from "./home-fox-checks";
 import { verifyHomeContent } from "./home-content-checks";
 import { verifyDeviceInstalls } from "./home-platform-checks";
 import { platformVisitors } from "./home-platform-fixtures";
+import { homeServer } from "./home-server";
+import { verifyEmailFallback } from "./home-email-fallback-checks";
 import { verifyClientComparison, verifyHomeAuthReturn, verifyHostedShell, verifyTouchComparison, verifyWorkspaceInstallCopy, verifyWorkspaceResize } from "./home-interaction-checks";
 
 const root = resolve(import.meta.dir, "../dist");
 const artifacts = resolve(import.meta.dir, "../.home-check");
-const types: Record<string, string> = {
-  ".html": "text/html", ".js": "text/javascript", ".css": "text/css",
-  ".svg": "image/svg+xml", ".woff2": "font/woff2", ".png": "image/png",
-};
-const server = Bun.serve({
-  hostname: "127.0.0.1", port: 0,
-  async fetch(request) {
-    const pathname = new URL(request.url).pathname;
-    let path = resolve(root, `.${pathname}`);
-    if (!path.startsWith(`${root}/`) && path !== root) return new Response(null, { status: 403 });
-    if (pathname === "/") path = resolve(root, "index.html");
-    if (!extname(path)) path += ".html";
-    const file = Bun.file(path);
-    if (!(await file.exists())) return new Response(null, { status: 404 });
-    return new Response(file, { headers: { "content-type": types[extname(path)] ?? file.type } });
-  },
-});
+const server = homeServer(root);
 const base = `http://127.0.0.1:${server.port}`;
 const browser = await chromium.launch({ channel: "chrome", headless: true });
 try {
@@ -160,6 +146,8 @@ try {
   }
   // The Mobile target carries the same TestFlight request /more posts.
   await target("mobile").click();
+  assert.ok(await request.getByRole("link", { name: "Open TestFlight" }).isVisible(), "native TestFlight is the first iOS choice");
+  await request.locator("[data-email-invite] > summary").click();
   await request.locator("input[name=email]").fill("iphone@example.com");
   await request.locator("button[type=submit]").click();
   await page.waitForFunction(() => document.querySelector("#beta-note")?.textContent?.includes("Invite sent") ?? false);
@@ -203,7 +191,8 @@ try {
   assert.ok(await page.getByRole("link", { name: "Open demo", exact: true }).evaluate((link) => link === document.activeElement), "closing restores focus");
   await page.goto(`${base}/more`);
   assert.equal(await page.getByRole("link", { name: /Built for automation/ }).getAttribute("href"), "https://docs.phux.sh/agents");
-  assert.ok(await page.locator("#testflight form").isVisible(), "iPhone signup is preserved");
+  assert.ok(await page.locator("#testflight form").isHidden(), "email is optional and does not summon a keyboard");
+  await page.locator("#testflight [data-email-invite] > summary").click();
   await page.locator("#testflight input[name=email]").fill("more@example.com");
   await page.locator("#testflight button[type=submit]").click();
   await page.waitForFunction(() => document.querySelector("#beta-note")?.textContent?.includes("Invite sent") ?? false);
@@ -234,6 +223,7 @@ try {
   await verifyWorkspaceInstallCopy(page);
   assert.equal(await live.locator(".install-hook-lede, .install-hook-proof, .live-session-hint").count(), 0, "the live hero has no surrounding marketing prose");
   await live.getByRole("button", { name: "iPhone" }).click();
+  await live.locator("[data-email-invite] > summary").click();
   assert.ok(await live.locator(".install-hook-request input[name=email]").isVisible(), "the iPhone target requests TestFlight");
   assert.ok(await page.locator(".hero").isVisible(), "the live workspace never replaces the product introduction");
   await page.evaluate(() => window.scrollTo(0, 0));
@@ -251,6 +241,7 @@ try {
   assert.deepEqual(errors, [], "no browser exceptions");
   await context.close();
   await verifyDeviceInstalls(browser, base, artifacts);
+  await verifyEmailFallback(browser, base);
   await verifyStaticHome(browser, base);
   console.log(`PASS home: real workspace captures, pointer/touch/keyboard reveal and enlargement, first-fold install, optional walkthrough, lazy workspace lifecycle, install/copy/beta, tour chapters/pause/focus, glass shell auth/failure recovery, mobile/tablet/desktop, reduced motion, no-JS, idle resource budget. Screenshots: ${artifacts}`);
 } finally {

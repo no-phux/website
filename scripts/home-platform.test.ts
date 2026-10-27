@@ -17,11 +17,13 @@ describe("device-first homepage installs", () => {
       expect(action.href === "/download/desktop").toBe(platform === "mac");
     }
   });
-  test("mobile access uses the existing beta flow, not an invented store link", () => {
-    for (const platform of ["iphone", "ipad", "android"] as const) {
-      expect(installActions[platform].target).toBe("mobile");
-      expect(installActions[platform].href).toBe("/more#testflight");
+  test("iOS uses a native TestFlight handoff; Android retains its existing access flow", () => {
+    for (const platform of ["iphone", "ipad"] as const) {
+      expect(installActions[platform].target).toBeUndefined();
+      expect(installActions[platform].href).toBe("/download/ios");
     }
+    expect(installActions.android.target).toBe("mobile");
+    expect(installActions.android.href).toBe("/more#testflight");
     expect(installActions.windows.note).toContain("No native Windows app yet");
   });
 });

@@ -15,6 +15,13 @@ function assetsOf(body: string, contentType = "text/html") {
 }
 
 describe("markdown negotiation", () => {
+  test("iOS download uses the dynamic handoff before static assets", async () => {
+    const response = await handler.fetch(new Request("https://phux.sh/download/ios"), {
+      ASSETS: { fetch: async () => { throw new Error("handoff must not fetch assets"); } },
+    });
+    expect(response.status).toBe(302);
+    expect(response.headers.get("location")).toBe("/more?phone=ios&testflight=unavailable#testflight");
+  });
   test("alias redirects precede assets, APIs, and app association handling", async () => {
     for (const host of ["phux.computer", "www.phux.computer"]) {
       for (const path of ["/", "/api/beta", "/_astro/site.js", "/.well-known/apple-app-site-association", "/apple-app-site-association"]) {

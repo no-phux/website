@@ -4,6 +4,7 @@ import assert from "node:assert/strict";
 import { mkdir } from "node:fs/promises";
 import { extname, resolve } from "node:path";
 import { chromium, type FrameLocator } from "playwright-core";
+import { verifyParentKeyboard } from "./home-keyboard-checks";
 
 const root = resolve(import.meta.dir, "../dist");
 const server = Bun.serve({ hostname: "127.0.0.1", port: 0, async fetch(request) {
@@ -83,6 +84,8 @@ try {
     await hero.getByRole("button", { name: "CLI", exact: true }).click();
     assert.equal(await hero.locator(".install-hook-line code").innerText(), "curl -fsSL https://phux.sh/install | sh");
     await hero.getByRole("button", { name: "iPhone", exact: true }).click();
+    assert.equal(await hero.getByRole("link", { name: "Open TestFlight" }).getAttribute("href"), "/download/ios");
+    await hero.locator("[data-email-invite] > summary").click();
     const input = hero.getByRole("textbox", { name: "Email address for the TestFlight invite" });
     const geometry = await input.evaluate(node => {
       const box = node.getBoundingClientRect(), style = getComputedStyle(node);
@@ -98,6 +101,7 @@ try {
       assert.ok(geometry.formHeight <= 64, `signup uses one compact shared surface at ${width}`);
       assert.equal(geometry.appearance, "none", "email controls do not use the platform's native inset style");
       assert.ok(parseFloat(geometry.font) >= 16, "email entry does not trigger iPhone focus zoom");
+      await verifyParentKeyboard(page, hero);
       await input.fill("layout@example.com");
       await hero.getByRole("button", { name: "Request access", exact: true }).click();
       await hero.getByRole("status").filter({ hasText: "Invite sent" }).waitFor();
