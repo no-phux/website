@@ -10,7 +10,7 @@ export const SITE = {
   url: "https://phux.sh",
   docsDomain: "docs.phux.sh",
   docsUrl: "https://docs.phux.sh",
-  category: "Programmable terminal runtime",
+  category: "Terminal multiplexer",
   tagline: oneLiner,
   description: oneLiner,
   github: "https://github.com/no-phux/phux",

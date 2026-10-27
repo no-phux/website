@@ -2,13 +2,15 @@
 /** Agent-facing docs acceptance against built assets, never a user's phux server. */
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
-import { mkdir, readFile } from "node:fs/promises";
+import { mkdir, readdir, readFile } from "node:fs/promises";
 import { extname, resolve } from "node:path";
 import { chromium, webkit, type Page } from "playwright-core";
 import handler from "../host/index";
 import { DOCS_HOST, SITE_HOST, routeRequest } from "../host/routes";
 import { htmlToMarkdown } from "../host/markdown";
-import { AGENT_START, OVERVIEW } from "../src/lib/site";
+import { AGENT_START, OVERVIEW, SITE } from "../src/lib/site";
+import { SHIPPED_OPERATING_SYSTEM } from "../src/lib/software-application";
+import { loadCompareMarkdown, measurementParagraphs, measurementsSection } from "../src/lib/performance-page";
 
 const root = resolve(import.meta.dir, "../dist");
 const useWebKit = process.argv.includes("--webkit");
@@ -129,6 +131,11 @@ async function verifyDiscovery() {
   }
   const catalog = JSON.parse(await readFile(resolve(root, ".well-known/ai-catalog.json"), "utf8"));
   const llms = await readFile(resolve(root, "llms.txt"), "utf8");
+  assert.ok(llms.startsWith(`# phux\n\n> ${SITE.tagline}\n`), "llms.txt leads with the canonical one-liner");
+  assert.equal(llms.includes("programmable terminal runtime"), false, "llms.txt does not open on the old category line");
+  for (const path of ["/compare", "/tmux-import", "/performance"]) {
+    assert.ok(llms.includes(`https://${DOCS_HOST}${path}`), `llms.txt indexes ${path}`);
+  }
   assert.ok(llms.includes("https://docs.phux.sh/agents.md"), "Markdown entrypoint is a published route");
   for (const skill of skills.skills) {
     assert.ok(catalog.entries.some((entry: { url: string }) => entry.url.endsWith(skill.url)));
@@ -183,11 +190,30 @@ async function verifySearchApi(pages: { url: string }[]) {
   return sections.length;
 }
 
+async function sitemapFiles(pattern: RegExp): Promise<{ name: string; xml: string }[]> {
+  const names = (await readdir(root)).filter((name) => pattern.test(name)).sort();
+  return Promise.all(names.map(async (name) => ({ name, xml: await readFile(resolve(root, name), "utf8") })));
+}
+
+function assertLastmodsDiffer(xml: string, label: string) {
+  const blocks = [...xml.matchAll(/<url>[\s\S]*?<\/url>/g)].map((match) => match[0]);
+  const dates = blocks
+    .map((block) => block.match(/<lastmod>([^<]+)<\/lastmod>/)?.[1])
+    .filter((date): date is string => Boolean(date));
+  if (dates.length > 1 && new Set(dates).size === 1) {
+    assert.fail(`${label}: every dated URL shares lastmod ${dates[0]}`);
+  }
+}
+
 async function verifyPublishedContent() {
   const index = JSON.parse(await readFile(resolve(root, "api/mcp-search.json"), "utf8"));
   const pages = index.pages as { url: string }[];
-  const sitemap = await readFile(resolve(root, "sitemap-0.xml"), "utf8");
-  for (const { url } of pages) await verifyPublishedPage(url, sitemap);
+  const siteSitemaps = await sitemapFiles(/^sitemap-\d+\.xml$/);
+  const docsSitemaps = await sitemapFiles(/^sitemap-docs-\d+\.xml$/);
+  const docsSitemap = docsSitemaps.map((file) => file.xml).join("\n");
+  assert.ok(docsSitemaps.length > 0, "docs host sitemap exists");
+  for (const { url } of pages) await verifyPublishedPage(url, docsSitemap);
+  await verifyCrawlMetadata(siteSitemaps, docsSitemaps);
   // /decisions is the live constraints page; only the historical ADR archive stays out.
   assert.ok(pages.every(({ url }) => !/^\/(?:adr(?:\/|$)|decisions\/)/.test(url)), "historical ADRs are not live search pages");
   const clients = await readFile(resolve(root, "clients.md"), "utf8");
@@ -202,6 +228,72 @@ async function verifyPublishedContent() {
   await verifyDiscovery();
   await verifyAgentSurfaces(pages);
   return { pages: pages.length, sections: await verifySearchApi(pages) };
+}
+
+async function verifyCrawlMetadata(
+  siteSitemaps: { name: string; xml: string }[],
+  docsSitemaps: { name: string; xml: string }[],
+) {
+  const docsSitemap = docsSitemaps.map((file) => file.xml).join("\n");
+  for (const file of siteSitemaps) {
+    assert.equal(file.xml.includes(`https://${DOCS_HOST}/`), false, `${file.name} lists no docs URLs`);
+    assertLastmodsDiffer(file.xml, file.name);
+  }
+  for (const file of docsSitemaps) assertLastmodsDiffer(file.xml, file.name);
+  assert.ok(docsSitemap.includes(`<loc>https://${DOCS_HOST}/performance</loc>`), "docs sitemap includes /performance");
+  const docsIndex = await readFile(resolve(root, "sitemap-docs-index.xml"), "utf8");
+  for (const file of docsSitemaps) {
+    assert.ok(docsIndex.includes(`<loc>https://${DOCS_HOST}/${file.name}</loc>`), `docs host index lists ${file.name}`);
+  }
+  assert.equal(docsIndex.includes("https://phux.sh/"), false, "the docs sitemap index stays on docs.phux.sh");
+  const measurements = measurementsSection(loadCompareMarkdown(resolve(import.meta.dir, "..")) ?? "");
+  assert.ok(measurements, "compare.md publishes a measurements section");
+  const performanceMd = await readFile(resolve(root, "performance.md"), "utf8");
+  assert.ok(performanceMd.includes(measurements!), "performance.md serves the published measurements");
+  assert.ok(performanceMd.includes("](/compare)"), "performance.md points at the comparison");
+  const paragraphs = measurementParagraphs(loadCompareMarkdown(resolve(import.meta.dir, "..")) ?? "");
+  assert.ok(paragraphs.length > 1, "measurements stay separate paragraphs");
+  const performanceHtml = await readFile(resolve(root, "performance.html"), "utf8");
+  for (const paragraph of paragraphs) {
+    const opening = paragraph.slice(0, 48);
+    assert.equal(performanceHtml.includes(`<p>${opening}`) || performanceHtml.includes(`<p>${opening.replace(/&/g, "&amp;")}`), true, `performance.html keeps a paragraph starting ${opening}`);
+  }
+  for (const file of ["index.html", "overview.html"]) {
+    const html = await readFile(resolve(root, file), "utf8");
+    const match = html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/);
+    assert.ok(match, `${file}: SoftwareApplication JSON-LD`);
+    const data = JSON.parse(match![1]!) as { "@graph"?: Record<string, unknown>[] };
+    const application = data["@graph"]?.find((node) => node["@type"] === "SoftwareApplication");
+    const source = data["@graph"]?.find((node) => node["@type"] === "SoftwareSourceCode");
+    assert.ok(application, `${file}: SoftwareApplication node`);
+    assert.equal(application?.["@id"], "https://phux.sh/#software");
+    assert.equal(application?.name, "phux");
+    assert.equal(application?.description, SITE.tagline);
+    assert.equal(application?.url, SITE.url, `${file}: one canonical product url`);
+    assert.equal(application?.applicationCategory, "DeveloperApplication");
+    assert.equal(application?.operatingSystem, SHIPPED_OPERATING_SYSTEM);
+    assert.equal(application?.license, "https://www.apache.org/licenses/LICENSE-2.0");
+    assert.equal(application?.codeRepository, undefined, `${file}: codeRepository is not a SoftwareApplication property`);
+    assert.equal(source?.codeRepository, "https://github.com/no-phux/phux");
+    assert.deepEqual(source?.targetProduct, { "@id": "https://phux.sh/#software" });
+    assert.deepEqual(application?.offers, { "@type": "Offer", price: "0", priceCurrency: "USD" });
+    assert.equal(typeof application?.softwareVersion, "string", `${file}: softwareVersion from this build`);
+    assert.ok(!/iPhone|Android|phone/i.test(String(application?.operatingSystem)), `${file}: JSON-LD names shipped systems only`);
+  }
+  const overview = await readFile(resolve(root, "overview.html"), "utf8");
+  assert.match(overview, /<title>Documentation overview — phux<\/title>/, "overview title names the page");
+  const env = { ASSETS: { fetch: asset } };
+  const docsIndexResponse = await handler.fetch(new Request(`https://${DOCS_HOST}/sitemap-index.xml`), env);
+  assert.equal(docsIndexResponse.status, 200);
+  assert.equal(await docsIndexResponse.text(), docsIndex, "docs.phux.sh/sitemap-index.xml is the docs index");
+  for (const host of [SITE_HOST, DOCS_HOST]) {
+    const response = await handler.fetch(new Request(`https://${host}/sitemap.xml`), env);
+    assert.equal(response.status, 301, `${host}/sitemap.xml redirects`);
+    assert.equal(response.headers.get("location"), `https://${host}/sitemap-index.xml`);
+  }
+  const performance = await handler.fetch(new Request(`https://${DOCS_HOST}/performance.md`), env);
+  assert.equal(performance.status, 200, "/performance.md serves");
+  assert.match(performance.headers.get("content-type") ?? "", /markdown/);
 }
 
 async function verifyPageCopy(page: Page, base: string, path: string) {

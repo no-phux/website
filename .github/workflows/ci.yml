@@ -71,6 +71,7 @@ jobs:
           repository: no-phux/phux
           ref: main
           path: phux
+          fetch-depth: 0
           persist-credentials: false
 
       - name: Build and verify current documentation

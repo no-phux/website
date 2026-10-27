@@ -86,6 +86,12 @@ export function isSiteHost(host: string): boolean {
   return hostname === SITE_HOST || hostname === `www.${SITE_HOST}`;
 }
 
+/** Docs requests for /sitemap-index.xml read the docs-host index, not phux.sh's. */
+export function sitemapIndexAsset(host: string, pathname: string): string | undefined {
+  if (isDocsHost(host) && pathname === "/sitemap-index.xml") return "/sitemap-docs-index.xml";
+  return undefined;
+}
+
 export function isDocsPath(pathname: string): boolean {
   const path = stripPageSuffix(pathname);
   if (isVgpuConceptPath(path)) return false;
@@ -108,6 +114,12 @@ export function routeRequest(host: string, url: URL): HostRoute {
     destination.host = SITE_HOST;
     destination.port = "";
     return { kind: "redirect", location: destination.href, status: 301 };
+  }
+
+  // /sitemap.xml was a 404; the generated file is /sitemap-index.xml.
+  if (path === "/sitemap.xml") {
+    const destinationHost = isDocsHost(host) ? DOCS_HOST : isSiteHost(host) ? SITE_HOST : hostnameOf(host);
+    return redirectOn(destinationHost, "/sitemap-index.xml", url.search);
   }
 
   if (isDocsHost(host)) {

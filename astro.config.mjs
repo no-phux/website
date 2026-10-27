@@ -14,7 +14,12 @@ import {
 } from "fumadocs-core/mdx-plugins";
 import { buildSearchIndex } from "./scripts/build-search.mjs";
 import { isDocsPath, isEmbedPath, isVgpuConceptPath } from "./host/routes.ts";
+import { splitDocsSitemap } from "./scripts/split-sitemaps.ts";
+import { pageLastmods } from "./scripts/sitemap-lastmod.ts";
 import { wgslVitePlugin } from "@vgpu/wgsl/loader-vite";
+
+const siteRoot = fileURLToPath(new URL(".", import.meta.url));
+const lastmods = pageLastmods(siteRoot);
 
 // The docs pages render with the Fumadocs markdown pipeline: anchored headings
 // (for the TOC), npm-install tabs, and Shiki-highlighted code.
@@ -86,7 +91,6 @@ export default defineConfig({
     "/concepts/when-to-use": compare ?? "/concepts",
     "/concepts/coming-from": "/getting-started",
     "/concepts/vision": "/architecture",
-    "/performance": compare ?? "/development",
     "/remote-access": "/remote",
     "/consumers": "/clients",
     "/wire": "/protocol",
@@ -161,13 +165,25 @@ export default defineConfig({
       filter: (page) => !isEmbedPath(new URL(page).pathname) && !isVgpuConceptPath(new URL(page).pathname),
       serialize(item) {
         const url = new URL(item.url);
-        if (isDocsPath(url.pathname)) {
+        const docs = isDocsPath(url.pathname);
+        if (docs) {
           url.hostname = "docs.phux.sh";
           item.url = url.href;
         }
+        const lastmod = lastmods.get(url.pathname);
+        if (lastmod) item.lastmod = lastmod;
+        else delete item.lastmod;
         return item;
       },
     }),
+    {
+      name: "phux-host-sitemaps",
+      hooks: {
+        "astro:build:done": async ({ dir }) => {
+          await splitDocsSitemap(fileURLToPath(dir));
+        },
+      },
+    },
     searchIndex(),
   ],
   markdown: {

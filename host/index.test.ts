@@ -1,5 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import handler from "./index";
+import { sitemapIndexAsset } from "./routes";
 import { rotationPayload } from "./tripwire-fixtures";
 
 const PAGE = `<!doctype html><html><head><title>phux</title></head>
@@ -13,6 +14,32 @@ function assetsOf(body: string, contentType = "text/html") {
     },
   };
 }
+
+describe("sitemaps", () => {
+  test("docs.phux.sh/sitemap-index.xml serves the docs index", async () => {
+    let requested = "";
+    const response = await handler.fetch(new Request("https://docs.phux.sh/sitemap-index.xml"), {
+      ASSETS: {
+        fetch: async (request) => {
+          requested = new URL(request.url).pathname;
+          return new Response("<sitemapindex></sitemapindex>", { headers: { "content-type": "application/xml" } });
+        },
+      },
+    });
+    expect(sitemapIndexAsset("docs.phux.sh", "/sitemap-index.xml")).toBe("/sitemap-docs-index.xml");
+    expect(requested).toBe("/sitemap-docs-index.xml");
+    expect(response.status).toBe(200);
+    expect(await response.text()).toContain("sitemapindex");
+  });
+
+  test("/sitemap.xml redirects before assets are fetched", async () => {
+    const response = await handler.fetch(new Request("https://phux.sh/sitemap.xml"), {
+      ASSETS: { fetch: async () => { throw new Error("sitemap.xml must redirect"); } },
+    });
+    expect(response.status).toBe(301);
+    expect(response.headers.get("location")).toBe("https://phux.sh/sitemap-index.xml");
+  });
+});
 
 describe("markdown negotiation", () => {
   test("iOS download uses the dynamic handoff before static assets", async () => {
