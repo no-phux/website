@@ -60,7 +60,7 @@ try {
   const comparisonBox = await page.locator(".client-comparison").boundingBox();
   assert.ok(installBox && comparisonBox && installBox.y < comparisonBox.y, "install controls lead into the real product");
   assert.equal(await page.locator(".tour").isVisible(), false, "the optional walkthrough stays closed initially");
-  assert.equal(await page.locator("#install .install-request").isHidden(), true, "the hero opens on a command, not the request form");
+  assert.equal(await page.locator("#install .install-request").count(), 0, "the homepage picker has no mobile request form");
   assert.equal(await page.locator(".beta, #testflight").count(), 0, "the landing carries no separate TestFlight band");
   assert.equal(await page.locator(".tour").count(), 1, "one product tour");
   assert.equal(await page.locator("body > header").count(), 1, "the landing carries one top bar");
@@ -105,17 +105,17 @@ try {
   assert.equal(await page.evaluate(() => navigator.clipboard.readText()), "curl -fsSL https://phux.sh/install | sh");
   assert.equal(await page.getByRole("status").innerText(), "Install command copied.");
   // The hero switcher swaps the command on hover, focus, click, and arrows,
-  // and turns Desktop into a download. Mobile keeps the beta request the
-  // publish contract pins, without naming a phone in the tab note.
+  // and turns Desktop into a download. There is no Mobile tab.
   const command = page.locator("#install-command");
   const line = page.locator("#install .install-line");
-  const request = page.locator("#install .install-request");
   const target = (name: string) => page.locator(`#install [data-install-target="${name}"]`);
-  assert.deepEqual(await page.locator("#install .install-tabs button").allInnerTexts(), ["CLI", "Desktop", "Mobile"], "three install targets");
+  assert.deepEqual(await page.locator("#install .install-tabs button").allInnerTexts(), ["CLI", "Desktop"], "two install targets");
   await assertInstallPickerCopy(page);
   const tabs = page.locator("#install [data-install-target]");
   for (let index = 0; index < await tabs.count(); index++) {
-    await tabs.nth(index).click();
+    const tab = tabs.nth(index);
+    assert.doesNotMatch((await tab.innerText()).trim(), /mobile/i, "an install tab is not Mobile");
+    await tab.click();
     assert.doesNotMatch((await page.locator("#install-note").innerText()).trim(), homepageInstallPromise, "each install tab note stays off the phone");
   }
   await target("cli").click();
@@ -143,23 +143,11 @@ try {
     });
   const dock = await box("#install");
   const cliTarget = await box('#install [data-install-target="cli"]');
-  for (const name of ["desktop", "mobile", "cli"]) {
+  for (const name of ["desktop", "cli"]) {
     await target(name).hover();
     assert.deepEqual(await box("#install"), dock, `the dock keeps its box while ${name} is previewed`);
     assert.deepEqual(await box('#install [data-install-target="cli"]'), cliTarget, `targets stay pinned while ${name} is previewed`);
   }
-  await target("mobile").click();
-  assert.equal(await target("mobile").getAttribute("aria-pressed"), "true", "the clicked target is pressed");
-  assert.ok(await request.isVisible(), "Mobile asks for an address instead of printing a command");
-  assert.equal(await line.isHidden(), true, "the command line steps aside for the request form");
-  assert.doesNotMatch((await page.locator("#install-note").innerText()).trim(), homepageInstallPromise, "the mobile tab note does not name a phone");
-  await request.locator("[data-email-invite] > summary").click();
-  await request.locator("input[name=email]").fill("iphone@example.com");
-  await request.locator("button[type=submit]").click();
-  await page.waitForFunction(() => document.querySelector("#beta-note")?.textContent?.includes("Invite sent") ?? false);
-  assert.equal(beta.payload?.email, "iphone@example.com", "the homepage request still posts the address");
-  assert.equal(beta.payload?.website, "", "the honeypot stays empty");
-  assert.equal(beta.payload?.platform, "ios", "the wired form posts the beta the component offers first");
   for (const width of [320, 390, 768, 1280]) {
     await page.setViewportSize({ width, height: width < 600 ? 740 : 900 });
     await page.locator(".install-options").evaluate((node: HTMLDetailsElement) => { node.open = false; });

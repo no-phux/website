@@ -5,13 +5,10 @@ import type { HookMoment } from "./install-hook";
 import "../../../../styles/mobile-access.css";
 
 const canShare = () => typeof navigator!=="undefined" && typeof navigator.share==="function" && matchMedia("(hover: none)").matches;
-// The homepage workspace lists shipped installers. The Mobile target stays on the
-// landing picker, where the publish contract pins its request form.
-const hookTargets = installTargets.filter((item) => item.id !== "mobile");
 
 /** Install controls for the homepage workspace. CLI and Desktop only. */
 export default function InstallHook({moment,onCopy,hookRef,copyRef}:{moment:HookMoment;onCopy:()=>void;hookRef:RefObject<HTMLElement|null>;copyRef:RefObject<HTMLButtonElement|null>}) {
-  const [target,setTarget]=useState<InstallTarget>(hookTargets[0]);
+  const [target,setTarget]=useState<InstallTarget>(installTargets[0]);
   const [status,setStatus]=useState("");
   const [copied,setCopied]=useState(false);
   const code=useRef<HTMLElement>(null);
@@ -24,9 +21,9 @@ export default function InstallHook({moment,onCopy,hookRef,copyRef}:{moment:Hook
     const delta=event.key==="ArrowRight"?1:event.key==="ArrowLeft"?-1:0;
     if(!delta)return;
     event.preventDefault();
-    const next=hookTargets[(index+delta+hookTargets.length)%hookTargets.length];
+    const next=installTargets[(index+delta+installTargets.length)%installTargets.length];
     choose(next);
-    (event.currentTarget.parentElement?.children[hookTargets.indexOf(next)] as HTMLElement|undefined)?.focus();
+    (event.currentTarget.parentElement?.children[installTargets.indexOf(next)] as HTMLElement|undefined)?.focus();
   };
   const copy=async(text:string)=>{
     try {
@@ -46,7 +43,7 @@ export default function InstallHook({moment,onCopy,hookRef,copyRef}:{moment:Hook
   };
   return <section ref={hookRef} className="install-hook" data-moment={moment} aria-label="Install phux">
     <div className="install-hook-tabs" role="group" aria-label="Choose an install">
-      {hookTargets.map((item,index)=><button key={item.id} type="button" aria-pressed={item.id===target.id} onClick={()=>choose(item)} onKeyDown={event=>step(event,index)}>{item.label}</button>)}
+      {installTargets.map((item,index)=><button key={item.id} type="button" aria-pressed={item.id===target.id} onClick={()=>choose(item)} onKeyDown={event=>step(event,index)}>{item.label}</button>)}
     </div>
     {desktop?<>
       <div className="install-hook-line install-hook-download">

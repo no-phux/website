@@ -9,17 +9,16 @@ export const cliInstall = "curl -fsSL https://phux.sh/install | sh";
 export const desktopInstall = "curl -fsSL https://phux.sh/install-desktop | sh";
 export const installScriptSource = `${SITE.github}/blob/main/scripts/install.sh`;
 
-export type InstallTarget = { id: "cli" | "desktop" | "mobile"; label: string; command: string; note: string };
+export type InstallTarget = { id: "cli" | "desktop"; label: string; command: string; note: string };
 
 /**
  * The CLI is a command. Desktop is a download, with its installer kept as the
- * terminal (and Linux) alternative. Mobile has no command: the homepage swaps
- * in the beta request. The publish contract pins that empty command.
+ * terminal (and Linux) alternative. The homepage picker maps this list, so it
+ * has no mobile target. `/more` keeps the beta request.
  */
 export const installTargets: InstallTarget[] = [
   { id: "cli", label: "CLI", command: cliInstall, note: "macOS and Linux · installs phux and phux-mcp" },
   { id: "desktop", label: "Desktop", command: desktopInstall, note: "Apple-silicon Mac · or install from a terminal on macOS or Linux. Installs the phux CLI too if none is found." },
-  { id: "mobile", label: "Mobile", command: "", note: "Beta request. This target has no install command." },
 ];
 
 /** The stable Apple-silicon Desktop archive; the site worker resolves it per click (host/download.ts). */

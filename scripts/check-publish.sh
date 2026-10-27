@@ -43,12 +43,15 @@ require .github/workflows/site-deploy.yml 'Verify the installers are served'
 require .github/workflows/site-deploy.yml 'if [ "$shebang" != '"'"'#!/bin/sh'"'"' ]; then'
 
 require src/lib/install.ts 'install-desktop | sh'
-require src/lib/install.ts 'id: "mobile", label: "Mobile", command: ""'
+# The homepage picker maps every install target. A mobile id would render a Mobile tab.
+forbid src/lib/install.ts 'id: "mobile"'
 require src/pages/index.astro 'installTargets'
-require src/pages/index.astro '<MobileAccessForm'
+forbid src/pages/index.astro '<MobileAccessForm'
 require src/components/MobileAccessForm.astro 'id="beta-form"'
 require src/components/MobileAccessForm.astro 'href={iosDownload}'
-require src/pages/index.astro 'wireBetaRequest('
+forbid src/pages/index.astro 'wireBetaRequest('
+require src/pages/more.astro '<MobileAccessForm'
+require src/pages/more.astro 'wireBetaRequest('
 # The homepage install switcher names only shipped platforms.
 forbid src/pages/index.astro 'iPhone'
 forbid src/pages/index.astro 'Android'

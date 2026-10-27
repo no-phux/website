@@ -13,13 +13,19 @@ export const homepageInstallPromise = /phone|testflight|google play/i;
 export async function assertInstallPickerCopy(page: Page) {
   const copy = await page.locator("#install").evaluate((root) => {
     const tabs = [...root.querySelectorAll<HTMLButtonElement>("[data-install-target]")];
-    return [
-      ...tabs.map((tab) => tab.textContent ?? ""),
-      ...tabs.map((tab) => tab.getAttribute("data-install-note") ?? ""),
-      root.querySelector("#install-note")?.textContent ?? "",
-    ];
+    return {
+      labels: tabs.map((tab) => (tab.textContent ?? "").trim()),
+      notes: [
+        ...tabs.map((tab) => tab.getAttribute("data-install-note") ?? ""),
+        root.querySelector("#install-note")?.textContent ?? "",
+      ],
+    };
   });
-  for (const text of copy) assert.doesNotMatch(text, homepageInstallPromise, `homepage install picker: ${text}`);
+  for (const label of copy.labels) {
+    assert.doesNotMatch(label, homepageInstallPromise, `homepage install tab: ${label}`);
+    assert.doesNotMatch(label, /mobile/i, `homepage install tab: ${label}`);
+  }
+  for (const text of copy.notes) assert.doesNotMatch(text, homepageInstallPromise, `homepage install picker: ${text}`);
 }
 
 /** Product copy and metadata must agree, including the script-free document. */
