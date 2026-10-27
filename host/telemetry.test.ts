@@ -1,5 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import {
+  classifyRef,
+  classifyReferrer,
   classifyRequest,
   classifySignal,
   classifyUserAgent,
@@ -95,6 +97,213 @@ describe("classifyRequest", () => {
     expect(events).toContainEqual({ dim: "session", key: "demo:edge" });
     expect(events).toContainEqual({ dim: "miss", key: "/nope" });
     expect(events).toContainEqual({ dim: "status", key: "4xx" });
+  });
+});
+
+describe("classifyRef", () => {
+  test("keeps the allowlist, lowercased", () => {
+    for (const ref of ["x", "hn", "reddit", "lobsters", "mastodon", "bsky", "gh", "newsletter"]) {
+      expect(classifyRef(ref.toUpperCase())).toBe(ref);
+      expect(classifyRef(`  ${ref}  `)).toBe(ref);
+    }
+  });
+
+  test("counts any other present value as other and drops a missing one", () => {
+    expect(classifyRef("facebook")).toBe("other");
+    expect(classifyRef("hn-extra")).toBe("other");
+    expect(classifyRef("x".repeat(200))).toBe("other");
+    expect(classifyRef("newsletter-october")).toBe("other");
+    expect(classifyRef(null)).toBeNull();
+    expect(classifyRef("")).toBeNull();
+    expect(classifyRef("   ")).toBeNull();
+  });
+});
+
+describe("classifyReferrer", () => {
+  test("normalises known hosts and drops the path and query", () => {
+    const cases: Array<[string, string]> = [
+      ["https://t.co/abc123", "x"],
+      ["https://x.com/someone/status/1?s=1", "x"],
+      ["https://twitter.com/someone", "x"],
+      ["https://mobile.twitter.com/someone", "x"],
+      ["https://WWW.X.com/home", "x"],
+      ["https://news.ycombinator.com/item?id=12345&secret=abc", "hn"],
+      ["https://news.ycombinator.com:443/item?id=9", "hn"],
+      ["https://reddit.com/r/programming/comments/abc?utm=1", "reddit"],
+      ["https://old.reddit.com/r/programming", "reddit"],
+      ["https://www.reddit.com/", "reddit"],
+      ["https://np.reddit.com/r/programming", "reddit"],
+      ["https://lobste.rs/s/abc?token=secret", "lobsters"],
+      ["https://github.com/no-phux/phux/pull/1?diff=1", "github"],
+      ["https://user:pass@github.com/no-phux/phux?token=secret", "github"],
+      ["https://www.github.com/", "github"],
+      ["https://gist.github.com/user/abc", "github"],
+      ["https://www.google.com/search?q=phux+terminal", "google"],
+      ["https://google.co.uk/search?q=phux", "google"],
+      ["https://www.google.de/search?q=phux", "google"],
+      ["https://google.com.au/search?q=phux", "google"],
+      ["https://www.google.co.uk./search?q=phux", "google"],
+      ["https://news.google.com/articles/abc?hl=en", "google"],
+      ["https://WWW.Google.COM/search?q=secret", "google"],
+      ["https://duckduckgo.com/?q=phux+terminal&ia=web", "duckduckgo"],
+      ["https://html.duckduckgo.com/html/?q=phux", "duckduckgo"],
+      ["https://www.bing.com/search?q=phux", "bing"],
+      ["https://phux.sh/install?ref=secret", "self"],
+      ["https://docs.phux.sh/protocol?x=1", "self"],
+      ["https://www.phux.sh/", "self"],
+      ["https://shell.phux.sh/", "self"],
+    ];
+    for (const [referer, channel] of cases) {
+      expect(classifyReferrer(referer)).toBe(channel);
+    }
+  });
+
+  test("counts unknown hosts as other and records nothing when there is no host", () => {
+    expect(classifyReferrer("https://example.com/page?q=secret")).toBe("other");
+    expect(classifyReferrer("https://news.ycombinator.com.evil.com/item?id=1")).toBe("other");
+    expect(classifyReferrer("https://notreddit.com/r/programming")).toBe("other");
+    expect(classifyReferrer("https://ycombinator.com/")).toBe("other");
+    expect(classifyReferrer("https://google.evil.com/search?q=phux")).toBe("other");
+    expect(classifyReferrer("https://githubusercontent.com/file")).toBe("other");
+    expect(classifyReferrer("http://203.0.113.9/admin?token=secret")).toBe("other");
+    expect(classifyReferrer("http://[2001:db8::1]/path?q=1")).toBe("other");
+    expect(classifyReferrer(null)).toBeNull();
+    expect(classifyReferrer("")).toBeNull();
+    expect(classifyReferrer("not a url")).toBeNull();
+    expect(classifyReferrer("about:blank")).toBeNull();
+  });
+});
+
+describe("channel attribution", () => {
+  test("records allowlisted ref and normalised referrer on a page view", () => {
+    const request = requestFor("/protocol?ref=HN&token=secret", {
+      headers: { referer: "https://news.ycombinator.com/item?id=12345&secret=abc" },
+    });
+    const events = classifyRequest(request, htmlResponse());
+    expect(events).toContainEqual({ dim: "signal", key: "page" });
+    expect(events).toContainEqual({ dim: "ref", key: "hn" });
+    expect(events).toContainEqual({ dim: "referrer", key: "hn" });
+    const serialized = JSON.stringify(events);
+    expect(serialized).not.toContain("secret");
+    expect(serialized).not.toContain("12345");
+    expect(serialized).not.toContain("item");
+    expect(serialized).not.toContain("token");
+  });
+
+  test("counts unknown refs and referrers as other without keeping the raw value", () => {
+    const request = requestFor("/?ref=facebook", {
+      headers: { referer: "https://example.com/landing?utm=launch" },
+    });
+    const events = classifyRequest(request, htmlResponse());
+    expect(events).toContainEqual({ dim: "ref", key: "other" });
+    expect(events).toContainEqual({ dim: "referrer", key: "other" });
+    const serialized = JSON.stringify(events);
+    expect(serialized).not.toContain("facebook");
+    expect(serialized).not.toContain("example.com");
+    expect(serialized).not.toContain("landing");
+    expect(serialized).not.toContain("utm");
+  });
+
+  test("records nothing for a missing ref or Referer", () => {
+    const refOnly = classifyRequest(requestFor("/?ref=gh"), htmlResponse());
+    expect(refOnly).toContainEqual({ dim: "ref", key: "gh" });
+    expect(refOnly.find((event) => event.dim === "referrer")).toBeUndefined();
+
+    const neither = classifyRequest(requestFor("/"), htmlResponse());
+    const withReferrer = classifyRequest(
+      new Request("https://phux.sh/", { headers: { referer: "https://github.com/no-phux/phux" } }),
+      htmlResponse(),
+    );
+    expect(neither.find((event) => event.dim === "ref" || event.dim === "referrer")).toBeUndefined();
+    expect(withReferrer.find((event) => event.dim === "ref")).toBeUndefined();
+    expect(withReferrer).toContainEqual({ dim: "referrer", key: "github" });
+  });
+
+  test("attributes installer hits and skips assets and other signals", () => {
+    const installer = classifyRequest(
+      requestFor("/install?ref=Newsletter", {
+        headers: { referer: "https://www.google.co.uk/search?q=phux+install" },
+      }),
+      new Response("#!/bin/sh"),
+    );
+    expect(installer).toContainEqual({ dim: "signal", key: "installer" });
+    expect(installer).toContainEqual({ dim: "ref", key: "newsletter" });
+    expect(installer).toContainEqual({ dim: "referrer", key: "google" });
+
+    const asset = classifyRequest(
+      requestFor("/app.css?ref=hn", {
+        headers: { referer: "https://news.ycombinator.com/item?id=1" },
+      }),
+      htmlResponse(),
+    );
+    expect(asset).toEqual([]);
+
+    const script = classifyRequest(
+      requestFor("/install.sh?ref=gh", {
+        headers: { referer: "https://github.com/no-phux/phux" },
+      }),
+      new Response("#!/bin/sh"),
+    );
+    expect(script).toEqual([]);
+
+    const dashboard = classifyRequest(
+      requestFor("/api/telemetry?ref=x", {
+        headers: { referer: "https://phux.sh/telemetry" },
+      }),
+      new Response("{}", { headers: { "content-type": "application/json" } }),
+    );
+    expect(dashboard).toEqual([]);
+
+    const mcp = classifyRequest(
+      new Request("https://phux.sh/mcp?ref=hn", {
+        method: "POST",
+        headers: { referer: "https://github.com/no-phux/phux" },
+      }),
+      new Response("{}"),
+    );
+    expect(mcp).toContainEqual({ dim: "signal", key: "mcp:call" });
+    expect(mcp.find((event) => event.dim === "ref" || event.dim === "referrer")).toBeUndefined();
+
+    const doc = classifyRequest(
+      requestFor("/llms.txt?ref=hn", {
+        headers: { referer: "https://lobste.rs/s/abc" },
+      }),
+      new Response("docs"),
+    );
+    expect(doc).toContainEqual({ dim: "signal", key: "doc:llms-txt" });
+    expect(doc.find((event) => event.dim === "ref" || event.dim === "referrer")).toBeUndefined();
+
+    const htmlMiss = classifyRequest(
+      requestFor("/missing?ref=bsky", { headers: { referer: "https://example.com/post/1" } }),
+      new Response("missing", { status: 404, headers: { "content-type": "text/html" } }),
+    );
+    expect(htmlMiss).toContainEqual({ dim: "signal", key: "page" });
+    expect(htmlMiss).toContainEqual({ dim: "ref", key: "bsky" });
+    expect(htmlMiss).toContainEqual({ dim: "referrer", key: "other" });
+    expect(htmlMiss).toContainEqual({ dim: "miss", key: "/missing" });
+    expect(JSON.stringify(htmlMiss)).not.toContain("example.com");
+
+    const plainMiss = classifyRequest(
+      requestFor("/missing?ref=bsky", { headers: { referer: "https://github.com/no-phux/phux" } }),
+      new Response("missing", { status: 404 }),
+    );
+    expect(plainMiss.find((event) => event.dim === "ref" || event.dim === "referrer")).toBeUndefined();
+    expect(plainMiss).toContainEqual({ dim: "miss", key: "/missing" });
+  });
+
+  test("does not keep an IP address or full referrer on an unknown host", () => {
+    const events = classifyRequest(
+      requestFor("/?ref=mastodon", {
+        headers: { referer: "http://203.0.113.9/admin?token=secret" },
+      }),
+      htmlResponse(),
+    );
+    expect(events).toContainEqual({ dim: "ref", key: "mastodon" });
+    expect(events).toContainEqual({ dim: "referrer", key: "other" });
+    const serialized = JSON.stringify(events);
+    expect(serialized).not.toContain("203.0.113.9");
+    expect(serialized).not.toContain("admin");
+    expect(serialized).not.toContain("secret");
   });
 });
 
