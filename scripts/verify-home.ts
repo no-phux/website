@@ -169,7 +169,7 @@ try {
       assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `no overflow with ${name} at ${width}px`);
     }
     assert.ok(await page.locator("#install code").evaluate((code) => code.scrollWidth <= code.clientWidth), `full install command readable at ${width}px`);
-    assert.equal(await page.locator("#beta-note").innerText(), "", "changing install targets clears unrelated signup/copy feedback");
+    assert.equal(await page.locator("#install-status").innerText(), "", "changing install targets clears unrelated signup/copy feedback");
     await page.locator("#install-command").evaluate(node => Promise.all(node.getAnimations().map(animation => animation.finished)));
     await page.locator(".install-options > summary").click();
     await page.evaluate(() => window.scrollTo(0, 0));

@@ -83,7 +83,7 @@ The primary install action follows the visitor's OS, not viewport width. The
 no-JavaScript platform line is exactly `macOS, Linux, Windows via WSL 2`.
 macOS keeps the Mac download; Linux opens the CLI installer; Windows leads to
 the WSL 2 instructions. Phone browsers get that same line and the installation
-guide. The homepage does not name a phone. The closing action follows the same
+guide. The homepage names no phone app. The closing action follows the same
 selection, and hides the desktop shell command on Windows and on phone browsers.
 Static/no-JavaScript HTML uses a real installation-guide link rather than guessing
 a Mac download; detection is client-side only, with no stored device profile or

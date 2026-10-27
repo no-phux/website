@@ -8,7 +8,7 @@ export async function verifyDeviceInstalls(browser: Browser, base: string, artif
     const platform: InstallPlatform = device === "ipadDesktop" ? "ipad" : device as InstallPlatform;
     const action = installActions[platform];
     // Astro production resolves docs links; this test module runs directly in Bun.
-    const href = action.href.replace(/^\/installation$/, "https://docs.phux.sh/installation");
+    const href = action.href.replace(/^\/installation(?=#|$)/, "https://docs.phux.sh/installation");
     const width = platform === "ipad" ? 768 : 390;
     const context = await browser.newContext({ userAgent: visitor.userAgent, viewport: { width, height: 844 }, hasTouch: visitor.maxTouchPoints > 0, isMobile: hidesClosingCommand(platform) && platform !== "windows" });
     await context.addInitScript(points => Object.defineProperty(navigator, "maxTouchPoints", { get: () => points }), visitor.maxTouchPoints);

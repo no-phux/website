@@ -33,7 +33,7 @@ export const installActions: Record<InstallPlatform, InstallAction> = {
   android: { ...choose },
   mac: { label: "Download for Mac", href: desktopDownload, note: "Apple silicon · macOS 26 or later · Apache-2.0 · No account", icon: "↓" },
   linux: { label: "Install for Linux", href: docsHref("/installation"), note: "Linux · CLI and desktop · Apache-2.0 · No account", icon: "→", target: "cli" },
-  windows: { label: "Install with WSL", href: docsHref("/installation"), note: "Windows via WSL 2", icon: "↗" },
+  windows: { label: "Install with WSL", href: docsHref("/installation#windows-wsl"), note: "Windows via WSL 2", icon: "↗" },
   unknown: { ...choose },
 };
 

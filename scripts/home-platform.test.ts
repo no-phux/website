@@ -21,6 +21,7 @@ describe("device-first homepage installs", () => {
     const shipped = "macOS, Linux, Windows via WSL 2";
     expect(installActions.unknown.note).toBe(shipped);
     expect(installActions.windows.note).toBe("Windows via WSL 2");
+    expect(installActions.windows.href).toBe("/installation#windows-wsl");
     for (const platform of ["iphone", "ipad", "android"] as const) {
       expect(installActions[platform].note).toBe(shipped);
       expect(installActions[platform].label).toBe("Choose your platform");

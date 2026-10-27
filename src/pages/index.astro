@@ -57,7 +57,7 @@ const fallback = installActions.unknown;
         </div>
         <span class="install-rule" aria-hidden="true"></span>
         <p class="install-note" id="install-note">{installs[0].note}</p>
-        <p class="copy-status" id="beta-note" role="status" aria-live="polite"></p>
+        <p class="copy-status" id="install-status" role="status" aria-live="polite"></p>
       </div>
         <p class="release-links">
           {release.url && <a href={release.url}>CLI {release.tag}</a>}
@@ -183,7 +183,7 @@ const fallback = installActions.unknown;
   .install-tabs button { position: relative; min-width: 64px; min-height: 44px; padding: 0 8px; border: 0; background: none; color: #8c9891; font: inherit; font-size: 12px; cursor: pointer; }
   .install-tabs button[aria-pressed=true], .install-tabs button:hover { color: #efeae1; }
   .install-rule { display: block; height: 1px; margin-top: 14px; background: #c8cfc31c; }
-  .install-stage { display: grid; align-items: center; min-height: 112px; }
+  .install-stage { display: grid; align-items: center; min-height: 64px; }
   .install-line { grid-area: 1 / 1; display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 10px; padding-top: 10px; }
   .install-command { display: flex; gap: 8px; align-items: start; min-width: 0; }
   .install-prompt { color: #a9d2b5; font: 12px var(--font-code); }
@@ -249,7 +249,6 @@ const fallback = installActions.unknown;
     .closing-fox { display: none; }
     .closing-platforms { margin: 10px 0 0; display: flex; width: fit-content; }
     .connection-details { margin-top: 18px; }
-    .install-stage { min-height: 112px; }
   }
   @media (prefers-reduced-motion: reduce) { .download-primary, .download-final, .install-tabs::before { transition: none; } }
   @media (scripting: none) { .install-head, .install-copy { display: none; } .install-line { grid-template-columns: 1fr; } }
