@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { inlineMarkdown, measurementsSection, performanceMarkdown } from "../src/lib/performance-page";
+import { inlineMarkdown, measurementParagraphs, measurementsSection, performanceMarkdown } from "../src/lib/performance-page";
 
 const compare = `# phux vs tmux
 
@@ -11,6 +11,8 @@ Programs keep running.
 
 On 2026-09-30, two runs compared clients. See [run 1](https://phux.sh/benchmarks/2026-09-30/run1/samples.json).
 
+Key echo here is measured in terminal bytes, not from keystroke to pixel.
+
 ## Next
 
 - [Install](./install.md)
@@ -19,9 +21,14 @@ On 2026-09-30, two runs compared clients. See [run 1](https://phux.sh/benchmarks
 describe("performance page", () => {
   test("lifts the measurements section and nothing around it", () => {
     expect(measurementsSection(compare)).toBe(
-      "On 2026-09-30, two runs compared clients. See [run 1](https://phux.sh/benchmarks/2026-09-30/run1/samples.json).",
+      "On 2026-09-30, two runs compared clients. See [run 1](https://phux.sh/benchmarks/2026-09-30/run1/samples.json).\n\nKey echo here is measured in terminal bytes, not from keystroke to pixel.",
     );
+    expect(measurementParagraphs(compare)).toEqual([
+      "On 2026-09-30, two runs compared clients. See [run 1](https://phux.sh/benchmarks/2026-09-30/run1/samples.json).",
+      "Key echo here is measured in terminal bytes, not from keystroke to pixel.",
+    ]);
     expect(measurementsSection("# No measurements\n\nNone.\n")).toBeUndefined();
+    expect(measurementParagraphs("# No measurements\n\nNone.\n")).toEqual([]);
   });
 
   test("renders published links and escapes the rest", () => {

@@ -31,7 +31,7 @@ const ogUrl = new URL(image ?? "/og.png", image ? origin : SITE.url);
 ogUrl.searchParams.set("v", previewIdentity);
 const ogImage = ogUrl.href;
 const ogAlt = image ? title : `${SITE.name}: ${SITE.tagline}`;
-const jsonLd = softwareApplicationJson(origin === SITE.docsUrl ? SITE.docsUrl : SITE.url);
+const jsonLd = softwareApplicationJson();
 ---
 
 <meta charset="utf-8" />

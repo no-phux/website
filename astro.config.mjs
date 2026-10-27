@@ -3,7 +3,6 @@ import react from "@astrojs/react";
 import sitemap from "@astrojs/sitemap";
 import tailwindcss from "@tailwindcss/vite";
 import mdx from "@astrojs/mdx";
-import { execFileSync } from "node:child_process";
 import { existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { unified } from "@astrojs/markdown-remark";
@@ -15,28 +14,12 @@ import {
 } from "fumadocs-core/mdx-plugins";
 import { buildSearchIndex } from "./scripts/build-search.mjs";
 import { isDocsPath, isEmbedPath, isVgpuConceptPath } from "./host/routes.ts";
-import { phuxRoot } from "./scripts/phux-root.ts";
 import { splitDocsSitemap } from "./scripts/split-sitemaps.ts";
+import { pageLastmods } from "./scripts/sitemap-lastmod.ts";
 import { wgslVitePlugin } from "@vgpu/wgsl/loader-vite";
 
-function commitDate(cwd) {
-  try {
-    const date = execFileSync("git", ["-C", cwd, "log", "-1", "--format=%cI"], { encoding: "utf8" }).trim();
-    return date || undefined;
-  } catch {
-    return undefined;
-  }
-}
-
 const siteRoot = fileURLToPath(new URL(".", import.meta.url));
-const siteLastmod = commitDate(siteRoot);
-const docsLastmod = (() => {
-  try {
-    return commitDate(phuxRoot(siteRoot)) ?? siteLastmod;
-  } catch {
-    return siteLastmod;
-  }
-})();
+const lastmods = pageLastmods(siteRoot);
 
 // The docs pages render with the Fumadocs markdown pipeline: anchored headings
 // (for the TOC), npm-install tabs, and Shiki-highlighted code.
@@ -180,7 +163,6 @@ export default defineConfig({
     mdx({ extendMarkdownConfig: true, syntaxHighlight: false }),
     sitemap({
       filter: (page) => !isEmbedPath(new URL(page).pathname) && !isVgpuConceptPath(new URL(page).pathname),
-      lastmod: siteLastmod ? new Date(siteLastmod) : undefined,
       serialize(item) {
         const url = new URL(item.url);
         const docs = isDocsPath(url.pathname);
@@ -188,8 +170,9 @@ export default defineConfig({
           url.hostname = "docs.phux.sh";
           item.url = url.href;
         }
-        const lastmod = docs ? docsLastmod : siteLastmod;
+        const lastmod = lastmods.get(url.pathname);
         if (lastmod) item.lastmod = lastmod;
+        else delete item.lastmod;
         return item;
       },
     }),

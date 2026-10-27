@@ -13,6 +13,13 @@ export function measurementsSection(markdown: string): string | undefined {
   return body || undefined;
 }
 
+/** One block per blank-line-separated paragraph. The comparison publishes more than one. */
+export function measurementParagraphs(markdown: string): string[] {
+  const section = measurementsSection(markdown);
+  if (!section) return [];
+  return section.split(/\n\n+/).map((paragraph) => paragraph.trim()).filter(Boolean);
+}
+
 /** Escape text, then restore http(s) and site-relative links as anchors. */
 export function inlineMarkdown(markdown: string): string {
   const escaped = markdown

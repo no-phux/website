@@ -11,12 +11,12 @@ import {
   PERFORMANCE_DESCRIPTION,
   inlineMarkdown,
   loadCompareMarkdown,
-  measurementsSection,
+  measurementParagraphs,
   performanceSource,
 } from "../lib/performance-page";
 
 const siteRoot = process.cwd();
-const measurements = measurementsSection(loadCompareMarkdown(siteRoot) ?? "");
+const paragraphs = measurementParagraphs(loadCompareMarkdown(siteRoot) ?? "");
 let revision: string | undefined;
 try {
   revision = (JSON.parse(readFileSync(join(siteRoot, "public/docs-manifest.json"), "utf8")) as { revision?: string }).revision;
@@ -39,8 +39,8 @@ const title = pageTitle("Performance");
     protocolVersion=""
     client:load
   >
-    {measurements
-      ? <p set:html={inlineMarkdown(measurements)} />
+    {paragraphs.length
+      ? paragraphs.map((paragraph) => <p set:html={inlineMarkdown(paragraph)} />)
       : <p>Measurements are published with the comparison.</p>}
     <p><a href="/compare">phux vs tmux, Herdr, and cmux</a></p>
   </Docs>
