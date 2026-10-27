@@ -32,6 +32,7 @@ export const DOCS_PREFIXES = [
   "/scripting",
   "/pane-command",
   "/agents",
+  "/agent-quickstart",
   "/agent-waiting",
   "/terminal-mcp",
   "/acp",
