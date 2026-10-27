@@ -10,7 +10,7 @@ export async function verifyHomeContent(page: Page) {
   assert.equal(await page.locator(".try-link").getAttribute("aria-label"), "Open the browser demo");
   assert.equal((await page.locator("#workspace-title").innerText()).trim(), "Browser demo");
   assert.equal((await page.locator(".workspace-heading p").innerText()).trim(), "A disposable phux shell in your browser.");
-  assert.equal((await page.locator(".closing-platforms").innerText()).trim(), "Linux and other platforms ↗");
+  assert.equal((await page.locator(".closing-platforms").innerText()).trim(), "All platforms ↗");
   assert.equal(await page.title(), "phux — A terminal multiplexer whose server you can drive from code.");
   assert.equal(await page.locator('meta[name="description"]').getAttribute("content"), "A terminal multiplexer whose server you can drive from code.");
   assert.equal(await page.locator('meta[property="og:description"]').getAttribute("content"), "A terminal multiplexer whose server you can drive from code.");

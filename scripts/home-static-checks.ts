@@ -19,6 +19,8 @@ export async function verifyStaticHome(browser: Browser, base: string) {
   const staticContext = await browser.newContext({ javaScriptEnabled: false });
   const staticPage = await staticContext.newPage();
   await staticPage.goto(base);
+  assert.equal(await staticPage.locator(".download-primary [data-device-label]").innerText(), "Choose your platform", "without device detection, never guess Mac");
+  assert.equal(await staticPage.locator(".download-primary").getAttribute("href"), "https://docs.phux.sh/installation", "the no-JS fallback is a real install guide");
   assert.ok(await staticPage.locator("[data-fox]").isVisible(), "the fox remains visible without JavaScript");
   assert.equal((await staticPage.getByRole("heading", { level: 1 }).innerText()).trim(), "phux");
   assert.equal((await staticPage.locator(".hero-description").innerText()).trim(), "A terminal multiplexer whose server you can drive from code.");
