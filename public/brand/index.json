@@ -27,6 +27,10 @@
     "1.3.1": {
       "sha256": "c4d7a1ac4f91c90f1fa57ea8fe6d6348653497e3b2ee0d4eefbfce79d1348f0a",
       "source_revision": "5b044a9e0ac0fa9957d7abdfbeefc17be60a3f82"
+    },
+    "1.4.0": {
+      "sha256": "8995194fb14065225e886c3db9edba9a520d540002c88fcd05f4adfdfda1f320",
+      "source_revision": "786354266582d7144de749b4b4a19bfc57b96a38"
     }
   },
   "schema": 1
