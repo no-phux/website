@@ -61,7 +61,9 @@ private `no-phux/ops` Alchemy stack.
 
 `host/telemetry.ts` records passive aggregate counters (hourly buckets keyed
 by user-agent class, country, host, agent signal, status, demo session) into
-a `TelemetryDO` Durable Object. No IPs, no raw user agents, no cookies —
+a `TelemetryDO` Durable Object. Page views and installer hits also count an
+allowlisted `ref` query tag and a referrer channel (hostname only, mapped to
+a known set). No IPs, no raw URLs, no full referrers, no cookies —
 edge-only, and it catches AI crawlers that JavaScript analytics is blind to.
 The public dashboard is `/telemetry`; its JSON API is `/api/telemetry`.
 Static assets and the dashboard's own polling are excluded.

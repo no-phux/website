@@ -6,8 +6,9 @@
  * analytics is blind to. This module turns that visibility into
  * aggregate-only counters: one Durable Object holds hourly buckets keyed by
  * dimension (user-agent class, country, host, agent signal, status, demo
- * session). No IPs, no raw URLs, no cookies — nothing that could identify a
- * visitor, so the dashboard can be public.
+ * session, and for page views and installer hits an allowlisted ref tag and
+ * a referrer channel). No IPs, no raw URLs, no full referrers, no cookies —
+ * nothing that could identify a visitor, so the dashboard can be public.
  *
  * Recording is fire-and-forget via `ctx.waitUntil` and swallows all errors:
  * telemetry must never slow or break a real request.
@@ -227,6 +228,15 @@ export function classifyRequest(
   const signal = classifySignal(request, response, pathname, ua);
   if (signal) events.push({ dim: "signal", key: signal });
 
+  // Channel attribution is only meaningful for visits, not assets, APIs, or
+  // crawler probes. The key is a channel name — never the raw query or URL.
+  if (signal === "page" || signal === "installer") {
+    const ref = classifyRef(url.searchParams.get("ref"));
+    if (ref) events.push({ dim: "ref", key: ref });
+    const referrer = classifyReferrer(request.headers.get("referer"));
+    if (referrer) events.push({ dim: "referrer", key: referrer });
+  }
+
   if (response.status === 404) {
     events.push({ dim: "miss", key: pathname.slice(0, 80) });
   }
@@ -308,6 +318,71 @@ export function classifySignal(
     return request.method === "GET" ? "page" : null;
   }
   return null;
+}
+
+/**
+ * Launch tag from `?ref=`. Allowlisted values are kept (lowercased); any
+ * other present value counts as `other`. A missing or blank param records
+ * nothing. Over-long values are `other` without being truncated into a match.
+ */
+const REF_CHANNELS = new Set([
+  "x",
+  "hn",
+  "reddit",
+  "lobsters",
+  "mastodon",
+  "bsky",
+  "gh",
+  "newsletter",
+]);
+const REF_MAX_LENGTH = 32;
+
+export function classifyRef(value: string | null): string | null {
+  if (!value) return null;
+  const clipped = value.trim().slice(0, REF_MAX_LENGTH + 1);
+  if (!clipped) return null;
+  if (clipped.length > REF_MAX_LENGTH) return "other";
+  const key = clipped.toLowerCase();
+  return REF_CHANNELS.has(key) ? key : "other";
+}
+
+/** google.com, google.de, google.co.uk, and their subdomains — not google.evil.com. */
+const GOOGLE_HOST = /(?:^|\.)google\.(?:[a-z]{2,}|(?:co|com|org|net|ac|gov|edu)\.[a-z]{2})$/;
+
+/**
+ * Referring site, reduced to a channel. The host is kept and the path and
+ * query are discarded; known hosts fold into a fixed set. No header, or a
+ * value with no host, records nothing.
+ */
+export function classifyReferrer(value: string | null): string | null {
+  const host = referrerHost(value);
+  if (!host) return null;
+  if (host === "t.co" || matchesHost(host, "x.com") || matchesHost(host, "twitter.com")) {
+    return "x";
+  }
+  if (host === "news.ycombinator.com") return "hn";
+  if (matchesHost(host, "reddit.com")) return "reddit";
+  if (matchesHost(host, "lobste.rs")) return "lobsters";
+  if (matchesHost(host, "github.com")) return "github";
+  if (GOOGLE_HOST.test(host)) return "google";
+  if (matchesHost(host, "duckduckgo.com")) return "duckduckgo";
+  if (matchesHost(host, "bing.com")) return "bing";
+  if (matchesHost(host, "phux.sh")) return "self";
+  return "other";
+}
+
+function referrerHost(value: string | null): string | null {
+  if (!value) return null;
+  try {
+    const host = new URL(value).hostname.toLowerCase().replace(/\.$/, "");
+    return host || null;
+  } catch {
+    return null;
+  }
+}
+
+function matchesHost(host: string, root: string): boolean {
+  return host === root || host.endsWith(`.${root}`);
 }
 
 /** Static assets carry no visitor signal; skip them entirely. */

@@ -53,8 +53,9 @@ export default Alchemy.Stack(
       observability: { enabled: false },
       env: {
         // TelemetryDO: hourly aggregate counters (ua class, country, agent
-        // signals). No IPs, no raw URLs — aggregate-only so /api/telemetry
-        // can be public.
+        // signals, and for pages and installer hits an allowlisted ref and
+        // referrer channel). No IPs, no raw URLs — aggregate-only so
+        // /api/telemetry can be public.
         TELEMETRY: Cloudflare.DurableObject("TELEMETRY", {
           className: "TelemetryDO",
         }),
