@@ -137,8 +137,7 @@ list and uses one call.
 Enable/share the public link in App Store Connect → TestFlight → external group
 to allow joining without email entry. Apple owns acceptance and installation.
 
-The "phux for iPhone" request is the landing's third install target (`Mobile`)
-and the form on `/more`; both post to `/api/beta`
+The "phux for iPhone" request is the form on `/more`; it posts to `/api/beta`
 (`host/testflight.ts`). The Worker adds the address to an external TestFlight
 group of `dev.phux.mobile` through the App Store Connect API, and Apple emails
 the invite. It reuses the phux-mobile release lane's team API key, set as

@@ -6,7 +6,7 @@ import { resolve } from "node:path";
 import { chromium } from "playwright-core";
 import { verifyStaticHome } from "./home-static-checks";
 import { verifyFox } from "./home-fox-checks";
-import { verifyHomeContent } from "./home-content-checks";
+import { assertInstallPickerCopy, homepageInstallPromise, verifyHomeContent } from "./home-content-checks";
 import { verifyDeviceInstalls } from "./home-platform-checks";
 import { platformVisitors } from "./home-platform-fixtures";
 import { homeServer } from "./home-server";
@@ -60,7 +60,7 @@ try {
   const comparisonBox = await page.locator(".client-comparison").boundingBox();
   assert.ok(installBox && comparisonBox && installBox.y < comparisonBox.y, "install controls lead into the real product");
   assert.equal(await page.locator(".tour").isVisible(), false, "the optional walkthrough stays closed initially");
-  assert.equal(await page.locator("#install .install-request").isHidden(), true, "the hero opens on a command, not the request form");
+  assert.equal(await page.locator("#install .install-request").count(), 0, "the homepage picker has no mobile request form");
   assert.equal(await page.locator(".beta, #testflight").count(), 0, "the landing carries no separate TestFlight band");
   assert.equal(await page.locator(".tour").count(), 1, "one product tour");
   assert.equal(await page.locator("body > header").count(), 1, "the landing carries one top bar");
@@ -105,12 +105,18 @@ try {
   assert.equal(await page.evaluate(() => navigator.clipboard.readText()), "curl -fsSL https://phux.sh/install | sh");
   assert.equal(await page.getByRole("status").innerText(), "Install command copied.");
   // The hero switcher swaps the command on hover, focus, click, and arrows,
-  // turns Desktop into a download, and the third target into the beta request.
+  // and turns Desktop into a download. There is no mobile target.
   const command = page.locator("#install-command");
   const line = page.locator("#install .install-line");
-  const request = page.locator("#install .install-request");
   const target = (name: string) => page.locator(`#install [data-install-target="${name}"]`);
-  assert.deepEqual(await page.locator("#install .install-tabs button").allInnerTexts(), ["CLI", "Desktop", "Mobile"], "three install targets");
+  assert.deepEqual(await page.locator("#install .install-tabs button").allInnerTexts(), ["CLI", "Desktop"], "two install targets");
+  await assertInstallPickerCopy(page);
+  const tabs = page.locator("#install [data-install-target]");
+  for (let index = 0; index < await tabs.count(); index++) {
+    await tabs.nth(index).click();
+    assert.doesNotMatch((await page.locator("#install-note").innerText()).trim(), homepageInstallPromise, "each install tab note stays off the phone");
+  }
+  await target("cli").click();
   const download = page.locator("#install-download");
   await target("desktop").hover();
   assert.ok(await download.isVisible(), "hover swaps to the desktop download");
@@ -118,16 +124,12 @@ try {
   assert.equal(await download.getAttribute("href"), "/download/desktop", "the download is the worker's stable Mac archive redirect");
   assert.equal((await page.locator("#install-note").innerText()).trim(), "First open: macOS asks to confirm an app downloaded from the internet. Choose Open.", "the first-open line stays until a real Mac confirms it");
   assert.equal(await page.locator(".linux-desktop-note").count(), 0);
-  await target("mobile").click();
-  assert.equal(await target("mobile").getAttribute("aria-pressed"), "true", "the clicked target is pressed");
-  assert.ok(await request.isVisible(), "Mobile asks for an address instead of printing a command");
-  assert.equal(await line.isHidden(), true, "the command line steps aside for the request form");
-  assert.match(await page.locator("#install-note").innerText(), /TestFlight/, "the note describes the mobile target");
-  await target("mobile").focus();
+  await target("desktop").focus();
   await page.keyboard.press("ArrowLeft");
-  assert.ok(await download.isVisible(), "arrow keys move the target back to Desktop");
-  assert.equal(await request.isHidden(), true, "a command target hides the request form");
-  assert.equal(await line.isVisible(), true, "a command target restores the command line");
+  assert.equal(await line.isVisible(), true, "arrow keys move the target back to CLI");
+  assert.equal(await download.isHidden(), true, "CLI restores the command line");
+  await page.keyboard.press("ArrowRight");
+  assert.ok(await download.isVisible(), "arrow keys move the target on to Desktop");
   await page.getByRole("button", { name: "Copy install command" }).click();
   assert.equal(await page.evaluate(() => navigator.clipboard.readText()), "curl -fsSL https://phux.sh/install-desktop | sh", "Desktop keeps its installer on the copy button");
   // Regression: a content-sized dock widened with the command and slid the
@@ -139,29 +141,11 @@ try {
     });
   const dock = await box("#install");
   const cliTarget = await box('#install [data-install-target="cli"]');
-  for (const name of ["desktop", "mobile", "cli"]) {
+  for (const name of ["desktop", "cli"]) {
     await target(name).hover();
     assert.deepEqual(await box("#install"), dock, `the dock keeps its box while ${name} is previewed`);
     assert.deepEqual(await box('#install [data-install-target="cli"]'), cliTarget, `targets stay pinned while ${name} is previewed`);
   }
-  // The Mobile target carries the same TestFlight request /more posts.
-  await target("mobile").click();
-  assert.ok(await request.getByRole("link", { name: "Open TestFlight" }).isVisible(), "native TestFlight is the first iOS choice");
-  await request.locator("[data-email-invite] > summary").click();
-  await request.locator("input[name=email]").fill("iphone@example.com");
-  await request.locator("button[type=submit]").click();
-  await page.waitForFunction(() => document.querySelector("#beta-note")?.textContent?.includes("Invite sent") ?? false);
-  assert.match(await page.locator("#beta-note").innerText(), /Invite sent/, "the hero reports the invite");
-  assert.equal(beta.payload?.email, "iphone@example.com", "the hero request posts the address");
-  assert.equal(beta.payload?.website, "", "the honeypot stays empty");
-  assert.equal(beta.payload?.platform, "ios", "a computer is offered the iPhone beta first");
-  await request.getByRole("button", { name: "Android instead" }).click();
-  assert.equal(await request.locator("input[name=email]").getAttribute("aria-label"), "Email address for the Google Play test", "the switch re-labels the address");
-  await request.locator("input[name=email]").fill("android@example.com");
-  await request.locator("button[type=submit]").click();
-  await page.waitForFunction(() => document.querySelector("#beta-note")?.textContent?.includes("Google Play") ?? false);
-  assert.equal(beta.payload?.platform, "android", "the Android request says so");
-  assert.ok(await request.getByRole("button", { name: "iPhone instead" }).isVisible(), "the switch offers the way back");
   for (const width of [320, 390, 768, 1280]) {
     await page.setViewportSize({ width, height: width < 600 ? 740 : 900 });
     await page.locator(".install-options").evaluate((node: HTMLDetailsElement) => { node.open = false; });
@@ -222,9 +206,8 @@ try {
   await verifyWorkspaceResize(page);
   await verifyWorkspaceInstallCopy(page);
   assert.equal(await live.locator(".install-hook-lede, .install-hook-proof, .live-session-hint").count(), 0, "the live hero has no surrounding marketing prose");
-  await live.getByRole("button", { name: "iPhone" }).click();
-  await live.locator("[data-email-invite] > summary").click();
-  assert.ok(await live.locator(".install-hook-request input[name=email]").isVisible(), "the iPhone target requests TestFlight");
+  assert.deepEqual(await live.locator(".install-hook-tabs button").allInnerTexts(), ["CLI", "Desktop"], "the live install hook has no mobile target");
+  assert.doesNotMatch(await live.locator(".install-hook").innerText(), homepageInstallPromise, "the live install hook does not name a phone");
   assert.ok(await page.locator(".hero").isVisible(), "the live workspace never replaces the product introduction");
   await page.evaluate(() => window.scrollTo(0, 0));
   await page.waitForFunction(() => !document.querySelector("#home-light iframe"));

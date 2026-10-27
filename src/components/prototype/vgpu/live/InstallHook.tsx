@@ -1,47 +1,21 @@
 import { useEffect, useRef, useState, type KeyboardEvent, type RefObject } from "react";
 import { SITE } from "../../../../lib/site";
-import { desktopDownload, desktopFirstOpen, desktopInstall, installTargets, iosDownload, type InstallTarget } from "../../../../lib/install";
-import { initialPhone, phones, wireBetaRequest, type Phone } from "../../../../lib/beta";
+import { desktopDownload, desktopFirstOpen, desktopInstall, installTargets, type InstallTarget } from "../../../../lib/install";
 import type { HookMoment } from "./install-hook";
 import "../../../../styles/mobile-access.css";
 
 const canShare = () => typeof navigator!=="undefined" && typeof navigator.share==="function" && matchMedia("(hover: none)").matches;
 
-function BetaRequest({phone,onSwitch}:{phone:Phone;onSwitch:()=>void}) {
-  const form=useRef<HTMLFormElement>(null),note=useRef<HTMLSpanElement>(null);
-  useEffect(()=>wireBetaRequest(form.current,note.current),[]);
-  const copy=phones[phone];
-  return <div className="mobile-access install-hook-mobile" data-mobile-access>
-    <a className="testflight-link" data-testflight-link href={iosDownload} target="_top" hidden={phone!=="ios"}>Open TestFlight <span aria-hidden="true">↗</span></a>
-    <details data-email-invite open={phone==="android"}>
-    <summary>{phone==="ios"?"Email an invite instead":"Request Google Play access"}</summary>
-    <form ref={form} className="install-hook-line install-hook-request" data-phone={phone}>
-      <input type="email" name="email" required autoComplete="email" inputMode="email" enterKeyHint="send" autoCapitalize="none" spellCheck={false} placeholder={copy.placeholder} aria-label={copy.field}/>
-      <input className="install-hook-trap" type="text" name="website" tabIndex={-1} autoComplete="off" aria-hidden="true"/>
-      <button type="submit" aria-label="Request access">↵</button>
-    </form>
-    <p className="install-hook-status">
-      <span ref={note} role="status" aria-live="polite"/>
-      <button type="button" className="install-hook-alt" onClick={()=>{if(note.current)note.current.textContent="";onSwitch();}}>{phones[copy.other].label} instead</button>
-    </p>
-    </details>
-  </div>;
-}
-
-/** Install controls; explanatory detail stays in the installation guide. */
+/** Install controls for the homepage workspace. CLI and Desktop only. */
 export default function InstallHook({moment,onCopy,hookRef,copyRef}:{moment:HookMoment;onCopy:()=>void;hookRef:RefObject<HTMLElement|null>;copyRef:RefObject<HTMLButtonElement|null>}) {
   const [target,setTarget]=useState<InstallTarget>(installTargets[0]);
-  // Rendered as iPhone first, then the visitor's own phone once hydrated.
-  const [phone,setPhone]=useState<Phone>("ios");
   const [status,setStatus]=useState("");
   const [copied,setCopied]=useState(false);
   const code=useRef<HTMLElement>(null);
   const reset=useRef<ReturnType<typeof setTimeout>|undefined>(undefined);
   useEffect(()=>()=>clearTimeout(reset.current),[]);
-  useEffect(()=>setPhone(initialPhone()),[]);
-  const mobile=target.id==="mobile",desktop=target.id==="desktop";
+  const desktop=target.id==="desktop";
   const command=target.command;
-  const label=(item:InstallTarget)=>item.id==="mobile"?phones[phone].label:item.label;
   const choose=(next:InstallTarget)=>{setTarget(next);setStatus("");setCopied(false);};
   const step=(event:KeyboardEvent<HTMLButtonElement>,index:number)=>{
     const delta=event.key==="ArrowRight"?1:event.key==="ArrowLeft"?-1:0;
@@ -69,9 +43,9 @@ export default function InstallHook({moment,onCopy,hookRef,copyRef}:{moment:Hook
   };
   return <section ref={hookRef} className="install-hook" data-moment={moment} aria-label="Install phux">
     <div className="install-hook-tabs" role="group" aria-label="Choose an install">
-      {installTargets.map((item,index)=><button key={item.id} type="button" aria-pressed={item.id===target.id} onClick={()=>choose(item)} onKeyDown={event=>step(event,index)}>{label(item)}</button>)}
+      {installTargets.map((item,index)=><button key={item.id} type="button" aria-pressed={item.id===target.id} onClick={()=>choose(item)} onKeyDown={event=>step(event,index)}>{item.label}</button>)}
     </div>
-    {mobile?<BetaRequest phone={phone} onSwitch={()=>setPhone(phones[phone].other)}/>:desktop?<>
+    {desktop?<>
       <div className="install-hook-line install-hook-download">
         <span className="install-hook-prompt" aria-hidden="true">↓</span>
         <span className="install-hook-what">Phux for Apple-silicon Mac</span>
@@ -89,6 +63,6 @@ export default function InstallHook({moment,onCopy,hookRef,copyRef}:{moment:Hook
       </div>
       <p className="install-hook-status" role="status" aria-live="polite">{status}</p>
     </>}
-    {!mobile&&canShare()&&<button type="button" className="install-hook-share" onClick={()=>void share()}>Share ↗</button>}
+    {canShare()&&<button type="button" className="install-hook-share" onClick={()=>void share()}>Share ↗</button>}
   </section>;
 }
