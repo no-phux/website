@@ -3,6 +3,7 @@ import react from "@astrojs/react";
 import sitemap from "@astrojs/sitemap";
 import tailwindcss from "@tailwindcss/vite";
 import mdx from "@astrojs/mdx";
+import { execFileSync } from "node:child_process";
 import { existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { unified } from "@astrojs/markdown-remark";
@@ -14,7 +15,28 @@ import {
 } from "fumadocs-core/mdx-plugins";
 import { buildSearchIndex } from "./scripts/build-search.mjs";
 import { isDocsPath, isEmbedPath, isVgpuConceptPath } from "./host/routes.ts";
+import { phuxRoot } from "./scripts/phux-root.ts";
+import { splitDocsSitemap } from "./scripts/split-sitemaps.ts";
 import { wgslVitePlugin } from "@vgpu/wgsl/loader-vite";
+
+function commitDate(cwd: string): string | undefined {
+  try {
+    const date = execFileSync("git", ["-C", cwd, "log", "-1", "--format=%cI"], { encoding: "utf8" }).trim();
+    return date || undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+const siteRoot = fileURLToPath(new URL(".", import.meta.url));
+const siteLastmod = commitDate(siteRoot);
+const docsLastmod = (() => {
+  try {
+    return commitDate(phuxRoot(siteRoot)) ?? siteLastmod;
+  } catch {
+    return siteLastmod;
+  }
+})();
 
 // The docs pages render with the Fumadocs markdown pipeline: anchored headings
 // (for the TOC), npm-install tabs, and Shiki-highlighted code.
@@ -86,7 +108,6 @@ export default defineConfig({
     "/concepts/when-to-use": compare ?? "/concepts",
     "/concepts/coming-from": "/getting-started",
     "/concepts/vision": "/architecture",
-    "/performance": compare ?? "/development",
     "/remote-access": "/remote",
     "/consumers": "/clients",
     "/wire": "/protocol",
@@ -159,15 +180,27 @@ export default defineConfig({
     mdx({ extendMarkdownConfig: true, syntaxHighlight: false }),
     sitemap({
       filter: (page) => !isEmbedPath(new URL(page).pathname) && !isVgpuConceptPath(new URL(page).pathname),
+      lastmod: siteLastmod ? new Date(siteLastmod) : undefined,
       serialize(item) {
         const url = new URL(item.url);
-        if (isDocsPath(url.pathname)) {
+        const docs = isDocsPath(url.pathname);
+        if (docs) {
           url.hostname = "docs.phux.sh";
           item.url = url.href;
         }
+        const lastmod = docs ? docsLastmod : siteLastmod;
+        if (lastmod) item.lastmod = lastmod;
         return item;
       },
     }),
+    {
+      name: "phux-host-sitemaps",
+      hooks: {
+        "astro:build:done": async ({ dir }) => {
+          await splitDocsSitemap(fileURLToPath(dir));
+        },
+      },
+    },
     searchIndex(),
   ],
   markdown: {

@@ -6,9 +6,9 @@ import { Docs } from "../components/docs/Docs";
 import { OverviewBody } from "../components/docs/Overview";
 import Layout from "../components/docs/layout.astro";
 import { source } from "../lib/source";
-import { OVERVIEW, SITE } from "../lib/site";
+import { OVERVIEW, SITE, pageTitle } from "../lib/site";
 
-const title = `${OVERVIEW.title} with ${SITE.name}`;
+const title = pageTitle("Documentation overview");
 const description = OVERVIEW.summary;
 ---
 

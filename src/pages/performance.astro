@@ -1,0 +1,47 @@
+---
+// /performance — the measurements section of the comparison, at the URL
+// engines already cite. The source of the numbers is docs/compare.md.
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+import { Docs } from "../components/docs/Docs";
+import Layout from "../components/docs/layout.astro";
+import { source } from "../lib/source";
+import { SITE, pageTitle } from "../lib/site";
+import {
+  PERFORMANCE_DESCRIPTION,
+  inlineMarkdown,
+  loadCompareMarkdown,
+  measurementsSection,
+  performanceSource,
+} from "../lib/performance-page";
+
+const siteRoot = process.cwd();
+const measurements = measurementsSection(loadCompareMarkdown(siteRoot) ?? "");
+let revision: string | undefined;
+try {
+  revision = (JSON.parse(readFileSync(join(siteRoot, "public/docs-manifest.json"), "utf8")) as { revision?: string }).revision;
+} catch {
+  revision = undefined;
+}
+const title = pageTitle("Performance");
+---
+
+<Layout title={title} description={PERFORMANCE_DESCRIPTION} origin={SITE.docsUrl} markdown="/performance.md">
+  <Docs
+    tree={source.getPageTree()}
+    pathname="/performance"
+    params={Astro.params}
+    sourceUrl={performanceSource(revision)}
+    title="Performance"
+    summary={PERFORMANCE_DESCRIPTION}
+    description={PERFORMANCE_DESCRIPTION}
+    stability="stable"
+    protocolVersion=""
+    client:load
+  >
+    {measurements
+      ? <p set:html={inlineMarkdown(measurements)} />
+      : <p>Measurements are published with the comparison.</p>}
+    <p><a href="/compare">phux vs tmux, Herdr, and cmux</a></p>
+  </Docs>
+</Layout>

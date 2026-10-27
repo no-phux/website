@@ -1,8 +1,9 @@
 # phux
 
-phux is a programmable terminal runtime. A background server owns terminals;
-clients and automation control them through a public protocol, locally or
-across machines.
+> A terminal multiplexer whose server you can drive from code.
+
+A background server owns terminals; clients and automation control them
+through a public protocol, locally or across machines.
 
 Start with the task guide below, not the complete architecture or decision archive.
 Every documentation page has a direct .md URL, for example
@@ -58,6 +59,10 @@ npx skills add no-phux/skills                    # agent skills
 - [Start here](https://docs.phux.sh/overview): guides and reference.
 - [Install](https://docs.phux.sh/installation): supported platforms and installation channels.
 - [Quickstart](https://docs.phux.sh/getting-started): start, split, detach, and inspect your first terminal.
+- [Compare](https://docs.phux.sh/compare): phux, tmux, Herdr, and cmux.
+- [Import tmux keys](https://docs.phux.sh/tmux-import): `phux config import-tmux` reads a running tmux and writes a preview.
+- [Performance](https://docs.phux.sh/performance): measurements published with the comparison.
+- [Use phux as an agent](https://docs.phux.sh/agent-quickstart): install phux and drive sessions from code.
 - [Run coding agents](https://docs.phux.sh/agents): choose an integration and verify it works.
 - [ACP-owned sessions](https://docs.phux.sh/acp): provider readiness, typed commands, human permissions, and uncertain outcomes.
 - [Terminal MCP adapter](https://docs.phux.sh/agents): connect to your running local phux server, not the hosted docs service.

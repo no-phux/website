@@ -11,7 +11,7 @@
  * tripwire traps on hostile-bait paths (host/tripwire-paths.ts →
  * host/tripwire.ts).
  */
-import { routeRequest } from "./routes";
+import { routeRequest, sitemapIndexAsset } from "./routes";
 import { handleAssociationRequest } from "./pairing";
 import { APP_RELEASE_PATH, handleAppRelease } from "./app-release";
 import type { TestFlightEnv } from "./testflight";
@@ -138,7 +138,11 @@ export default {
       return handleAnalyticsHttp(request, env, ctx);
     }
 
-    let asset = await env.ASSETS.fetch(request);
+    const sitemapAsset = sitemapIndexAsset(url.hostname, url.pathname);
+    const assetRequest = sitemapAsset
+      ? new Request(new URL(sitemapAsset, request.url), request)
+      : request;
+    let asset = await env.ASSETS.fetch(assetRequest);
     if (
       request.method === "GET" && url.pathname.startsWith("/demos/") &&
       asset.status === 200 && asset.headers.get("content-type")?.includes("video/mp4") &&

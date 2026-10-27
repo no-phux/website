@@ -8,7 +8,9 @@ import { chromium, webkit, type Page } from "playwright-core";
 import handler from "../host/index";
 import { DOCS_HOST, SITE_HOST, routeRequest } from "../host/routes";
 import { htmlToMarkdown } from "../host/markdown";
-import { AGENT_START, OVERVIEW } from "../src/lib/site";
+import { AGENT_START, OVERVIEW, SITE } from "../src/lib/site";
+import { SHIPPED_OPERATING_SYSTEM } from "../src/lib/software-application";
+import { loadCompareMarkdown, measurementsSection } from "../src/lib/performance-page";
 
 const root = resolve(import.meta.dir, "../dist");
 const useWebKit = process.argv.includes("--webkit");
@@ -129,6 +131,11 @@ async function verifyDiscovery() {
   }
   const catalog = JSON.parse(await readFile(resolve(root, ".well-known/ai-catalog.json"), "utf8"));
   const llms = await readFile(resolve(root, "llms.txt"), "utf8");
+  assert.ok(llms.startsWith(`# phux\n\n> ${SITE.tagline}\n`), "llms.txt leads with the canonical one-liner");
+  assert.equal(llms.includes("programmable terminal runtime"), false, "llms.txt does not open on the old category line");
+  for (const path of ["/compare", "/tmux-import", "/performance"]) {
+    assert.ok(llms.includes(`https://${DOCS_HOST}${path}`), `llms.txt indexes ${path}`);
+  }
   assert.ok(llms.includes("https://docs.phux.sh/agents.md"), "Markdown entrypoint is a published route");
   for (const skill of skills.skills) {
     assert.ok(catalog.entries.some((entry: { url: string }) => entry.url.endsWith(skill.url)));
@@ -188,6 +195,7 @@ async function verifyPublishedContent() {
   const pages = index.pages as { url: string }[];
   const sitemap = await readFile(resolve(root, "sitemap-0.xml"), "utf8");
   for (const { url } of pages) await verifyPublishedPage(url, sitemap);
+  await verifyCrawlMetadata(sitemap);
   // /decisions is the live constraints page; only the historical ADR archive stays out.
   assert.ok(pages.every(({ url }) => !/^\/(?:adr(?:\/|$)|decisions\/)/.test(url)), "historical ADRs are not live search pages");
   const clients = await readFile(resolve(root, "clients.md"), "utf8");
@@ -202,6 +210,51 @@ async function verifyPublishedContent() {
   await verifyDiscovery();
   await verifyAgentSurfaces(pages);
   return { pages: pages.length, sections: await verifySearchApi(pages) };
+}
+
+async function verifyCrawlMetadata(sitemap: string) {
+  assert.match(sitemap, /<lastmod>[^<]+<\/lastmod>/, "sitemap URLs carry lastmod");
+  assert.ok(sitemap.includes(`<loc>https://${DOCS_HOST}/performance</loc>`), "sitemap includes /performance");
+  const docsIndex = await readFile(resolve(root, "sitemap-docs-index.xml"), "utf8");
+  assert.ok(docsIndex.includes(`<loc>https://${DOCS_HOST}/sitemap-docs-0.xml</loc>`), "docs host has its own sitemap");
+  assert.equal(docsIndex.includes("https://phux.sh/"), false, "the docs sitemap index stays on docs.phux.sh");
+  const docsSitemap = await readFile(resolve(root, "sitemap-docs-0.xml"), "utf8");
+  assert.ok(docsSitemap.includes(`<loc>https://${DOCS_HOST}/performance</loc>`), "docs sitemap includes /performance");
+  assert.match(docsSitemap, /<lastmod>/, "docs sitemap carries lastmod");
+  const measurements = measurementsSection(loadCompareMarkdown(resolve(import.meta.dir, "..")) ?? "");
+  assert.ok(measurements, "compare.md publishes a measurements section");
+  const performanceMd = await readFile(resolve(root, "performance.md"), "utf8");
+  assert.ok(performanceMd.includes(measurements!), "performance.md serves the published measurements");
+  assert.ok(performanceMd.includes("](/compare)"), "performance.md points at the comparison");
+  for (const file of ["index.html", "overview.html"]) {
+    const html = await readFile(resolve(root, file), "utf8");
+    const match = html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/);
+    assert.ok(match, `${file}: SoftwareApplication JSON-LD`);
+    const data = JSON.parse(match![1]!);
+    assert.equal(data["@type"], "SoftwareApplication");
+    assert.equal(data.name, "phux");
+    assert.equal(data.applicationCategory, "DeveloperApplication");
+    assert.equal(data.operatingSystem, SHIPPED_OPERATING_SYSTEM);
+    assert.equal(data.license, "https://www.apache.org/licenses/LICENSE-2.0");
+    assert.equal(data.codeRepository, "https://github.com/no-phux/phux");
+    assert.deepEqual(data.offers, { "@type": "Offer", price: "0", priceCurrency: "USD" });
+    assert.equal(typeof data.softwareVersion, "string", `${file}: softwareVersion from this build`);
+    assert.ok(!/iPhone|Android|phone/i.test(data.operatingSystem), `${file}: JSON-LD names shipped systems only`);
+  }
+  const overview = await readFile(resolve(root, "overview.html"), "utf8");
+  assert.match(overview, /<title>Documentation overview — phux<\/title>/, "overview title names the page");
+  const env = { ASSETS: { fetch: asset } };
+  const docsIndexResponse = await handler.fetch(new Request(`https://${DOCS_HOST}/sitemap-index.xml`), env);
+  assert.equal(docsIndexResponse.status, 200);
+  assert.equal(await docsIndexResponse.text(), docsIndex, "docs.phux.sh/sitemap-index.xml is the docs index");
+  for (const host of [SITE_HOST, DOCS_HOST]) {
+    const response = await handler.fetch(new Request(`https://${host}/sitemap.xml`), env);
+    assert.equal(response.status, 301, `${host}/sitemap.xml redirects`);
+    assert.equal(response.headers.get("location"), `https://${host}/sitemap-index.xml`);
+  }
+  const performance = await handler.fetch(new Request(`https://${DOCS_HOST}/performance.md`), env);
+  assert.equal(performance.status, 200, "/performance.md serves");
+  assert.match(performance.headers.get("content-type") ?? "", /markdown/);
 }
 
 async function verifyPageCopy(page: Page, base: string, path: string) {

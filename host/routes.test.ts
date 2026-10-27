@@ -199,6 +199,25 @@ describe("host routing", () => {
     });
   });
 
+  test("/sitemap.xml redirects to the index on the same public host", () => {
+    expect(routeRequest(SITE_HOST, urlOn(SITE_HOST, "/sitemap.xml"))).toEqual({
+      kind: "redirect",
+      location: "https://phux.sh/sitemap-index.xml",
+      status: 301,
+    });
+    expect(routeRequest(DOCS_HOST, urlOn(DOCS_HOST, "/sitemap.xml?from=robots"))).toEqual({
+      kind: "redirect",
+      location: "https://docs.phux.sh/sitemap-index.xml?from=robots",
+      status: 301,
+    });
+    expect(routeRequest(SITE_HOST, urlOn(SITE_HOST, "/performance.md"))).toEqual({
+      kind: "redirect",
+      location: "https://docs.phux.sh/performance.md",
+      status: 301,
+    });
+    expect(routeRequest(DOCS_HOST, urlOn(DOCS_HOST, "/performance.md"))).toEqual({ kind: "asset" });
+  });
+
   test("evaluation and recovery pages use the docs origin without swallowing similarly named assets", () => {
     expect(routeRequest(SITE_HOST, urlOn(SITE_HOST, "/performance?view=latency"))).toEqual({
       kind: "redirect",
@@ -253,7 +272,7 @@ describe("public concept gallery", () => {
 
 describe("published documentation boundaries", () => {
   test("flat task guides and installation stay on the docs host for every page suffix", () => {
-    for (const page of ["acp", "embedding", "desktop-capture", "desktop-changes", "desktop-panes", "organization", "installation", "substrate", "program-protocol", "program-sequences", "host-services"]) {
+    for (const page of ["acp", "agent-quickstart", "embedding", "desktop-capture", "desktop-changes", "desktop-panes", "organization", "installation", "substrate", "program-protocol", "program-sequences", "host-services"]) {
       for (const suffix of ["", "/", ".html", ".md", "/index.html"]) {
         const path = `/${page}${suffix}`;
         expect(isDocsPath(path)).toBe(true);
