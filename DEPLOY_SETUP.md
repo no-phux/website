@@ -1,7 +1,7 @@
 # One-time deployment setup
 
 These commands run from the repository root unless specified. Return to
-[the deployment guide](../DEPLOY.md#push-to-deploy-github-actions) for the release lanes.
+[the deployment guide](DEPLOY.md#push-to-deploy-github-actions) for the release lanes.
 
 1. **Cloudflare API token** (My Profile → API Tokens → Create Custom Token).
    Exact recipe — a token's permissions cannot be edited from the API later,

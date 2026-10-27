@@ -212,7 +212,7 @@ installers live in no-phux/phux. A push there that changes them dispatches
 
 ### One-time setup
 
-See [One-time deployment setup](infra/SETUP.md) for Cloudflare permissions,
+See [One-time deployment setup](DEPLOY_SETUP.md) for Cloudflare permissions,
 domains, repository and Worker secrets, OAuth callbacks, and native prerequisites.
 
 ### Optional read-only GitHub App for portfolio discovery
