@@ -79,6 +79,16 @@ to center on pointer exit. Reduced motion, hidden tabs and offscreen art settle
 to a static pose. No WebGL, animation loop at rest or extra framework is needed.
 On phones the fox sits below the download, above the real product comparison.
 
+The primary install action follows the visitor's OS, not viewport width. iPhone,
+iPad (including desktop-mode iPadOS), and Android lead with their own beta-access
+action and an honest invite-by-email note. One tap opens and focuses the existing
+mobile request form. macOS keeps the Mac download; Linux opens the CLI installer;
+Windows leads to the WSL2 instructions, without claiming a native Windows app.
+The closing action follows the same selection, and hides desktop shell commands
+on phones and Windows. All platforms remain available. Static/no-JavaScript HTML
+uses a real installation-guide link rather than guessing a Mac download; detection
+is client-side only, with no stored device profile or device-dependent edge cache.
+
 The landing carries a short top bar: mark and typeset wordmark, Docs, and a recognizable
 GitHub source badge (local SVG, no third-party badge request or invented star count).
 The headline, install action and fox lead a draggable TUI/GUI

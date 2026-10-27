@@ -7,6 +7,8 @@ import { chromium } from "playwright-core";
 import { verifyStaticHome } from "./home-static-checks";
 import { verifyFox } from "./home-fox-checks";
 import { verifyHomeContent } from "./home-content-checks";
+import { verifyDeviceInstalls } from "./home-platform-checks";
+import { platformVisitors } from "./home-platform-fixtures";
 import { verifyClientComparison, verifyHomeAuthReturn, verifyHostedShell, verifyTouchComparison, verifyWorkspaceInstallCopy, verifyWorkspaceResize } from "./home-interaction-checks";
 
 const root = resolve(import.meta.dir, "../dist");
@@ -32,7 +34,8 @@ const base = `http://127.0.0.1:${server.port}`;
 const browser = await chromium.launch({ channel: "chrome", headless: true });
 try {
   await mkdir(artifacts, { recursive: true });
-  const context = await browser.newContext({ viewport: { width: 1440, height: 900 }, permissions: ["clipboard-read", "clipboard-write"], hasTouch: true });
+  const context = await browser.newContext({ userAgent: platformVisitors.mac.userAgent, viewport: { width: 1440, height: 900 }, permissions: ["clipboard-read", "clipboard-write"], hasTouch: true });
+  await context.addInitScript(() => Object.defineProperty(navigator, "maxTouchPoints", { get: () => 0 }));
   // Offline acceptance: never allocate production demo sessions or use real identity.
   await context.routeWebSocket(/wss?:\/\//, socket => socket.close());
   await context.route("**/auth/session", route => route.fulfill({ json: { authenticated: false } }));
@@ -247,6 +250,7 @@ try {
   await verifyHomeAuthReturn(page, base);
   assert.deepEqual(errors, [], "no browser exceptions");
   await context.close();
+  await verifyDeviceInstalls(browser, base, artifacts);
   await verifyStaticHome(browser, base);
   console.log(`PASS home: real workspace captures, pointer/touch/keyboard reveal and enlargement, first-fold install, optional walkthrough, lazy workspace lifecycle, install/copy/beta, tour chapters/pause/focus, glass shell auth/failure recovery, mobile/tablet/desktop, reduced motion, no-JS, idle resource budget. Screenshots: ${artifacts}`);
 } finally {

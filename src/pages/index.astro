@@ -9,7 +9,9 @@ import { SITE, docsHref } from "../lib/site";
 import { cliInstall, desktopDownload, desktopFirstOpen, desktopInstall, installTargets } from "../lib/install";
 import release from "../lib/release.json";
 import brand from "../../brand.lock.json";
+import { installActions } from "../lib/home-platform";
 const installs = installTargets;
+const fallback = installActions.unknown;
 ---
 
 <BaseLayout minimal>
@@ -23,11 +25,11 @@ const installs = installTargets;
           <p class="hero-description">A terminal multiplexer whose server you can drive from code.</p>
           <p class="hero-body">Shells run in a background server. Attach from the terminal UI, the desktop app, or a script: every action is also a command with JSON output and an exit code. phux tracks which panes run a coding agent and whether it is waiting on you.</p>
           <div class="download-actions">
-            <a class="download-primary" href={desktopDownload}>Download for Mac <span aria-hidden="true">↓</span></a>
+            <a class="download-primary" data-device-install href={fallback.href}><span data-device-label>{fallback.label}</span> <span data-device-icon aria-hidden="true">{fallback.icon}</span></a>
             <a class="try-link" href="#live-workspace" aria-label="Open the browser demo">Try it first <span aria-hidden="true">↗</span></a>
           </div>
-          <p class="download-note">Apple silicon · macOS 26 or later · Apache-2.0 · No account</p>
-      <details class="install-options" id="install-options"><summary>CLI, Linux &amp; mobile</summary>
+          <p class="download-note">{fallback.note}</p>
+      <details class="install-options" id="install-options"><summary>All platforms</summary>
       <div class="install" id="install" data-install aria-label="Install phux">
         <div class="install-head">
           <div class="install-tabs" role="group" aria-label="Choose an install">
@@ -118,8 +120,8 @@ const installs = installTargets;
     <div class="closing-copy">
       <h2 id="closing-title">Install</h2>
       <p class="closing-command"><span class="install-prompt" aria-hidden="true">$</span> <code>{cliInstall}</code></p>
-      <a class="download-final" href={desktopDownload}>Download for Mac <span aria-hidden="true">↓</span></a>
-      <a class="closing-platforms" href={docsHref("/installation")}>Linux and other platforms ↗</a>
+      <a class="download-final" data-device-install href={fallback.href}><span data-device-label>{fallback.label}</span> <span data-device-icon aria-hidden="true">{fallback.icon}</span></a>
+      <a class="closing-platforms" href={docsHref("/installation")}>All platforms ↗</a>
     </div>
     <img class="closing-fox" src={`/brand/images/fox.svg?v=${brand.version}`} width="340" height="340" alt="" aria-hidden="true" loading="lazy" />
   </section>
@@ -137,6 +139,7 @@ const installs = installTargets;
   import { registerSiteTools, siteModelContext } from "../webmcp.ts";
   import { wireBetaRequest } from "../lib/beta.ts";
   import { wireInstallTargets } from "../lib/home-install";
+  import { wireDeviceInstall } from "../lib/home-platform";
   const facts = document.querySelector<HTMLElement>("[data-webmcp]");
   const context = siteModelContext(globalThis);
   if (facts && context) {
@@ -177,6 +180,7 @@ const installs = installTargets;
     document.getElementById("beta-note"),
     document.getElementById("beta-phone") as HTMLButtonElement | null,
   );
+  wireDeviceInstall();
 </script>
 
 <style>
@@ -191,7 +195,7 @@ const installs = installTargets;
   .download-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 12px 20px; }
   .download-primary, .download-final { display: inline-flex; align-items: center; justify-content: center; gap: 28px; min-height: 56px; padding: 0 24px; border: 1px solid #efeadf; border-radius: 8px; background: #e7e2da; color: #171a1e; font-size: 14px; font-weight: 650; line-height: 1.2; box-shadow: 0 1px #fff8 inset, 0 5px 20px #0003; transition: background 160ms, transform 160ms, box-shadow 160ms; }
   .download-primary:hover, .download-final:hover { background: #fffaf2; color: #171a1e; transform: translateY(-1px); box-shadow: 0 1px #fff inset, 0 7px 28px #0005; }
-  .download-primary > span, .download-final > span { font-size: 20px; font-weight: 400; }
+  [data-device-icon] { font-size: 20px; font-weight: 400; }
   .try-link { display: inline-flex; align-items: center; gap: 12px; min-height: 44px; color: #adb5b0; font-size: 13px; }
   .try-link:hover { color: #f0ebe3; }
   .closing-command code { color: #dce4dc; font-size: 11px; overflow-wrap: anywhere; }
@@ -215,7 +219,7 @@ const installs = installTargets;
   .install-copy { min-height: 44px; border: 0; padding: 0; color: #aab4ad; background: none; font: 11px var(--font-reading); cursor: pointer; }
   .install-download { color: #e7e2da; font-size: 12px; text-decoration: underline; text-underline-offset: 4px; }
   .install-request { grid-area: 1 / 1; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding-top: 10px; }
-  .install-request input { min-height: 44px; flex: 1; min-width: 120px; width: 100%; border: 1px solid #c8cfc330; border-radius: 6px; padding: 10px; background: #0d1012; color: #e7e2da; font: 12px var(--font-reading); }
+  .install-request input { min-height: 44px; flex: 1; min-width: 120px; width: 100%; border: 1px solid #c8cfc330; border-radius: 6px; padding: 10px; background: #0d1012; color: #e7e2da; font: 16px var(--font-reading); }
   .install-request button { min-height: 44px; padding: 6px 12px; border: 1px solid #c8cfc333; border-radius: 6px; background: #262d29; color: #e7e2da; font: 12px var(--font-reading); cursor: pointer; }
   .install-request .install-phone { min-height: 44px; padding: 0; border: 0; background: none; color: #a1aca4; font-size: 11px; }
   .install-request .install-trap { position: absolute; left: -10000px; width: 1px; height: 1px; opacity: 0; }
