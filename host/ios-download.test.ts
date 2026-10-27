@@ -156,7 +156,6 @@ describe("native TestFlight handoff", () => {
     await Bun.sleep(20);
     expect(fetches).toBe(1);
     expect(pending).toHaveLength(8);
-    expect(new Set(pending).size).toBe(1);
     release(Response.json({ data: { attributes: enabled } }));
     const responses = await Promise.all(calls);
     expect(fetches).toBe(1);
@@ -184,6 +183,64 @@ describe("native TestFlight handoff", () => {
     await Promise.all(pending);
     expect(puts).toBe(0);
     expect(stored.headers.get("location")).toBe(link);
+  });
+  test("each waiting host stores the shared lookup on its own cache key", async () => {
+    const stored = new Map<string, Response>();
+    let matches = 0;
+    const cache = {
+      match: async (key: Request) => { matches += 1; return stored.get(key.url)?.clone(); },
+      put: async (key: Request, response: Response) => { stored.set(key.url, response); },
+    };
+    let fetches = 0;
+    let release!: (response: Response) => void;
+    const gate = new Promise<Response>(resolve => { release = resolve; });
+    const fetchImpl: Fetch = async () => { fetches += 1; return gate; };
+    const pending: Promise<unknown>[] = [];
+    const ctx = { waitUntil: (promise: Promise<unknown>) => { pending.push(promise); } };
+    const configured = env();
+    const first = new Request("https://phux.sh/download/ios");
+    const second = new Request("https://preview.phux.sh/download/ios");
+    const calls = [first, second].map(input => iosDownload(input, configured, fetchImpl, cache, ctx, 5_000));
+    for (let i = 0; i < 50 && (fetches < 1 || matches < 2); i += 1) await Bun.sleep(10);
+    expect(fetches).toBe(1);
+    expect(matches).toBeGreaterThanOrEqual(2);
+    release(Response.json({ data: { attributes: enabled } }));
+    const responses = await Promise.all(calls);
+    await Promise.all(pending);
+    expect(fetches).toBe(1);
+    for (const response of responses) expect(response.headers.get("location")).toBe(link);
+    expect(stored.get("https://phux.sh/download/ios")!.headers.get("location")).toBe(link);
+    expect(stored.get("https://preview.phux.sh/download/ios")!.headers.get("location")).toBe(link);
+    expect(stored.get("https://phux.sh/download/ios")!.headers.get("cache-control")).toBe("public, max-age=300");
+    expect(stored.get("https://preview.phux.sh/download/ios")!.headers.get("cache-control")).toBe("public, max-age=300");
+  });
+  test("a late failure fills only the host that does not already have a link", async () => {
+    const stored = new Map<string, Response>();
+    let matches = 0;
+    const cache = {
+      match: async (key: Request) => { matches += 1; return stored.get(key.url)?.clone(); },
+      put: async (key: Request, response: Response) => { stored.set(key.url, response); },
+    };
+    let fetches = 0;
+    let release!: (response: Response) => void;
+    const gate = new Promise<Response>(resolve => { release = resolve; });
+    const pending: Promise<unknown>[] = [];
+    const ctx = { waitUntil: (promise: Promise<unknown>) => { pending.push(promise); } };
+    const configured = env();
+    const primary = "https://phux.sh/download/ios";
+    const other = "https://preview.phux.sh/download/ios";
+    const calls = [primary, other].map(url => iosDownload(new Request(url), configured, () => { fetches += 1; return gate; }, cache, ctx, 5_000));
+    for (let i = 0; i < 50 && (fetches < 1 || matches < 2); i += 1) await Bun.sleep(10);
+    expect(fetches).toBe(1);
+    stored.set(primary, new Response(null, { status: 302, headers: { location: link, "cache-control": "public, max-age=300" } }));
+    release(new Response(null, { status: 429 }));
+    await Promise.all(calls);
+    await Promise.all(pending);
+    expect(fetches).toBe(1);
+    expect(stored.get(primary)!.headers.get("location")).toBe(link);
+    expect(stored.get(primary)!.headers.get("cache-control")).toBe("public, max-age=300");
+    expect(stored.get(other)!.headers.get("location")).toBe(IOS_INVITE_FALLBACK);
+    expect(stored.get(other)!.headers.get("cache-control")).toBe("public, max-age=60");
   });
   test("logs the rejection cause without the join code or credentials", async () => {
     const logs: string[] = [];

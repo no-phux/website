@@ -68,27 +68,20 @@ type WaitUntil = { waitUntil(promise: Promise<unknown>): void };
 /** One cold lookup per isolate. Concurrent misses await this, then it is cleared. */
 let inflight: Promise<string | null> | undefined;
 
-function startLookup(
-  env: TestFlightEnv,
-  fetchImpl: Fetch,
-  remember: (location: string, seconds: number) => Promise<void>,
-): Promise<string | null> {
+function startLookup(env: TestFlightEnv, fetchImpl: Fetch): Promise<string | null> {
   if (inflight) return inflight;
   const run = publicTestFlightLink(env, fetchImpl).then(
-    async link => {
-      await remember(link ?? IOS_INVITE_FALLBACK, link ? LINK_TTL_SECONDS : FALLBACK_TTL_SECONDS);
-      return link;
-    },
-    async (error: unknown) => {
+    link => link,
+    (error: unknown) => {
       console.error("TestFlight public link unavailable", failureReason(error));
-      await remember(IOS_INVITE_FALLBACK, FALLBACK_TTL_SECONDS);
       return null;
     },
   );
   inflight = run;
+  // `finally` repeats a rejection, and nothing awaits that promise.
   void run.finally(() => {
     if (inflight === run) inflight = undefined;
-  });
+  }).catch(() => {});
   return run;
 }
 
@@ -137,7 +130,10 @@ export async function iosDownload(
     }
     await cache?.put(key, redirect(location, `public, max-age=${seconds}`)).catch(() => undefined);
   };
-  const lookup = startLookup(env, fetchImpl, remember);
+  const lookup = startLookup(env, fetchImpl).then(async link => {
+    await remember(link ?? IOS_INVITE_FALLBACK, link ? LINK_TTL_SECONDS : FALLBACK_TTL_SECONDS);
+    return link;
+  });
   ctx?.waitUntil(lookup);
   let timer: ReturnType<typeof setTimeout> | undefined;
   const deadline = new Promise<null>(resolve => { timer = setTimeout(() => resolve(null), deadlineMs); });
