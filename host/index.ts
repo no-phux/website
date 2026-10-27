@@ -106,7 +106,7 @@ export default {
     // Native iOS handoff uses only the already-enabled external TestFlight link.
     if (url.pathname === "/download/ios") {
       const { iosDownload } = await import("./ios-download");
-      return iosDownload(request, env);
+      return iosDownload(request, env, undefined, undefined, ctx);
     }
 
     // The Desktop download button: the stable Mac archive, resolved per click.

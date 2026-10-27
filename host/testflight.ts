@@ -125,14 +125,24 @@ export async function resolveAppId(env: TestFlightEnv, asc: Asc): Promise<string
   return appId;
 }
 
-export async function resolveGroup(env: TestFlightEnv, asc: Asc): Promise<string> {
-  const cacheKey = `${env.ASC_ISSUER_ID}:${env.ASC_BETA_GROUP ?? ""}`;
-  const cached = groups.get(cacheKey);
-  if (cached) return cached;
+export interface BetaGroupAttributes {
+  name: string;
+  isInternalGroup: boolean;
+  publicLinkEnabled?: boolean;
+  publicLink?: unknown;
+}
+
+/**
+ * The app's external beta group, including the public-link fields.
+ * `GET /v1/apps/{id}/betaGroups` accepts `fields[betaGroups]`, and
+ * `publicLink` / `publicLinkEnabled` are BetaGroup attributes, so a cold
+ * lookup can read the link here instead of fetching the group again.
+ */
+export async function externalBetaGroup(env: TestFlightEnv, asc: Asc): Promise<Resource<BetaGroupAttributes>> {
   const appId = await resolveAppId(env, asc);
   const list = (await (
-    await asc(`/apps/${appId}/betaGroups?fields[betaGroups]=name,isInternalGroup&limit=200`)
-  ).json()) as { data: Resource<{ name: string; isInternalGroup: boolean }>[] };
+    await asc(`/apps/${appId}/betaGroups?fields[betaGroups]=name,isInternalGroup,publicLinkEnabled,publicLink&limit=200`)
+  ).json()) as { data: Resource<BetaGroupAttributes>[] };
   const group = list.data.find(
     (candidate) =>
       !candidate.attributes.isInternalGroup &&
@@ -141,8 +151,15 @@ export async function resolveGroup(env: TestFlightEnv, asc: Asc): Promise<string
   if (!group) {
     throw new Error(`no external TestFlight group${env.ASC_BETA_GROUP ? ` named ${env.ASC_BETA_GROUP}` : ""}`);
   }
-  groups.set(cacheKey, group.id);
-  return group.id;
+  groups.set(`${env.ASC_ISSUER_ID}:${env.ASC_BETA_GROUP ?? ""}`, group.id);
+  return group;
+}
+
+export async function resolveGroup(env: TestFlightEnv, asc: Asc): Promise<string> {
+  const cacheKey = `${env.ASC_ISSUER_ID}:${env.ASC_BETA_GROUP ?? ""}`;
+  const cached = groups.get(cacheKey);
+  if (cached) return cached;
+  return (await externalBetaGroup(env, asc)).id;
 }
 
 async function addTester(asc: Asc, groupId: string, email: string): Promise<void> {

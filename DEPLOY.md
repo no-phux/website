@@ -125,8 +125,15 @@ attaches to the same session through `wss://shell.phux.sh/session?attach=CODE`.
 
 `/download/ios` reads the same external group's enabled public link with the
 existing ASC credentials, then redirects to Apple. It never enables a link or
-changes distribution. Lookup caching is bounded to 60 seconds; a missing,
-disabled, or failed link falls back to `/more` with optional email access.
+changes distribution. A visitor waits at most four seconds for Apple; a slower
+cold lookup keeps running after the redirect (`ctx.waitUntil`) and stores the
+link for the next visitor. Apple's link is cached for five minutes. Revoking
+or disabling it in App Store Connect can take that long to stop new visitors,
+because a stored link is served until that entry expires. A missing, disabled,
+or failed link falls back to `/more` with optional email access and is cached
+for 60 seconds. Without `ASC_BETA_GROUP_ID`, a cold lookup reads the link from
+the group list (two App Store Connect calls). Pinning that secret skips the
+list and uses one call.
 Enable/share the public link in App Store Connect → TestFlight → external group
 to allow joining without email entry. Apple owns acceptance and installation.
 
