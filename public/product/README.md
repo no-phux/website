@@ -1,15 +1,11 @@
 # Workspace captures
 
-Real TUI and Desktop screenshots supplied by the user on October 24, 2026:
+Privacy-safe TUI and Desktop screenshots. Both show the `default` workspace
+for the `demo` user, with neutral session names and paths under
+`/Users/demo/dev/phux`.
 
-- `desktop-workspace.webp`: `Screenshot 2026-10-24 at 5.33.46 PM.png`.
-- `tui-workspace.webp`: `Screenshot 2026-10-24 at 5.33.40 PM.png`.
+- `desktop-workspace.webp`: lossless WebP, 3088 × 1740.
+- `tui-workspace.webp`: lossy WebP (`cwebp -q 92 -sharp_yuv -m 6`), 3088 × 1740, 370 KB. The lossless source is 858 KB; -sharp_yuv keeps coloured glyph edges clean.
 
-Both source images are 3840 × 2160. Each uses the same crop: x=324, y=116,
-width=3088, height=1740. This removes the macOS desktop and menu bar while
-preserving the complete app window. The crops are encoded as lossless WebP,
-without resizing or changing the product UI.
-
-They show the same `default` workspace with different active agent tabs.
 The homepage overlays them at identical dimensions for its drag reveal.
 Do not substitute an Agent Fleet overview, invented UI, or unrelated session.

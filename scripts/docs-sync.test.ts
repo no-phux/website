@@ -234,6 +234,22 @@ describe("source Markdown rendering interface", () => {
     expect(text.split("---\n").at(-1)).toBe(`## Commands\n\n${code}`);
   });
 
+  test("replaces a published native Windows desktop with the WSL limit", () => {
+    const truth = "On Windows today, the CLI and TUI run under WSL 2. The native desktop build is not published yet.";
+    const clients = render(`# Clients\n\nThe terminal UI.\n\n## Desktop\n\nPhux Desktop is a native app for macOS 26 or later on Apple silicon,\nLinux on x86_64 or arm64 with Vulkan, and Windows x64 with a WSL 2 server.\nOn macOS and Linux, install it with:\n\nThe [Windows app](../clients/desktop/README.md#windows) uses native Direct3D\nrendering, input and clipboard; shells and agents stay in WSL. Its desktop\nupdates use the Windows installer. WSLg is not required. The local Changes\npanel and external Unix developer socket are not available on Windows.\n\nIt shows every session.\n`);
+    expect(clients).toContain(truth);
+    expect(clients).not.toContain("Windows app");
+    expect(clients).not.toContain("Windows x64");
+    const install = { ...entry, repoPath: "docs/install.md", slug: "installation" };
+    const installation = createPageRenderer([install], revision, versions)(`# Install\n\nOne command.\n\nWindows uses these Linux CLI/server builds through [WSL](#windows-wsl),\nincluding from PowerShell. The [Windows desktop](../clients/desktop/README.md#windows)\nis native, with its coordinator in WSL. There is no native Windows coordinator\nor Intel Mac build.\n\nThe terminal UI runs in WSL; the native Windows desktop\nconnects to the same coordinator.\n\ninside WSL. Neither step removes your distribution. For a native window,\nsee [Windows Desktop](../clients/desktop/README.md#windows); WSLg is not required.\n`, install);
+    expect(installation).toContain(truth);
+    expect(installation).toContain("There is no Intel Mac build.");
+    expect(installation).not.toContain("does not exist");
+    expect(installation).toContain("The terminal UI runs in WSL.");
+    expect(installation).not.toContain("connects to the same coordinator");
+    expect(installation).not.toContain("Windows Desktop");
+  });
+
   test("honors metadata overrides, YAML escaping and safe stability defaults", () => {
     const override = { ...entry, title: 'A "quoted" \\ title', summary: "Owned summary." };
     const renderer = createPageRenderer([override], revision, versions);
