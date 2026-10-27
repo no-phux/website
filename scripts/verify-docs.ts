@@ -9,6 +9,7 @@ import handler from "../host/index";
 import { DOCS_HOST, SITE_HOST, routeRequest } from "../host/routes";
 import { htmlToMarkdown } from "../host/markdown";
 import { AGENT_START, OVERVIEW } from "../src/lib/site";
+import { SITE_PAGE_CATALOG } from "./site-pages";
 
 const root = resolve(import.meta.dir, "../dist");
 const useWebKit = process.argv.includes("--webkit");
@@ -35,7 +36,8 @@ async function verifyPublishedPage(url: string, sitemap: string) {
   assert.ok(sitemap.includes(`<loc>https://${DOCS_HOST}${url}</loc>`), `${url}: canonical sitemap entry`);
   assert.match(markdown, /^---\n/);
   assert.match(markdown, /\n# .+/);
-  const repository = url === "/overview" ? "website" : "phux";
+  const websitePages = new Set(["/overview", ...SITE_PAGE_CATALOG.map(({ slug }) => `/${slug}`)]);
+  const repository = websitePages.has(url) ? "website" : "phux";
   assert.match(markdown, new RegExp(`source: "https://github.com/no-phux/${repository}/blob/[0-9a-f]{40}/`));
   assert.ok(!/^\w+: undefined$/m.test(markdown) && !markdown.endsWith("\n\nundefined"), `${url}: complete Markdown`);
   for (const suffix of ["", ".md"]) {
