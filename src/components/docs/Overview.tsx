@@ -5,8 +5,7 @@ export function OverviewBody() {
   const { pitch } = OVERVIEW;
   return (
     <div className="docs-overview">
-      <section className="overview-pitch" aria-labelledby="leave-the-view-keep-the-shell">
-        <h2 id="leave-the-view-keep-the-shell">{pitch.headline}</h2>
+      <section className="overview-pitch">
         <p>{pitch.text}</p>
       </section>
 
