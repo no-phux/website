@@ -5,6 +5,7 @@ import { mkdir } from "node:fs/promises";
 import { extname, resolve } from "node:path";
 import { chromium } from "playwright-core";
 import { verifyStaticHome } from "./home-static-checks";
+import { verifyFox } from "./home-fox-checks";
 import { verifyClientComparison, verifyHomeAuthReturn, verifyHostedShell, verifyTouchComparison, verifyWorkspaceInstallCopy, verifyWorkspaceResize } from "./home-interaction-checks";
 
 const root = resolve(import.meta.dir, "../dist");
@@ -56,6 +57,7 @@ try {
   assert.equal(await page.locator(".download-primary").getAttribute("href"), "/download/desktop", "the primary action downloads the actual desktop release");
   await page.waitForTimeout(350);
   assert.ok(!requests.some(url => /(?:HeroDemo|PhuxTerminal|VgpuPrototype)[^/]*\.js|\.wasm|\/auth\/session|\/healthz|phux-architecture\.mp4/.test(url)), "first fold does not download React demos, GPU, WASM, film or allocate sessions");
+  await verifyFox(page);
   await verifyClientComparison(page, artifacts);
   await page.evaluate(() => window.scrollTo(0, 0));
   await page.screenshot({ path: `${artifacts}/home-desktop.png` });
@@ -171,7 +173,7 @@ try {
     await page.locator(".install-options").evaluate((node: HTMLDetailsElement) => { node.open = false; });
     await page.evaluate(() => window.scrollTo(0, 0));
     const preview = (await page.locator(".client-comparison").boundingBox())!;
-    assert.ok(preview.y < (width < 600 ? 620 : 650), `the real product begins within the first screen at ${width}px`);
+    assert.ok(preview.y < (width < 600 ? 740 : 650), `the fox and real product begin within the first screen at ${width}px`);
     const downloadBox = (await page.locator(".download-primary").boundingBox())!;
     assert.ok(downloadBox.y + downloadBox.height < preview.y, "the primary download is visible before the reveal");
     assert.ok(downloadBox.y + downloadBox.height < (width < 600 ? 500 : 600), "install is reachable without scrolling");

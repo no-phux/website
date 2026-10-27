@@ -67,12 +67,24 @@ applies the saved preference before paint and Astro document swaps.
 
 ## Landing and live shell
 
-The landing carries a short top bar: wordmark plus Docs, Try, and a recognizable
+The homepage opens with a two-column hero: headline, description and download
+on the left; an alert, lean silver fox on the right. The fox is a site illustration
+(`src/components/fox/Fox.astro`), not a modification of the pinned identity kit.
+Long legs, a tucked waist, tapered tail, clean cheek planes and satin highlights
+replace rounded toy-like anatomy. The only ambient art token is `--fox-halo`
+(`#bacab309`); the illustration's silver/graphite material stops are local SVG paint.
+Keep the silhouette still: only the eyes and a sub-two-degree head response follow
+the pointer. Gaze is bounded, clipped inside the eyes and time-damped; it returns
+to center on pointer exit. Reduced motion, hidden tabs and offscreen art settle
+to a static pose. No WebGL, animation loop at rest or extra framework is needed.
+On phones the fox sits below the download, above the real product comparison.
+
+The landing carries a short top bar: mark and typeset wordmark, Docs, and a recognizable
 GitHub source badge (local SVG, no third-party badge request or invented star count).
-A compact 36–52px wordmark and one-line description lead a draggable TUI/GUI
-comparison. The entire comparison must fit in the first screen at mobile and
-desktop widths. It is an explicitly labelled illustrated client preview, not a
-screenshot or a live connection; both sides show the same terminals and state.
+The headline, install action and fox lead a draggable TUI/GUI
+comparison. The comparison begins in the first screen at mobile and desktop
+widths. It shows real product captures, not a live connection; both sides show
+the same workspace.
 Use a native range input for pointer, touch and keyboard, plus full-client shortcuts.
 Without JavaScript, show both previews and hide the inert controls.
 

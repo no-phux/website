@@ -6,6 +6,8 @@ export async function verifyStaticHome(browser: Browser, base: string) {
   const stillContext = await browser.newContext({ reducedMotion: "reduce" });
   const stillPage = await stillContext.newPage();
   await stillPage.goto(`${base}/?hero=classic`);
+  await stillPage.mouse.move(1200, 100);
+  assert.equal(await stillPage.locator("[data-fox-eye]").first().getAttribute("transform"), "translate(0 0)", "initial reduced motion keeps the fox centered");
   await stillPage.locator("#connection-details > summary").click();
   await stillPage.locator(".tour").scrollIntoViewIfNeeded();
   await stillPage.locator("astro-island:not([ssr]) .tour").waitFor();
@@ -17,6 +19,7 @@ export async function verifyStaticHome(browser: Browser, base: string) {
   const staticContext = await browser.newContext({ javaScriptEnabled: false });
   const staticPage = await staticContext.newPage();
   await staticPage.goto(base);
+  assert.ok(await staticPage.locator("[data-fox]").isVisible(), "the fox remains visible without JavaScript");
   assert.equal((await staticPage.getByRole("heading", { level: 1 }).innerText()).trim(), "Run the\nwhole show.");
   await staticPage.locator(".install-options > summary").click();
   assert.ok(await staticPage.locator("#install code").isVisible());
