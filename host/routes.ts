@@ -34,6 +34,7 @@ export const DOCS_PREFIXES = [
   "/desktop-reviews",
   "/agent-quickstart",
   "/agents",
+  "/agent-quickstart",
   "/acp",
   "/remote",
   "/clients",

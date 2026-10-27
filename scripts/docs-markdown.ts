@@ -1,5 +1,6 @@
 /** Source-page presentation and immutable, catalog-aware Markdown links. */
 import { dirname, join } from "node:path";
+import { extendComparePage } from "./compare-extension";
 import { GROUPS, isDeniedDocumentation, parseFrontmatter, type Entry } from "./docs-catalog";
 
 export interface Versions { protocolVersion: string; projectVersion: string }
@@ -211,6 +212,7 @@ export function createPageRenderer(entries: Entry[], revision: string, versions:
   return function renderSourcePage(raw: string, entry: Entry): string {
     const { body, title, summary, stability } = pageMetadata(raw, entry);
     const published = correctUnpublishedWindowsDesktop(body, entry.repoPath);
+    const extended = entry.repoPath === "docs/compare.md" ? extendComparePage(published, revision) : published;
     const fm = [
       "---",
       `title: ${yamlString(title)}`,
@@ -226,6 +228,6 @@ export function createPageRenderer(entries: Entry[], revision: string, versions:
       "---",
       "",
     ].join("\n");
-    return fm + rewriteLinks(presentBody(published), entry.repoPath);
+    return fm + rewriteLinks(presentBody(extended), entry.repoPath);
   };
 }
