@@ -19,7 +19,7 @@ import { phuxRoot } from "./scripts/phux-root.ts";
 import { splitDocsSitemap } from "./scripts/split-sitemaps.ts";
 import { wgslVitePlugin } from "@vgpu/wgsl/loader-vite";
 
-function commitDate(cwd: string): string | undefined {
+function commitDate(cwd) {
   try {
     const date = execFileSync("git", ["-C", cwd, "log", "-1", "--format=%cI"], { encoding: "utf8" }).trim();
     return date || undefined;
