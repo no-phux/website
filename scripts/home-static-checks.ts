@@ -20,6 +20,8 @@ export async function verifyStaticHome(browser: Browser, base: string) {
   const staticPage = await staticContext.newPage();
   await staticPage.goto(base);
   assert.equal(await staticPage.locator(".download-primary [data-device-label]").innerText(), "Choose your platform", "without device detection, never guess Mac");
+  assert.equal((await staticPage.locator(".download-note").innerText()).trim(), "macOS, Linux, Windows via WSL 2");
+  assert.doesNotMatch(await staticPage.locator("body").innerText(), /iPhone|Android|TestFlight|not available yet/, "the platform line names only shipped systems");
   assert.equal(await staticPage.locator(".download-primary").getAttribute("href"), "https://docs.phux.sh/installation", "the no-JS fallback is a real install guide");
   assert.ok(await staticPage.locator("[data-fox]").isVisible(), "the fox remains visible without JavaScript");
   assert.equal((await staticPage.getByRole("heading", { level: 1 }).innerText()).trim(), "phux");

@@ -119,12 +119,12 @@ try {
   assert.equal(await page.evaluate(() => navigator.clipboard.readText()), "curl -fsSL https://phux.sh/install | sh");
   assert.equal(await page.getByRole("status").innerText(), "Install command copied.");
   // The hero switcher swaps the command on hover, focus, click, and arrows,
-  // turns Desktop into a download, and the third target into the beta request.
+  // and turns Desktop into a download.
   const command = page.locator("#install-command");
   const line = page.locator("#install .install-line");
-  const request = page.locator("#install .install-request");
   const target = (name: string) => page.locator(`#install [data-install-target="${name}"]`);
-  assert.deepEqual(await page.locator("#install .install-tabs button").allInnerTexts(), ["CLI", "Desktop", "Mobile"], "three install targets");
+  assert.deepEqual(await page.locator("#install .install-tabs button").allInnerTexts(), ["CLI", "Desktop"], "CLI and Desktop install targets");
+  assert.equal(await page.locator("#install .install-request, #beta-form").count(), 0, "the homepage has no phone request");
   const download = page.locator("#install-download");
   await target("desktop").hover();
   assert.ok(await download.isVisible(), "hover swaps to the desktop download");
@@ -132,16 +132,12 @@ try {
   assert.equal(await download.getAttribute("href"), "/download/desktop", "the download is the worker's stable Mac archive redirect");
   assert.equal((await page.locator("#install-note").innerText()).trim(), "First open: macOS asks to confirm an app downloaded from the internet. Choose Open.", "the first-open line stays until a real Mac confirms it");
   assert.equal(await page.locator(".linux-desktop-note").count(), 0);
-  await target("mobile").click();
-  assert.equal(await target("mobile").getAttribute("aria-pressed"), "true", "the clicked target is pressed");
-  assert.ok(await request.isVisible(), "Mobile asks for an address instead of printing a command");
-  assert.equal(await line.isHidden(), true, "the command line steps aside for the request form");
-  assert.match(await page.locator("#install-note").innerText(), /TestFlight/, "the note describes the mobile target");
-  await target("mobile").focus();
+  await target("desktop").focus();
   await page.keyboard.press("ArrowLeft");
-  assert.ok(await download.isVisible(), "arrow keys move the target back to Desktop");
-  assert.equal(await request.isHidden(), true, "a command target hides the request form");
-  assert.equal(await line.isVisible(), true, "a command target restores the command line");
+  assert.equal(await target("cli").getAttribute("aria-pressed"), "true", "arrow keys move from Desktop back to CLI");
+  assert.equal(await line.isVisible(), true, "CLI restores the command line");
+  assert.equal(await download.isHidden(), true, "CLI hides the desktop download");
+  await target("desktop").hover();
   await page.getByRole("button", { name: "Copy install command" }).click();
   assert.equal(await page.evaluate(() => navigator.clipboard.readText()), "curl -fsSL https://phux.sh/install-desktop | sh", "Desktop keeps its installer on the copy button");
   // Regression: a content-sized dock widened with the command and slid the
@@ -153,27 +149,11 @@ try {
     });
   const dock = await box("#install");
   const cliTarget = await box('#install [data-install-target="cli"]');
-  for (const name of ["desktop", "mobile", "cli"]) {
+  for (const name of ["desktop", "cli"]) {
     await target(name).hover();
     assert.deepEqual(await box("#install"), dock, `the dock keeps its box while ${name} is previewed`);
     assert.deepEqual(await box('#install [data-install-target="cli"]'), cliTarget, `targets stay pinned while ${name} is previewed`);
   }
-  // The Mobile target carries the same TestFlight request /more posts.
-  await target("mobile").click();
-  await request.locator("input[name=email]").fill("iphone@example.com");
-  await request.locator("button[type=submit]").click();
-  await page.waitForFunction(() => document.querySelector("#beta-note")?.textContent?.includes("Invite sent") ?? false);
-  assert.match(await page.locator("#beta-note").innerText(), /Invite sent/, "the hero reports the invite");
-  assert.equal(beta.payload?.email, "iphone@example.com", "the hero request posts the address");
-  assert.equal(beta.payload?.website, "", "the honeypot stays empty");
-  assert.equal(beta.payload?.platform, "ios", "a computer is offered the iPhone beta first");
-  await request.getByRole("button", { name: "Android instead" }).click();
-  assert.equal(await request.locator("input[name=email]").getAttribute("aria-label"), "Email address for the Google Play test", "the switch re-labels the address");
-  await request.locator("input[name=email]").fill("android@example.com");
-  await request.locator("button[type=submit]").click();
-  await page.waitForFunction(() => document.querySelector("#beta-note")?.textContent?.includes("Google Play") ?? false);
-  assert.equal(beta.payload?.platform, "android", "the Android request says so");
-  assert.ok(await request.getByRole("button", { name: "iPhone instead" }).isVisible(), "the switch offers the way back");
   for (const width of [320, 390, 768, 1280]) {
     await page.setViewportSize({ width, height: width < 600 ? 740 : 900 });
     await page.locator(".install-options").evaluate((node: HTMLDetailsElement) => { node.open = false; });

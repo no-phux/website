@@ -10,7 +10,7 @@ import { cliInstall, desktopDownload, desktopFirstOpen, desktopInstall, installT
 import release from "../lib/release.json";
 import brand from "../../brand.lock.json";
 import { installActions } from "../lib/home-platform";
-const installs = installTargets;
+const installs = installTargets.filter((target) => target.id !== "mobile");
 const fallback = installActions.unknown;
 ---
 
@@ -38,7 +38,7 @@ const fallback = installActions.unknown;
                 type="button"
                 data-install-target={target.id}
                 data-install-command={target.command}
-                data-install-note={target.id === "desktop" ? desktopFirstOpen : target.id === "mobile" ? "iPhone: TestFlight · Android: Google Play testing" : target.note}
+                data-install-note={target.id === "desktop" ? desktopFirstOpen : target.note}
                 aria-pressed={index === 0 ? "true" : "false"}
               >{target.label}</button>
             ))}
@@ -54,26 +54,6 @@ const fallback = installActions.unknown;
             <a class="install-download" id="install-download" href={desktopDownload} hidden>Download for Mac ↓</a>
             <button type="button" class="install-copy" data-copy={cliInstall} aria-label="Copy install command">Copy</button>
           </div>
-          <form class="install-request" id="beta-form" hidden>
-            <input
-              type="email"
-              name="email"
-              required
-              autocomplete="email"
-              placeholder="Apple Account email"
-              aria-label="Email address for the TestFlight invite"
-            />
-            <input
-              class="install-trap"
-              type="text"
-              name="website"
-              tabindex="-1"
-              autocomplete="off"
-              aria-hidden="true"
-            />
-            <button type="submit">Request access</button>
-            <button type="button" class="install-phone" id="beta-phone">Android instead</button>
-          </form>
         </div>
         <span class="install-rule" aria-hidden="true"></span>
         <p class="install-note" id="install-note">{installs[0].note}</p>
@@ -137,7 +117,6 @@ const fallback = installActions.unknown;
 
 <script>
   import { registerSiteTools, siteModelContext } from "../webmcp.ts";
-  import { wireBetaRequest } from "../lib/beta.ts";
   import { wireInstallTargets } from "../lib/home-install";
   import { wireDeviceInstall } from "../lib/home-platform";
   const facts = document.querySelector<HTMLElement>("[data-webmcp]");
@@ -170,16 +149,9 @@ const fallback = installActions.unknown;
 
   // The dock keeps its fixed width and reserves its stage height, so a swap
   // moves nothing. Only the target underline travels (transform), and the
-  // command settles with opacity and a short translate. The Mobile target has
-  // no command: it swaps the command line for the beta request form. No
-  // clip or backdrop animation: both are what made the first pass stutter.
+  // command settles with opacity and a short translate. No clip or backdrop
+  // animation: both are what made the first pass stutter.
   wireInstallTargets(button);
-
-  wireBetaRequest(
-    document.getElementById("beta-form") as HTMLFormElement | null,
-    document.getElementById("beta-note"),
-    document.getElementById("beta-phone") as HTMLButtonElement | null,
-  );
   wireDeviceInstall();
 </script>
 
@@ -218,11 +190,6 @@ const fallback = installActions.unknown;
   #install-command { min-width: 0; color: #dce4dc; font-size: 11px; line-height: 1.7; white-space: normal; overflow-wrap: anywhere; }
   .install-copy { min-height: 44px; border: 0; padding: 0; color: #aab4ad; background: none; font: 11px var(--font-reading); cursor: pointer; }
   .install-download { color: #e7e2da; font-size: 12px; text-decoration: underline; text-underline-offset: 4px; }
-  .install-request { grid-area: 1 / 1; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding-top: 10px; }
-  .install-request input { min-height: 44px; flex: 1; min-width: 120px; width: 100%; border: 1px solid #c8cfc330; border-radius: 6px; padding: 10px; background: #0d1012; color: #e7e2da; font: 16px var(--font-reading); }
-  .install-request button { min-height: 44px; padding: 6px 12px; border: 1px solid #c8cfc333; border-radius: 6px; background: #262d29; color: #e7e2da; font: 12px var(--font-reading); cursor: pointer; }
-  .install-request .install-phone { min-height: 44px; padding: 0; border: 0; background: none; color: #a1aca4; font-size: 11px; }
-  .install-request .install-trap { position: absolute; left: -10000px; width: 1px; height: 1px; opacity: 0; }
   .install-note { min-height: 3.2em; margin: 10px 0 0; color: #919e95; font-size: 11px; line-height: 1.6; }
   .copy-status { min-height: 20px; margin: 3px 0 0; color: #c3d6c6; font-size: 11px; }
   .release-links { display: flex; flex-wrap: wrap; gap: 4px 14px; margin: 10px 0 0; color: #8f9c92; font-size: 10px; }

@@ -17,16 +17,30 @@ export function detectInstallPlatform(visitor: Visitor): InstallPlatform {
   return "unknown";
 }
 
-const ios = { href: "/more#testflight", note: "iOS beta · TestFlight invite by email", icon: "→", target: "mobile", phone: "ios" } as const;
+/** Published installs. The homepage names these and nothing else. */
+export const shippedPlatforms = "macOS, Linux, Windows via WSL 2";
+
+const choose = {
+  label: "Choose your platform",
+  href: docsHref("/installation"),
+  note: shippedPlatforms,
+  icon: "↗",
+} as const;
+
 export const installActions: Record<InstallPlatform, InstallAction> = {
-  iphone: { ...ios, label: "Get for iPhone" },
-  ipad: { ...ios, label: "Get for iPad", note: "iPadOS beta · TestFlight invite by email" },
-  android: { label: "Get for Android", href: "/more#testflight", note: "Android beta · Google Play access by email", icon: "→", target: "mobile", phone: "android" },
+  iphone: { ...choose },
+  ipad: { ...choose },
+  android: { ...choose },
   mac: { label: "Download for Mac", href: desktopDownload, note: "Apple silicon · macOS 26 or later · Apache-2.0 · No account", icon: "↓" },
   linux: { label: "Install for Linux", href: docsHref("/installation"), note: "Linux · CLI and desktop · Apache-2.0 · No account", icon: "→", target: "cli" },
-  windows: { label: "Install with WSL", href: docsHref("/installation"), note: "Windows: use the CLI in WSL2 · No native Windows app yet", icon: "↗" },
-  unknown: { label: "Choose your platform", href: docsHref("/installation"), note: "Mac, Linux, iPhone & Android · All install options", icon: "↗" },
+  windows: { label: "Install with WSL", href: docsHref("/installation"), note: "Windows via WSL 2", icon: "↗" },
+  unknown: { ...choose },
 };
+
+/** The closing shell command is for macOS and Linux. Other visitors get the install guide. */
+export function hidesClosingCommand(platform: InstallPlatform): boolean {
+  return platform === "iphone" || platform === "ipad" || platform === "android" || platform === "windows";
+}
 
 /** Shared hero and closing actions; never guess Mac from the viewport width. */
 export function wireDeviceInstall() {
@@ -45,18 +59,12 @@ export function wireDeviceInstall() {
     });
   });
   document.querySelector<HTMLElement>(".download-note")!.textContent = action.note;
-  // A phone cannot run the shell command displayed in the closing desktop CTA.
-  document.querySelector<HTMLElement>(".closing-command")!.hidden = Boolean(action.phone) || platform === "windows";
+  document.querySelector<HTMLElement>(".closing-command")!.hidden = hidesClosingCommand(platform);
 }
 
 function openInstall(action: InstallAction) {
   const details = document.querySelector<HTMLDetailsElement>("#install-options")!;
   details.open = true;
   details.querySelector<HTMLButtonElement>(`[data-install-target="${action.target}"]`)!.click();
-  const form = details.querySelector<HTMLFormElement>("#beta-form")!;
-  if (action.phone && form.dataset.phone !== action.phone) {
-    details.querySelector<HTMLButtonElement>("#beta-phone")!.click();
-  }
-  const field = action.target === "mobile" ? 'input[name="email"]' : ".install-copy";
-  details.querySelector<HTMLElement>(field)!.focus();
+  details.querySelector<HTMLElement>(".install-copy")!.focus();
 }

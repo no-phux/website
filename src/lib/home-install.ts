@@ -8,7 +8,7 @@ export function wireInstallTargets(copyButton: HTMLButtonElement | null) {
   const status = install.querySelector<HTMLElement>("#beta-note")!;
   const tabs = install.querySelector<HTMLElement>(".install-tabs")!;
   const line = install.querySelector<HTMLElement>(".install-line")!;
-  const request = install.querySelector<HTMLFormElement>(".install-request")!;
+  const request = install.querySelector<HTMLFormElement>(".install-request");
   const commandBox = install.querySelector<HTMLElement>(".install-command")!;
   const download = install.querySelector<HTMLElement>("#install-download")!;
   const targets = [...install.querySelectorAll<HTMLButtonElement>("[data-install-target]")];
@@ -39,8 +39,8 @@ export function wireInstallTargets(copyButton: HTMLButtonElement | null) {
     code.textContent = command;
     note.textContent = target.dataset.installNote ?? "";
     setInstallCopy(copyButton, command, desktop);
-    line.hidden = mobile;
-    request.hidden = !mobile;
+    line.hidden = mobile && request !== null;
+    if (request) request.hidden = !mobile;
     commandBox.hidden = desktop;
     download.hidden = !desktop;
     placePill(target);
@@ -84,8 +84,8 @@ function arrowStep(key: string): number {
   return 0;
 }
 
-function installPreview(mobile: boolean, desktop: boolean, request: HTMLElement, download: HTMLElement, code: HTMLElement) {
-  if (mobile) return { element: request, distance: 4, duration: 340 };
+function installPreview(mobile: boolean, desktop: boolean, request: HTMLElement | null, download: HTMLElement, code: HTMLElement) {
+  if (mobile && request) return { element: request, distance: 4, duration: 340 };
   if (desktop) return { element: download, distance: 6, duration: 420 };
   return { element: code, distance: 6, duration: 420 };
 }

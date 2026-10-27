@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import type { Browser } from "playwright-core";
 import { platformVisitors } from "./home-platform-fixtures";
-import { installActions, type InstallPlatform } from "../src/lib/home-platform";
+import { hidesClosingCommand, installActions, type InstallPlatform } from "../src/lib/home-platform";
 
 export async function verifyDeviceInstalls(browser: Browser, base: string, artifacts: string) {
   for (const [device, visitor] of Object.entries(platformVisitors)) {
@@ -10,7 +10,7 @@ export async function verifyDeviceInstalls(browser: Browser, base: string, artif
     // Astro production resolves docs links; this test module runs directly in Bun.
     const href = action.href.replace(/^\/installation$/, "https://docs.phux.sh/installation");
     const width = platform === "ipad" ? 768 : 390;
-    const context = await browser.newContext({ userAgent: visitor.userAgent, viewport: { width, height: 844 }, hasTouch: visitor.maxTouchPoints > 0, isMobile: Boolean(action.phone) });
+    const context = await browser.newContext({ userAgent: visitor.userAgent, viewport: { width, height: 844 }, hasTouch: visitor.maxTouchPoints > 0, isMobile: hidesClosingCommand(platform) && platform !== "windows" });
     await context.addInitScript(points => Object.defineProperty(navigator, "maxTouchPoints", { get: () => points }), visitor.maxTouchPoints);
     await context.routeWebSocket(/wss?:\/\//, socket => socket.close());
     const page = await context.newPage();
@@ -26,7 +26,9 @@ export async function verifyDeviceInstalls(browser: Browser, base: string, artif
       assert.equal(await page.locator(".download-primary").getAttribute("href"), href);
       assert.equal(await page.locator(".download-final").getAttribute("href"), href);
       assert.equal(await page.locator(".download-note").innerText(), action.note);
-      assert.equal(await page.locator(".closing-command").isHidden(), Boolean(action.phone) || platform === "windows");
+      assert.doesNotMatch(action.note, /iPhone|Android|TestFlight|phone/i, `${device}: platform line`);
+      assert.doesNotMatch(await page.locator("body").innerText(), /iPhone|Android|TestFlight/, `${device}: homepage`);
+      assert.equal(await page.locator(".closing-command").isHidden(), hidesClosingCommand(platform));
       assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
       await page.screenshot({ path: `${artifacts}/install-${device}.png` });
       if (action.target) {

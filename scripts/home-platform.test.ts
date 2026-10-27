@@ -17,11 +17,18 @@ describe("device-first homepage installs", () => {
       expect(action.href === "/download/desktop").toBe(platform === "mac");
     }
   });
-  test("mobile access uses the existing beta flow, not an invented store link", () => {
+  test("the homepage names only the shipped platforms", () => {
+    const shipped = "macOS, Linux, Windows via WSL 2";
+    expect(installActions.unknown.note).toBe(shipped);
+    expect(installActions.windows.note).toBe("Windows via WSL 2");
     for (const platform of ["iphone", "ipad", "android"] as const) {
-      expect(installActions[platform].target).toBe("mobile");
-      expect(installActions[platform].href).toBe("/more#testflight");
+      expect(installActions[platform].note).toBe(shipped);
+      expect(installActions[platform].label).toBe("Choose your platform");
+      expect(installActions[platform].target).toBeUndefined();
+      expect(installActions[platform].phone).toBeUndefined();
     }
-    expect(installActions.windows.note).toContain("No native Windows app yet");
+    for (const action of Object.values(installActions)) {
+      expect(`${action.label} ${action.note}`).not.toMatch(/iPhone|Android|TestFlight|phone|Mobile/i);
+    }
   });
 });
