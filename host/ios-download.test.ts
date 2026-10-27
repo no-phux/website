@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { exportPKCS8, generateKeyPair } from "jose";
-import { approvedTestFlightLink, iosDownload, IOS_INVITE_FALLBACK, publicTestFlightLink } from "./ios-download";
-import type { TestFlightEnv } from "./testflight";
+import { approvedTestFlightLink, iosDownload, IOS_INVITE_FALLBACK, IOS_LOOKUP_DEADLINE_MS, publicTestFlightLink } from "./ios-download";
+import type { Fetch, TestFlightEnv } from "./testflight";
 
 const pair = await generateKeyPair("ES256", { extractable: true });
 const pem = await exportPKCS8(pair.privateKey);
@@ -70,10 +70,71 @@ describe("native TestFlight handoff", () => {
     let storedKey = "";
     const cache = { match: async () => value?.clone(), put: async (key: Request, response: Response) => { storedKey = key.url; value = response; } };
     await iosDownload(request(), env(), async () => Response.json({ data: { attributes: enabled } }), cache);
-    expect(value!.headers.get("cache-control")).toBe("public, max-age=60");
+    expect(value!.headers.get("cache-control")).toBe("public, max-age=300");
     const cached = await iosDownload(request(), env(), async () => { throw new Error("cached lookup must not fetch"); }, cache);
     expect(storedKey).toBe("https://phux.sh/download/ios");
     expect(cached.headers.get("location")).toBe(link);
     expect(cached.headers.get("cache-control")).toBe("no-store");
+  });
+  test("a slow Apple lookup finishes after the visitor's redirect and serves the next visitor", async () => {
+    let value: Response | undefined;
+    const cache = { match: async () => value?.clone(), put: async (_key: Request, response: Response) => { value = response; } };
+    const pending: Promise<unknown>[] = [];
+    const ctx = { waitUntil: (promise: Promise<unknown>) => { pending.push(promise); } };
+    const slow = async () => { await Bun.sleep(50); return Response.json({ data: { attributes: enabled } }); };
+    const first = await iosDownload(request(), env(), slow, cache, ctx, 5);
+    expect(first.headers.get("location")).toBe(IOS_INVITE_FALLBACK);
+    expect(pending).toHaveLength(1);
+    await Promise.all(pending);
+    expect(value!.headers.get("location")).toBe(link);
+    expect(value!.headers.get("cache-control")).toBe("public, max-age=300");
+    const next = await iosDownload(request(), env(), async () => { throw new Error("cached lookup must not fetch"); }, cache, ctx, 5);
+    expect(next.headers.get("location")).toBe(link);
+    expect(next.headers.get("cache-control")).toBe("no-store");
+  });
+  test("a cold lookup answers within the deadline and is not aborted", async () => {
+    expect(IOS_LOOKUP_DEADLINE_MS).toBe(4_000);
+    let value: Response | undefined;
+    const cache = { match: async () => value?.clone(), put: async (_key: Request, response: Response) => { value = response; } };
+    const pending: Promise<unknown>[] = [];
+    const ctx = { waitUntil: (promise: Promise<unknown>) => { pending.push(promise); } };
+    let signal: AbortSignal | undefined;
+    let release!: (response: Response) => void;
+    const gate = new Promise<Response>(resolve => { release = resolve; });
+    const hung = (input: Request) => { signal = input.signal; return gate; };
+    const started = performance.now();
+    const first = await iosDownload(request(), env(), hung, cache, ctx, 200);
+    expect(performance.now() - started).toBeLessThan(1_500);
+    expect(first.headers.get("location")).toBe(IOS_INVITE_FALLBACK);
+    expect(first.headers.get("cache-control")).toBe("no-store");
+    expect(pending).toHaveLength(1);
+    await Bun.sleep(50);
+    expect(signal?.aborted).toBe(false);
+    release(Response.json({ data: { attributes: enabled } }));
+    await Promise.all(pending);
+    expect(value!.headers.get("location")).toBe(link);
+    expect(value!.headers.get("cache-control")).toBe("public, max-age=300");
+  });
+  test("a disabled, internal, or failed link is remembered only briefly", async () => {
+    const cases: Fetch[] = [
+      async () => Response.json({ data: { attributes: { ...enabled, publicLinkEnabled: false } } }),
+      async () => Response.json({ data: { attributes: { ...enabled, isInternalGroup: true } } }),
+      async () => Response.json({ data: { attributes: { ...enabled, publicLink: "http://testflight.apple.com/join/x" } } }),
+      async () => new Response(null, { status: 503 }),
+    ];
+    for (const fetchImpl of cases) {
+      let value: Response | undefined;
+      let fetches = 0;
+      const cache = { match: async () => value?.clone(), put: async (_key: Request, response: Response) => { value = response; } };
+      const counted: Fetch = async (input) => { fetches += 1; return fetchImpl(input); };
+      const response = await iosDownload(request(), env(), counted, cache);
+      expect(response.headers.get("location")).toBe(IOS_INVITE_FALLBACK);
+      expect(value!.headers.get("location")).toBe(IOS_INVITE_FALLBACK);
+      expect(value!.headers.get("cache-control")).toBe("public, max-age=60");
+      const again = await iosDownload(request(), env(), async () => { throw new Error("cached fallback must not fetch"); }, cache);
+      expect(again.headers.get("location")).toBe(IOS_INVITE_FALLBACK);
+      expect(again.headers.get("cache-control")).toBe("no-store");
+      expect(fetches).toBe(1);
+    }
   });
 });
