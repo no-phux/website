@@ -1,15 +1,36 @@
 /** Read the existing beta group's public link. Never enables or changes distribution. */
-import { ascClient, ascConfigured, resolveGroup, type Fetch, type TestFlightEnv } from "./testflight";
+import { AscError, ascClient, ascConfigured, externalBetaGroup, type Fetch, type TestFlightEnv } from "./testflight";
 
 export const IOS_DOWNLOAD_PATH = "/download/ios";
 export const IOS_INVITE_FALLBACK = "/more?phone=ios&testflight=unavailable#testflight";
 type EdgeCache = { match(key: Request): Promise<Response | undefined>; put(key: Request, response: Response): Promise<void> };
 
 export function approvedTestFlightLink(attributes: { publicLinkEnabled?: boolean; publicLink?: unknown; isInternalGroup?: boolean }): string | null {
-  if (!attributes.publicLinkEnabled || attributes.isInternalGroup !== false) return null;
+  const reason = linkRejection(attributes);
+  if (reason) {
+    console.error("TestFlight public link rejected", reason);
+    return null;
+  }
+  return parseLink(attributes.publicLink)!.href;
+}
+
+/** A stable cause. Never the link, the join code, or request credentials. */
+function linkRejection(attributes: { publicLinkEnabled?: boolean; publicLink?: unknown; isInternalGroup?: boolean }): string | null {
+  if (!attributes.publicLinkEnabled) return "public link disabled";
+  if (attributes.isInternalGroup !== false) return "internal group";
   const url = parseLink(attributes.publicLink);
-  if (!url) return null;
-  return isAppleJoinLink(url) ? url.href : null;
+  if (!url || !isAppleJoinLink(url)) return "bad URL";
+  return null;
+}
+
+function failureReason(error: unknown): string {
+  if (error instanceof AscError) return `HTTP ${error.status}`;
+  if (isTimeout(error)) return "timeout";
+  return "request failed";
+}
+
+function isTimeout(error: unknown): boolean {
+  return typeof error === "object" && error !== null && "name" in error && error.name === "TimeoutError";
 }
 
 function parseLink(value: unknown): URL | null {
@@ -29,8 +50,11 @@ function isAppleJoinLink(url: URL): boolean {
 
 export async function publicTestFlightLink(env: TestFlightEnv, fetchImpl: Fetch): Promise<string | null> {
   const asc = ascClient(env, fetchImpl);
-  const groupId = env.ASC_BETA_GROUP_ID || await resolveGroup(env, asc);
-  const response = await asc(`/betaGroups/${encodeURIComponent(groupId)}?fields[betaGroups]=publicLinkEnabled,publicLink,isInternalGroup`);
+  if (!env.ASC_BETA_GROUP_ID) {
+    const group = await externalBetaGroup(env, asc);
+    return approvedTestFlightLink(group.attributes);
+  }
+  const response = await asc(`/betaGroups/${encodeURIComponent(env.ASC_BETA_GROUP_ID)}?fields[betaGroups]=publicLinkEnabled,publicLink,isInternalGroup`);
   const group = await response.json() as { data: { attributes: Parameters<typeof approvedTestFlightLink>[0] } };
   return approvedTestFlightLink(group.data.attributes);
 }
@@ -41,6 +65,32 @@ export const IOS_LOOKUP_DEADLINE_MS = 4_000;
 const LINK_TTL_SECONDS = 300;
 const FALLBACK_TTL_SECONDS = 60;
 type WaitUntil = { waitUntil(promise: Promise<unknown>): void };
+/** One cold lookup per isolate. Concurrent misses await this, then it is cleared. */
+let inflight: Promise<string | null> | undefined;
+
+function startLookup(
+  env: TestFlightEnv,
+  fetchImpl: Fetch,
+  remember: (location: string, seconds: number) => Promise<void>,
+): Promise<string | null> {
+  if (inflight) return inflight;
+  const run = publicTestFlightLink(env, fetchImpl).then(
+    async link => {
+      await remember(link ?? IOS_INVITE_FALLBACK, link ? LINK_TTL_SECONDS : FALLBACK_TTL_SECONDS);
+      return link;
+    },
+    async (error: unknown) => {
+      console.error("TestFlight public link unavailable", failureReason(error));
+      await remember(IOS_INVITE_FALLBACK, FALLBACK_TTL_SECONDS);
+      return null;
+    },
+  );
+  inflight = run;
+  void run.finally(() => {
+    if (inflight === run) inflight = undefined;
+  });
+  return run;
+}
 
 function redirect(location: string, cacheControl = "no-store"): Response {
   return new Response(null, {
@@ -67,7 +117,7 @@ export async function iosDownload(
   deadlineMs: number = IOS_LOOKUP_DEADLINE_MS,
 ): Promise<Response> {
   if (request.method !== "GET" && request.method !== "HEAD") {
-    return new Response("GET only", { status: 405, headers: { allow: "GET, HEAD" } });
+    return new Response("GET only", { status: 405, headers: { allow: "GET, HEAD", "cache-control": "no-store" } });
   }
   const key = new Request(new URL(IOS_DOWNLOAD_PATH, request.url));
   const cached = await cache?.match(key).catch(() => undefined);
@@ -78,19 +128,16 @@ export async function iosDownload(
   if (!ascConfigured(env)) return redirect(IOS_INVITE_FALLBACK);
 
   // Cache only the server-side lookup, not the browser's redirect; revocation stays bounded.
-  const remember = (location: string, seconds: number) =>
-    cache?.put(key, redirect(location, `public, max-age=${seconds}`)).catch(() => undefined);
-  const lookup = publicTestFlightLink(env, fetchImpl).then(
-    async link => {
-      await remember(link ?? IOS_INVITE_FALLBACK, link ? LINK_TTL_SECONDS : FALLBACK_TTL_SECONDS);
-      return link;
-    },
-    async error => {
-      console.error("TestFlight public link unavailable", error);
-      await remember(IOS_INVITE_FALLBACK, FALLBACK_TTL_SECONDS);
-      return null;
-    },
-  );
+  const remember = async (location: string, seconds: number) => {
+    if (location === IOS_INVITE_FALLBACK) {
+      const current = await cache?.match(key).catch(() => undefined);
+      const currentLocation = current?.headers.get("location");
+      // A late 429 or timeout must not replace a link another lookup already stored.
+      if (currentLocation && currentLocation !== IOS_INVITE_FALLBACK) return;
+    }
+    await cache?.put(key, redirect(location, `public, max-age=${seconds}`)).catch(() => undefined);
+  };
+  const lookup = startLookup(env, fetchImpl, remember);
   ctx?.waitUntil(lookup);
   let timer: ReturnType<typeof setTimeout> | undefined;
   const deadline = new Promise<null>(resolve => { timer = setTimeout(() => resolve(null), deadlineMs); });

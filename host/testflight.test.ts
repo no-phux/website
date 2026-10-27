@@ -75,6 +75,7 @@ describe("inviteTester", () => {
       "POST /betaTesters",
     ]);
     expect(calls[0]!.path).toContain("filter[bundleId]=dev.phux.mobile");
+    expect(calls[1]!.path).toContain("fields[betaGroups]=name,isInternalGroup,publicLinkEnabled,publicLink");
     expect(calls[2]!.body).toEqual({
       data: {
         type: "betaTesters",

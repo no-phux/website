@@ -37,13 +37,16 @@ describe("native TestFlight handoff", () => {
       const path = new URL(input.url).pathname;
       if (path === "/v1/apps") return Response.json({ data: [{ id: "app" }] });
       if (path === "/v1/apps/app/betaGroups") return Response.json({ data: [
-        { id: "internal", attributes: { name: "Website", isInternalGroup: true } },
-        { id: "public", attributes: { name: "Website", isInternalGroup: false } },
+        { id: "internal", attributes: { name: "Website", isInternalGroup: true, publicLinkEnabled: true, publicLink: link } },
+        { id: "public", attributes: { name: "Website", isInternalGroup: false, publicLinkEnabled: true, publicLink: link } },
       ] });
-      return Response.json({ data: { attributes: enabled } });
+      throw new Error(`unexpected ${path}`);
     });
     expect(result).toBe(link);
-    expect(urls.at(-1)).toContain("/betaGroups/public?");
+    expect(urls).toHaveLength(2);
+    const list = new URL(urls[1]!);
+    expect(list.pathname).toBe("/v1/apps/app/betaGroups");
+    expect(list.searchParams.get("fields[betaGroups]")).toBe("name,isInternalGroup,publicLinkEnabled,publicLink");
   });
   test("normal GET/HEAD navigation redirects to Apple without asking for email", async () => {
     for (const method of ["GET", "HEAD"]) {
@@ -64,6 +67,7 @@ describe("native TestFlight handoff", () => {
     expect(failed.headers.get("location")).toBe(IOS_INVITE_FALLBACK);
     const post = await iosDownload(new Request(request(), { method: "POST" }), {});
     expect(post.status).toBe(405);
+    expect(post.headers.get("cache-control")).toBe("no-store");
   });
   test("query strings cannot bypass lookup caching and the browser never caches the handoff", async () => {
     let value: Response | undefined;
@@ -136,5 +140,75 @@ describe("native TestFlight handoff", () => {
       expect(again.headers.get("cache-control")).toBe("no-store");
       expect(fetches).toBe(1);
     }
+  });
+  test("concurrent cold misses share one lookup", async () => {
+    let value: Response | undefined;
+    const cache = { match: async () => value?.clone(), put: async (_key: Request, response: Response) => { value = response; } };
+    let fetches = 0;
+    let release!: (response: Response) => void;
+    const gate = new Promise<Response>(resolve => { release = resolve; });
+    const fetchImpl: Fetch = async () => { fetches += 1; return gate; };
+    const pending: Promise<unknown>[] = [];
+    const ctx = { waitUntil: (promise: Promise<unknown>) => { pending.push(promise); } };
+    const configured = env();
+    const calls = Array.from({ length: 8 }, () => iosDownload(request(), configured, fetchImpl, cache, ctx, 5_000));
+    for (let i = 0; i < 50 && fetches < 1; i += 1) await Bun.sleep(10);
+    await Bun.sleep(20);
+    expect(fetches).toBe(1);
+    expect(pending).toHaveLength(8);
+    expect(new Set(pending).size).toBe(1);
+    release(Response.json({ data: { attributes: enabled } }));
+    const responses = await Promise.all(calls);
+    expect(fetches).toBe(1);
+    for (const response of responses) expect(response.headers.get("location")).toBe(link);
+    await Promise.all(pending);
+  });
+  test("a late failure does not overwrite a cached success", async () => {
+    let stored: Response | undefined;
+    let puts = 0;
+    const cache = {
+      match: async () => stored?.clone(),
+      put: async (_key: Request, response: Response) => { puts += 1; stored = response; },
+    };
+    let fetches = 0;
+    let release!: (response: Response) => void;
+    const gate = new Promise<Response>(resolve => { release = resolve; });
+    const pending: Promise<unknown>[] = [];
+    const ctx = { waitUntil: (promise: Promise<unknown>) => { pending.push(promise); } };
+    const response = iosDownload(request(), env(), () => { fetches += 1; return gate; }, cache, ctx, 5_000);
+    for (let i = 0; i < 50 && fetches < 1; i += 1) await Bun.sleep(10);
+    expect(fetches).toBe(1);
+    stored = new Response(null, { status: 302, headers: { location: link, "cache-control": "public, max-age=300" } });
+    release(new Response(null, { status: 429 }));
+    expect((await response).headers.get("location")).toBe(IOS_INVITE_FALLBACK);
+    await Promise.all(pending);
+    expect(puts).toBe(0);
+    expect(stored.headers.get("location")).toBe(link);
+  });
+  test("logs the rejection cause without the join code or credentials", async () => {
+    const logs: string[] = [];
+    const original = console.error;
+    console.error = (...args: unknown[]) => { logs.push(args.map(part => String(part)).join(" ")); };
+    try {
+      approvedTestFlightLink({ ...enabled, publicLinkEnabled: false });
+      approvedTestFlightLink({ ...enabled, isInternalGroup: true });
+      approvedTestFlightLink({ ...enabled, publicLink: `${link}?next=1` });
+      const miss = () => ({ match: async () => undefined, put: async () => undefined });
+      await iosDownload(request(), env(), async () => new Response(null, { status: 401 }), miss());
+      await iosDownload(request(), env(), async () => new Response(null, { status: 429 }), miss());
+      await iosDownload(request(), env(), async () => { throw new DOMException("The operation was aborted due to timeout", "TimeoutError"); }, miss());
+    } finally {
+      console.error = original;
+    }
+    const text = logs.join("\n");
+    expect(text).toContain("public link disabled");
+    expect(text).toContain("internal group");
+    expect(text).toContain("bad URL");
+    expect(text).toContain("HTTP 401");
+    expect(text).toContain("HTTP 429");
+    expect(text).toContain("timeout");
+    expect(text).not.toContain("AbCd1234");
+    expect(text).not.toContain("Bearer");
+    expect(text).not.toContain("PRIVATE KEY");
   });
 });
