@@ -29,7 +29,7 @@ describe("website task guides", () => {
       for (const phrase of FORBIDDEN) {
         expect(text.toLowerCase()).not.toContain(phrase.toLowerCase());
       }
-      expect(DOCS_PREFIXES).toContain(`/${page.slug}`);
+      expect((DOCS_PREFIXES as readonly string[]).includes(`/${page.slug}`)).toBe(true);
     }
     expect(rootNavigation([], new Set())).toEqual([
       "---Get started---", "overview",
