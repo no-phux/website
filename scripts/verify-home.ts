@@ -137,7 +137,7 @@ try {
   assert.equal(await target("cli").getAttribute("aria-pressed"), "true", "arrow keys move from Desktop back to CLI");
   assert.equal(await line.isVisible(), true, "CLI restores the command line");
   assert.equal(await download.isHidden(), true, "CLI hides the desktop download");
-  await target("desktop").hover();
+  await target("desktop").click();
   await page.getByRole("button", { name: "Copy install command" }).click();
   assert.equal(await page.evaluate(() => navigator.clipboard.readText()), "curl -fsSL https://phux.sh/install-desktop | sh", "Desktop keeps its installer on the copy button");
   // Regression: a content-sized dock widened with the command and slid the
