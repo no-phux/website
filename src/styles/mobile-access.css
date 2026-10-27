@@ -17,7 +17,7 @@
 .mobile-access details[open] > summary::after { content: "−"; }
 .mobile-access form { margin-top: 8px; padding-block: 4px 12px; }
 .mobile-access .email-label { flex-basis: 100%; font-size: 12px; opacity: .85; }
-.mobile-access input[type="email"] { font-size: 16px; min-height: 48px; scroll-margin-block: 24px; }
+.mobile-access input[type="email"] { font-size: 16px; min-height: 48px; scroll-margin-block: 24px; appearance: none; }
 .mobile-access button[type="submit"] { min-height: 48px; }
 .mobile-access [hidden] { display: none !important; }
 .mobile-access .access-unavailable { font-size: 13px; line-height: 1.6; }

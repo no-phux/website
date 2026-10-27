@@ -11,6 +11,7 @@ import { verifyDeviceInstalls } from "./home-platform-checks";
 import { platformVisitors } from "./home-platform-fixtures";
 import { homeServer } from "./home-server";
 import { verifyEmailFallback } from "./home-email-fallback-checks";
+import { verifyMoreEmailField } from "./home-keyboard-checks";
 import { verifyClientComparison, verifyHomeAuthReturn, verifyHostedShell, verifyTouchComparison, verifyWorkspaceInstallCopy, verifyWorkspaceResize } from "./home-interaction-checks";
 
 const root = resolve(import.meta.dir, "../dist");
@@ -227,6 +228,7 @@ try {
   await context.close();
   await verifyDeviceInstalls(browser, base, artifacts);
   await verifyEmailFallback(browser, base);
+  await verifyMoreEmailField(browser, base);
   await verifyStaticHome(browser, base);
   console.log(`PASS home: real workspace captures, pointer/touch/keyboard reveal and enlargement, first-fold install, optional walkthrough, lazy workspace lifecycle, install/copy/beta, tour chapters/pause/focus, glass shell auth/failure recovery, mobile/tablet/desktop, reduced motion, no-JS, idle resource budget. Screenshots: ${artifacts}`);
 } finally {
