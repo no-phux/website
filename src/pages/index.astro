@@ -3,6 +3,7 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 import AuthReturn from "../components/AuthReturn.astro";
 import HeroDemo from "../components/HeroDemo";
 import ClientComparison from "../components/ClientComparison.astro";
+import Fox from "../components/fox/Fox.astro";
 import LiveWorkspaceSection from "../components/LiveWorkspaceSection.astro";
 import { SITE, docsHref } from "../lib/site";
 import { cliInstall, desktopDownload, desktopFirstOpen, desktopInstall, installTargets } from "../lib/install";
@@ -16,6 +17,7 @@ const installs = installTargets;
   <div class="home">
     <section class="hero" aria-labelledby="product-name">
       <div class="hero-intro">
+        <div class="hero-copy">
         <h1 id="product-name">phux</h1>
         <div class="hero-decision">
           <p class="hero-description">A terminal multiplexer whose server you can drive from code.</p>
@@ -82,6 +84,8 @@ const installs = installTargets;
         </p>
       </details>
         </div>
+        </div>
+        <div class="hero-art"><Fox /></div>
       </div>
       <ClientComparison />
     </section>
@@ -177,10 +181,11 @@ const installs = installTargets;
 
 <style>
   .home { width: min(100%, 1240px); margin-inline: auto; padding-inline: 40px; box-sizing: border-box; }
-  .hero { padding-top: 48px; }
-  .hero-intro { display: grid; grid-template-columns: 1.25fr 1fr; align-items: start; gap: 64px; margin-bottom: 40px; }
+  .hero { padding-top: 28px; }
+  .hero-intro { display: grid; grid-template-columns: 1.05fr 1fr; align-items: center; gap: 12px; margin-bottom: 32px; }
+  .hero-copy { position: relative; z-index: 1; padding-block: 22px; }
+  .hero-art { margin: -24px -38px -20px -36px; pointer-events: none; overflow: clip; }
   h1 { margin: 0 0 14px; color: #e7e2da; font-size: clamp(54px, 6.5vw, 88px); line-height: .99; font-weight: 450; letter-spacing: -.065em; }
-  h1 span { font-weight: 650; }
   .hero-description { margin: 0 0 12px; color: #bdc2be; font-size: clamp(16px, 1.5vw, 19px); line-height: 1.45; letter-spacing: -.015em; }
   .hero-body { margin: 0 0 18px; max-width: 62ch; color: #9ca79f; font-size: 15px; line-height: 1.5; }
   .download-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 12px 20px; }
@@ -241,7 +246,8 @@ const installs = installTargets;
   a:focus-visible, button:focus-visible, summary:focus-visible, input:focus-visible { outline: 2px solid #c1dbc8; outline-offset: 4px; }
   @media (max-width: 900px) {
     .home { padding-inline: 28px; }
-    .hero-intro { gap: 28px; grid-template-columns: 1.1fr 1fr; }
+    .hero-intro { gap: 0; grid-template-columns: 1.1fr 1fr; }
+    .hero-art { margin-inline: -36px -20px; }
     h1 { font-size: clamp(48px, 7vw, 68px); }
     .hero-description { font-size: 15px; }
     .workflow-proof { gap: 28px; }
@@ -250,13 +256,16 @@ const installs = installTargets;
   }
   @media (max-width: 650px) {
     .home { padding-inline: 20px; }
-    .hero { padding-top: 26px; }
-    .hero-intro { grid-template-columns: 1fr; gap: 0; margin-bottom: 28px; }
+    .hero { padding-top: 18px; }
+    .hero-intro { grid-template-columns: 1fr; gap: 0; margin-bottom: 24px; }
+    .hero-copy { padding-block: 12px 0; }
+    .hero-art { width: min(100%, 340px); margin: -20px auto -20px; }
     h1 { font-size: clamp(52px, 11vw, 70px); }
     .hero-description { margin-bottom: 10px; font-size: 16px; }
     .hero-body { margin-bottom: 14px; font-size: 14px; line-height: 1.45; }
     h1 { margin-bottom: 10px; }
-    .download-primary { min-height: 52px; gap: 22px; padding-inline: 20px; }
+    .download-actions { gap: 12px; }
+    .download-primary { min-height: 52px; gap: 16px; padding-inline: 16px; }
     .download-note { margin-top: 10px; }
     .workflow-proof { grid-template-columns: 1fr; gap: 32px; margin-top: 48px; padding-top: 32px; }
     .workflow-proof > a { display: grid; grid-template-columns: 44px 1fr; gap: 0 18px; }
