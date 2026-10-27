@@ -1,12 +1,12 @@
 <section class="workspace-section" id="live-workspace" aria-labelledby="workspace-title">
   <div class="workspace-heading">
-    <div><h2 id="workspace-title">Try it. Make it yours.</h2><p>A disposable workspace in your browser. Type, split, explore.</p></div>
+    <div><h2 id="workspace-title">Browser demo</h2><p>A disposable phux shell in your browser.</p></div>
     <a href="/embed">Open full shell <span aria-hidden="true">↗</span></a>
   </div>
-  <div id="home-light" class="workspace-frame" aria-label="PHUX live workspace">
-    <div class="workspace-placeholder"><span aria-hidden="true">⌘</span><p>The workspace connects when it comes into view.</p><a href="/concepts/vgpu?variant=combo">Open the glass workspace ↗</a></div>
+  <div id="home-light" class="workspace-frame" aria-label="phux browser demo">
+    <div class="workspace-placeholder"><span aria-hidden="true">⌘</span><p>The workspace connects when it comes into view.</p><a href="/concepts/vgpu?variant=combo">Open the browser demo ↗</a></div>
   </div>
-  <p class="workspace-note">Limited edge shell · no sign-in</p>
+  <p class="workspace-note">Limited demo shell · no sign-in</p>
 </section>
 <script>
   import { homeHero } from "../lib/home-hero";
@@ -24,7 +24,7 @@
       clearTimeout(release);
       if (frame) return;
       frame = document.createElement("iframe");
-      frame.title = "PHUX live workspace — interactive demo";
+      frame.title = "phux browser demo";
       frame.src = "/concepts/vgpu?variant=combo&embedded=home";
       frame.allow = "clipboard-write; web-share";
       host.append(frame);
