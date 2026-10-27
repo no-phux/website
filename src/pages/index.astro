@@ -4,6 +4,7 @@ import AuthReturn from "../components/AuthReturn.astro";
 import HeroDemo from "../components/HeroDemo";
 import ClientComparison from "../components/ClientComparison.astro";
 import Fox from "../components/fox/Fox.astro";
+import MobileAccessForm from "../components/MobileAccessForm.astro";
 import LiveWorkspaceSection from "../components/LiveWorkspaceSection.astro";
 import { SITE, docsHref } from "../lib/site";
 import { cliInstall, desktopDownload, desktopFirstOpen, desktopInstall, installTargets } from "../lib/install";
@@ -53,6 +54,9 @@ const fallback = installActions.unknown;
             </span>
             <a class="install-download" id="install-download" href={desktopDownload} hidden>Download for Mac ↓</a>
             <button type="button" class="install-copy" data-copy={cliInstall} aria-label="Copy install command">Copy</button>
+          </div>
+          <div class="install-request mobile-access" data-mobile-access hidden>
+            <MobileAccessForm />
           </div>
         </div>
         <span class="install-rule" aria-hidden="true"></span>
@@ -117,6 +121,7 @@ const fallback = installActions.unknown;
 
 <script>
   import { registerSiteTools, siteModelContext } from "../webmcp.ts";
+  import { wireBetaRequest } from "../lib/beta.ts";
   import { wireInstallTargets } from "../lib/home-install";
   import { wireDeviceInstall } from "../lib/home-platform";
   const facts = document.querySelector<HTMLElement>("[data-webmcp]");
@@ -149,9 +154,15 @@ const fallback = installActions.unknown;
 
   // The dock keeps its fixed width and reserves its stage height, so a swap
   // moves nothing. Only the target underline travels (transform), and the
-  // command settles with opacity and a short translate. No clip or backdrop
-  // animation: both are what made the first pass stutter.
+  // command settles with opacity and a short translate. The Mobile target has
+  // no command: it swaps the command line for the beta request form. No
+  // clip or backdrop animation: both are what made the first pass stutter.
   wireInstallTargets(button);
+  wireBetaRequest(
+    document.getElementById("beta-form") as HTMLFormElement | null,
+    document.getElementById("beta-note"),
+    document.getElementById("beta-phone") as HTMLButtonElement | null,
+  );
   wireDeviceInstall();
 </script>
 
