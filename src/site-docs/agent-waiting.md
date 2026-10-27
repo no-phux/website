@@ -1,6 +1,6 @@
 ---
 title: See which coding agent is waiting on you
-summary: phux records a state on each pane that is running a coding agent. The state blocked means that pane is waiting on you.
+summary: phux agent list prints each coding agent's state, and blocked means it is waiting on you. phux agent wait --any --until blocked returns when the next one starts waiting.
 description: See which phux pane is running a coding agent that is waiting on you, and wait until one is.
 ---
 
