@@ -89,7 +89,7 @@ export const CHAPTERS: readonly Chapter[] = [
     id: "attach",
     label: "Attach",
     title: "Attach",
-    text: "",
+    text: "Attach from any client. The same terminals, the same output.",
     href: "/concepts",
     seconds: 4.2,
     steps: [
@@ -115,7 +115,7 @@ export const CHAPTERS: readonly Chapter[] = [
     id: "agents",
     label: "Agents",
     title: "Agents",
-    text: "",
+    text: "See which agent needs you, wherever you are working.",
     href: "/agents",
     seconds: 4.8,
     steps: [
@@ -142,7 +142,7 @@ export const CHAPTERS: readonly Chapter[] = [
     id: "away",
     label: "Walk away",
     title: "Walk away",
-    text: "",
+    text: "Close a client. The server keeps the terminals running.",
     href: "/concepts",
     seconds: 4.5,
     steps: [
@@ -156,7 +156,7 @@ export const CHAPTERS: readonly Chapter[] = [
       { at: 1.54, line: "y", pane: "claude", tone: "cmd" },
       { at: 1.54, status: "working", pane: "claude" },
       { at: 1.54, notice: null },
-      { at: 1.54, log: "@7 input from phone" },
+      { at: 1.54, log: "@7 working" },
       { at: 1.56, line: "Applying 0042_users to staging…", pane: "claude", tone: "dim" },
       { at: 2.08, line: "✓ Staging migrated.", pane: "claude", tone: "ok" },
       { at: 2.08, status: "done", pane: "claude" },
@@ -167,7 +167,7 @@ export const CHAPTERS: readonly Chapter[] = [
     id: "remote",
     label: "Remote",
     title: "Remote",
-    text: "",
+    text: "Reach another machine without moving your workspace.",
     href: "/remote",
     seconds: 4.2,
     steps: [
@@ -268,4 +268,23 @@ const STARTS: readonly Frame[] = CHAPTERS.reduce<Frame[]>(
 /** The frame at `time` seconds into a chapter; `Infinity` is its final state. */
 export function frameAt(chapter: number, time: number): Frame {
   return play(STARTS[chapter]!, CHAPTERS[chapter]!.steps, time);
+}
+
+/** Every string the illustration can show, including mid-chapter frames. */
+export function illustratedCopy(): string {
+  const parts: string[] = [];
+  for (let chapter = 0; chapter < CHAPTERS.length; chapter++) {
+    const script = CHAPTERS[chapter]!;
+    parts.push(script.label, script.title, script.text);
+    const samples = Math.max(1, Math.ceil(script.seconds * 20));
+    for (let tick = 0; tick <= samples; tick++) {
+      const frame = frameAt(chapter, (tick / samples) * script.seconds);
+      parts.push(frame.log, frame.notice ?? "");
+      for (const signal of frame.signals) parts.push(signal.label);
+      for (const pane of Object.values(frame.panes)) {
+        for (const line of pane.lines) parts.push(line.text);
+      }
+    }
+  }
+  return parts.join("\n");
 }
