@@ -118,6 +118,16 @@ describe("host routing", () => {
     expect(isDocsPath("/distros.png")).toBe(false);
   });
 
+  test("the Omarchy guide uses the docs origin without swallowing sibling assets", () => {
+    for (const path of ["/omarchy", "/omarchy.md", "/omarchy/index.html"]) {
+      expect(routeRequest(SITE_HOST, urlOn(SITE_HOST, path))).toEqual({
+        kind: "redirect", location: `https://${DOCS_HOST}${path}`, status: 301,
+      });
+      expect(routeRequest(DOCS_HOST, urlOn(DOCS_HOST, path))).toEqual({ kind: "asset" });
+    }
+    expect(isDocsPath("/omarchy-old")).toBe(false);
+  });
+
   test("tmux import uses the docs origin for HTML and Markdown without swallowing sibling assets", () => {
     for (const path of ["/tmux-import", "/tmux-import/", "/tmux-import.html", "/tmux-import.md", "/tmux-import/index.html"]) {
       for (const host of [SITE_HOST, `www.${SITE_HOST}`]) {

@@ -29,6 +29,7 @@ export const DOCS_PREFIXES = [
   "/plugins",
   "/distros",
   "/projects",
+  "/omarchy",
   "/scripting",
   "/desktop-reviews",
   "/agent-quickstart",
