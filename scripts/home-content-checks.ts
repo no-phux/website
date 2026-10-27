@@ -17,6 +17,10 @@ export async function verifyHomeContent(page: Page) {
   assert.equal(await page.locator('meta[name="twitter:description"]').getAttribute("content"), "A terminal multiplexer whose server you can drive from code.");
   assert.equal((await page.locator(".download-note").innerText()).trim(), "Apple silicon · macOS 26 or later · Apache-2.0 · No account");
   assert.doesNotMatch(await page.locator("body").innerText(), /iPhone|Android|TestFlight/, "the homepage does not claim a phone app");
-  assert.deepEqual(await page.locator("#install .install-tabs button").allInnerTexts(), ["CLI", "Desktop"]);
+  assert.deepEqual(
+    await page.locator("#install .install-tabs button").evaluateAll((nodes) => nodes.map((node) => node.textContent?.trim() ?? "")),
+    ["CLI", "Desktop"],
+    "CLI and Desktop are the homepage install targets",
+  );
   assert.equal(await page.locator(".cli-requirement").count(), 0);
 }
