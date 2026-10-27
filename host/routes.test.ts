@@ -82,6 +82,18 @@ describe("host routing", () => {
     expect(routeRequest(SITE_HOST, urlOn(SITE_HOST, "/.well-known/agent-skills/using-phux/SKILL.md"))).toEqual({ kind: "asset" });
   });
 
+  test("docs.phux.sh/quickstart is a 301 to /getting-started", () => {
+    for (const path of ["/quickstart", "/quickstart/", "/quickstart.html", "/quickstart/index.html"]) {
+      expect(routeRequest(DOCS_HOST, urlOn(DOCS_HOST, `${path}?from=search`))).toEqual({
+        kind: "redirect",
+        location: "https://docs.phux.sh/getting-started?from=search",
+        status: 301,
+      });
+    }
+    expect(routeRequest(DOCS_HOST, urlOn(DOCS_HOST, "/quickstart/install"))).toEqual({ kind: "asset" });
+    expect(routeRequest(DOCS_HOST, urlOn(DOCS_HOST, "/quickstart.md"))).toEqual({ kind: "asset" });
+  });
+
   test("docs.phux.sh/ becomes /overview", () => {
     expect(routeRequest(DOCS_HOST, urlOn(DOCS_HOST, "/"))).toEqual({
       kind: "redirect",

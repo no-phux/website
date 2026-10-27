@@ -51,7 +51,8 @@ export const DOCS_PREFIXES = [
   "/development",
   "/releasing",
   "/substrate",
-  // Pre-2026-10 docs URLs; Astro redirects them to the pages above.
+  // Pre-2026-10 docs URLs. Nested paths still use Astro's HTML redirects.
+  // /quickstart itself is a worker 301 onto /getting-started.
   "/quickstart",
   "/consumers",
   "/remote-access",
@@ -110,6 +111,11 @@ export function routeRequest(host: string, url: URL): HostRoute {
     if (path === "/" || path === "/index.html" || path === "") {
       return redirectOn(DOCS_HOST, "/overview", url.search);
     }
+    // Astro emits /quickstart as a 200 meta-refresh. Answer the retired URL
+    // with a real permanent redirect before that page can be served.
+    if (isRetiredQuickstartPage(path)) {
+      return redirectOn(DOCS_HOST, "/getting-started", url.search);
+    }
     if (isMarketingOnlyPath(path)) {
       return redirectOn(SITE_HOST, path, url.search);
     }
@@ -133,6 +139,15 @@ export function isEmbedPath(pathname: string): boolean {
 export function isVgpuConceptPath(pathname: string): boolean {
   const path = stripPageSuffix(pathname);
   return path === "/concepts/vgpu" || path.startsWith("/concepts/vgpu/");
+}
+
+function isRetiredQuickstartPage(pathname: string): boolean {
+  return (
+    pathname === "/quickstart" ||
+    pathname === "/quickstart/" ||
+    pathname === "/quickstart.html" ||
+    pathname === "/quickstart/index.html"
+  );
 }
 
 function redirectOn(host: string, path: string, search: string): HostRoute {

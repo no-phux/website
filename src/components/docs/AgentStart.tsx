@@ -20,8 +20,8 @@ export function AgentStart() {
         <span role="status" aria-live="polite">{status}</span>
       </div>
       <p className="agent-links">
-        <a href="/consumers/getting-started">Agent integrations →</a>
-        <a href="/consumers/getting-started#let-your-agent-read-the-docs">Docs MCP (read-only) →</a>
+        <a href="/agents#agent-setup">Agent integrations →</a>
+        <a href="/agents#mcp">MCP →</a>
       </p>
       <p className="agent-search">
         {AGENT_START.search.text} <a href={AGENT_START.search.example}><code>{AGENT_START.search.example}</code></a>

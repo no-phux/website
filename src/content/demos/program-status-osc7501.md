@@ -36,7 +36,7 @@ printf '\033]7501;state=blocked:kind=permission:app=my-tool\033\\'
 printf '\033]7501;state=done:app=my-tool\033\\'
 ```
 
-Read the [program-status contract](https://docs.phux.sh/wire/l3#373-phuxprogram-statusv1--osc-7501-program-status)
+Read the [program-status contract](https://docs.phux.sh/program-protocol#program-status-osc-7501)
 for record lifetime, hierarchical jobs, messages, and support detection, or the
 [full OSC 7501 specification](https://www.superlogical.com/rex/docs/build/program-status)
 for an integration in your own tool.
