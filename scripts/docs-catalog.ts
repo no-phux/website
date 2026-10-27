@@ -69,6 +69,7 @@ const ORIENTATION: { file: string; slug: string; group: Group; order: number }[]
   { file: "plugins.md", slug: "plugins", group: "customize", order: 6 },
   { file: "distros.md", slug: "distros", group: "customize", order: 7 },
   { file: "projects.md", slug: "projects", group: "customize", order: 8 },
+  { file: "omarchy.md", slug: "omarchy", group: "customize", order: 9 },
   { file: "agent-quickstart.md", slug: "agent-quickstart", group: "automate", order: 0 },
   { file: "scripting.md", slug: "scripting", group: "automate", order: 1 },
   { file: "agents.md", slug: "agents", group: "automate", order: 2 },
