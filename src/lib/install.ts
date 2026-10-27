@@ -23,6 +23,8 @@ export const installTargets: InstallTarget[] = [
 
 /** The stable Apple-silicon Desktop archive; the site worker resolves it per click (host/download.ts). */
 export const desktopDownload = "/download/desktop";
+/** Existing enabled public TestFlight group, resolved by the site Worker. */
+export const iosDownload = "/download/ios";
 
 /** Pending a real-Mac check. Delete this line if that Mac shows no confirmation dialog. */
 export const desktopFirstOpen = "First open: macOS asks to confirm an app downloaded from the internet. Choose Open.";

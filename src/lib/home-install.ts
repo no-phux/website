@@ -8,7 +8,7 @@ export function wireInstallTargets(copyButton: HTMLButtonElement | null) {
   const status = install.querySelector<HTMLElement>("#beta-note")!;
   const tabs = install.querySelector<HTMLElement>(".install-tabs")!;
   const line = install.querySelector<HTMLElement>(".install-line")!;
-  const request = install.querySelector<HTMLFormElement>(".install-request")!;
+  const request = install.querySelector<HTMLElement>(".install-request")!;
   const commandBox = install.querySelector<HTMLElement>(".install-command")!;
   const download = install.querySelector<HTMLElement>("#install-download")!;
   const targets = [...install.querySelectorAll<HTMLButtonElement>("[data-install-target]")];

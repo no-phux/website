@@ -125,7 +125,7 @@ export async function resolveAppId(env: TestFlightEnv, asc: Asc): Promise<string
   return appId;
 }
 
-async function resolveGroup(env: TestFlightEnv, asc: Asc): Promise<string> {
+export async function resolveGroup(env: TestFlightEnv, asc: Asc): Promise<string> {
   const cacheKey = `${env.ASC_ISSUER_ID}:${env.ASC_BETA_GROUP ?? ""}`;
   const cached = groups.get(cacheKey);
   if (cached) return cached;

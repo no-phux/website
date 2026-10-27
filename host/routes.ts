@@ -30,6 +30,7 @@ export const DOCS_PREFIXES = [
   "/distros",
   "/projects",
   "/scripting",
+  "/agent-quickstart",
   "/agents",
   "/acp",
   "/remote",

@@ -4,6 +4,7 @@ import AuthReturn from "../components/AuthReturn.astro";
 import HeroDemo from "../components/HeroDemo";
 import ClientComparison from "../components/ClientComparison.astro";
 import Fox from "../components/fox/Fox.astro";
+import MobileAccessForm from "../components/MobileAccessForm.astro";
 import LiveWorkspaceSection from "../components/LiveWorkspaceSection.astro";
 import { SITE, docsHref } from "../lib/site";
 import { cliInstall, desktopDownload, desktopFirstOpen, desktopInstall, installTargets } from "../lib/install";
@@ -54,26 +55,9 @@ const fallback = installActions.unknown;
             <a class="install-download" id="install-download" href={desktopDownload} hidden>Download for Mac ↓</a>
             <button type="button" class="install-copy" data-copy={cliInstall} aria-label="Copy install command">Copy</button>
           </div>
-          <form class="install-request" id="beta-form" hidden>
-            <input
-              type="email"
-              name="email"
-              required
-              autocomplete="email"
-              placeholder="Apple Account email"
-              aria-label="Email address for the TestFlight invite"
-            />
-            <input
-              class="install-trap"
-              type="text"
-              name="website"
-              tabindex="-1"
-              autocomplete="off"
-              aria-hidden="true"
-            />
-            <button type="submit">Request access</button>
-            <button type="button" class="install-phone" id="beta-phone">Android instead</button>
-          </form>
+          <div class="install-request mobile-access" data-mobile-access hidden>
+            <MobileAccessForm />
+          </div>
         </div>
         <span class="install-rule" aria-hidden="true"></span>
         <p class="install-note" id="install-note">{installs[0].note}</p>
@@ -218,11 +202,7 @@ const fallback = installActions.unknown;
   #install-command { min-width: 0; color: #dce4dc; font-size: 11px; line-height: 1.7; white-space: normal; overflow-wrap: anywhere; }
   .install-copy { min-height: 44px; border: 0; padding: 0; color: #aab4ad; background: none; font: 11px var(--font-reading); cursor: pointer; }
   .install-download { color: #e7e2da; font-size: 12px; text-decoration: underline; text-underline-offset: 4px; }
-  .install-request { grid-area: 1 / 1; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding-top: 10px; }
-  .install-request input { min-height: 44px; flex: 1; min-width: 120px; width: 100%; border: 1px solid #c8cfc330; border-radius: 6px; padding: 10px; background: #0d1012; color: #e7e2da; font: 16px var(--font-reading); }
-  .install-request button { min-height: 44px; padding: 6px 12px; border: 1px solid #c8cfc333; border-radius: 6px; background: #262d29; color: #e7e2da; font: 12px var(--font-reading); cursor: pointer; }
-  .install-request .install-phone { min-height: 44px; padding: 0; border: 0; background: none; color: #a1aca4; font-size: 11px; }
-  .install-request .install-trap { position: absolute; left: -10000px; width: 1px; height: 1px; opacity: 0; }
+  .install-request { grid-area: 1 / 1; padding-block: 10px; min-width: 0; }
   .install-note { min-height: 3.2em; margin: 10px 0 0; color: #919e95; font-size: 11px; line-height: 1.6; }
   .copy-status { min-height: 20px; margin: 3px 0 0; color: #c3d6c6; font-size: 11px; }
   .release-links { display: flex; flex-wrap: wrap; gap: 4px 14px; margin: 10px 0 0; color: #8f9c92; font-size: 10px; }
@@ -283,7 +263,6 @@ const fallback = installActions.unknown;
     .closing-platforms { margin: 10px 0 0; display: flex; width: fit-content; }
     .connection-details { margin-top: 18px; }
     .install-stage { min-height: 112px; }
-    .install-request input { flex-basis: 100%; font-size: 16px; }
   }
   @media (prefers-reduced-motion: reduce) { .download-primary, .download-final, .install-tabs::before { transition: none; } }
   @media (scripting: none) { .install-head, .install-copy { display: none; } .install-line { grid-template-columns: 1fr; } }

@@ -1,0 +1,31 @@
+/* Shared by the landing, /more, and the hosted workspace. */
+.mobile-access { min-width: 0; }
+.mobile-access .testflight-link {
+  display: flex; align-items: center; justify-content: space-between; gap: 24px;
+  min-height: 48px; padding: 8px 16px; box-sizing: border-box;
+  border: 1px solid #e7e2da40; border-radius: 8px; background: #e7e2da;
+  color: #171a1e; font: 600 14px var(--font-reading, system-ui); text-decoration: none;
+}
+.mobile-access .testflight-link:hover { background: #fffaf2; color: #171a1e; }
+.mobile-access details { width: 100%; }
+.mobile-access summary {
+  display: flex; align-items: center; justify-content: space-between; min-height: 44px;
+  gap: 16px; color: inherit; opacity: .8; font-size: 12px; cursor: pointer; list-style: none;
+}
+.mobile-access summary::-webkit-details-marker { display: none; }
+.mobile-access summary::after { content: "+"; font-size: 18px; }
+.mobile-access details[open] > summary::after { content: "−"; }
+.mobile-access form { margin-top: 8px; padding-block: 4px 12px; }
+.mobile-access .email-label { flex-basis: 100%; font-size: 12px; opacity: .85; }
+.mobile-access input[type="email"] { font-size: 16px; min-height: 48px; scroll-margin-block: 24px; }
+.mobile-access button[type="submit"] { min-height: 48px; }
+.mobile-access [hidden] { display: none !important; }
+.mobile-access .access-unavailable { font-size: 13px; line-height: 1.6; }
+.install-hook-mobile form { margin: 0; padding: 0; }
+@media (max-width: 650px) {
+  .mobile-access input[type="email"], .mobile-access button[type="submit"] { flex-basis: 100%; width: 100%; }
+  .mobile-access form { gap: 10px; }
+  .install-hook-mobile input[type="email"] { flex: 1 1 0; width: auto; }
+  .install-hook-mobile button[type="submit"] { flex: 0 0 44px; width: 44px; }
+}
+@media (scripting: none) { .mobile-access [data-email-invite] { display: none; } }

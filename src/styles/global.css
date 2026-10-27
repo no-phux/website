@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "./terminal-surface.css";
+@import "./mobile-access.css";
 
 /* Fumadocs primitives. Reader-only tokens below leave marketing unchanged. */
 @import "fumadocs-ui/css/neutral.css";

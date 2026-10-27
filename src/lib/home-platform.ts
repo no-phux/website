@@ -1,5 +1,5 @@
 import { detectPhone, type Phone } from "./beta";
-import { desktopDownload } from "./install";
+import { desktopDownload, iosDownload } from "./install";
 import { docsHref } from "./site";
 
 export type InstallPlatform = "iphone" | "ipad" | "android" | "mac" | "linux" | "windows" | "unknown";
@@ -17,10 +17,10 @@ export function detectInstallPlatform(visitor: Visitor): InstallPlatform {
   return "unknown";
 }
 
-const ios = { href: "/more#testflight", note: "iOS beta · TestFlight invite by email", icon: "→", target: "mobile", phone: "ios" } as const;
+const ios = { href: iosDownload, note: "iOS beta · Join in TestFlight", icon: "→", phone: "ios" } as const;
 export const installActions: Record<InstallPlatform, InstallAction> = {
   iphone: { ...ios, label: "Get for iPhone" },
-  ipad: { ...ios, label: "Get for iPad", note: "iPadOS beta · TestFlight invite by email" },
+  ipad: { ...ios, label: "Get for iPad", note: "iPadOS beta · Join in TestFlight" },
   android: { label: "Get for Android", href: "/more#testflight", note: "Android beta · Google Play access by email", icon: "→", target: "mobile", phone: "android" },
   mac: { label: "Download for Mac", href: desktopDownload, note: "Apple silicon · macOS 26 or later · Apache-2.0 · No account", icon: "↓" },
   linux: { label: "Install for Linux", href: docsHref("/installation"), note: "Linux · CLI and desktop · Apache-2.0 · No account", icon: "→", target: "cli" },
@@ -57,6 +57,11 @@ function openInstall(action: InstallAction) {
   if (action.phone && form.dataset.phone !== action.phone) {
     details.querySelector<HTMLButtonElement>("#beta-phone")!.click();
   }
-  const field = action.target === "mobile" ? 'input[name="email"]' : ".install-copy";
-  details.querySelector<HTMLElement>(field)!.focus();
+  if (action.target === "mobile") {
+    // Opening access is not consent to summon the keyboard. Let the visitor choose email.
+    details.querySelector<HTMLElement>("[data-email-invite] > summary")!.focus({ preventScroll: true });
+    details.scrollIntoView({ block: "center", behavior: "instant" });
+    return;
+  }
+  details.querySelector<HTMLElement>(".install-copy")!.focus();
 }
