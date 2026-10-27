@@ -5,9 +5,10 @@ export function wireInstallTargets(copyButton: HTMLButtonElement | null) {
   // These IDs are one markup contract, owned by pages/index.astro.
   const code = install.querySelector<HTMLElement>("#install-command")!;
   const note = install.querySelector<HTMLElement>("#install-note")!;
-  const status = install.querySelector<HTMLElement>("#install-status")!;
+  const status = install.querySelector<HTMLElement>("#beta-note")!;
   const tabs = install.querySelector<HTMLElement>(".install-tabs")!;
-
+  const line = install.querySelector<HTMLElement>(".install-line")!;
+  const request = install.querySelector<HTMLElement>(".install-request")!;
   const commandBox = install.querySelector<HTMLElement>(".install-command")!;
   const download = install.querySelector<HTMLElement>("#install-download")!;
   const targets = [...install.querySelectorAll<HTMLButtonElement>("[data-install-target]")];
@@ -33,14 +34,18 @@ export function wireInstallTargets(copyButton: HTMLButtonElement | null) {
     status.textContent = "";
     targets.forEach(candidate => candidate.setAttribute("aria-pressed", String(candidate === target)));
     const command = target.dataset.installCommand ?? "";
+    const mobile = command === "";
     const desktop = target.dataset.installTarget === "desktop";
     code.textContent = command;
     note.textContent = target.dataset.installNote ?? "";
     setInstallCopy(copyButton, command, desktop);
+    line.hidden = mobile;
+    request.hidden = !mobile;
     commandBox.hidden = desktop;
     download.hidden = !desktop;
     placePill(target);
-    settle(desktop ? download : code, 6, 420);
+    const preview = installPreview(mobile, desktop, request, download, code);
+    settle(preview.element, preview.distance, preview.duration);
     settle(note, 4, 340);
   };
   targets.forEach((target, index) => {
@@ -77,4 +82,10 @@ function arrowStep(key: string): number {
   if (key === "ArrowRight") return 1;
   if (key === "ArrowLeft") return -1;
   return 0;
+}
+
+function installPreview(mobile: boolean, desktop: boolean, request: HTMLElement, download: HTMLElement, code: HTMLElement) {
+  if (mobile) return { element: request, distance: 4, duration: 340 };
+  if (desktop) return { element: download, distance: 6, duration: 420 };
+  return { element: code, distance: 6, duration: 420 };
 }
