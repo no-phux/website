@@ -17,7 +17,14 @@ Site chrome, page titles, demos, and the generated social card read that identit
 Changing it does not rename commands, packages, domains, protocol identifiers,
 or the canonical documentation. A product rename must migrate those deliberately.
 
-The homepage's marketing outcome is **Run agents. Stay in control.** Show running
+The homepage's marketing outcome is **Run agents. Stay in control.** The buyer's
+job is operating agent work: delegate an outcome, supervise execution, unblock
+decisions, review evidence, and accept the result. Agents are the workforce;
+the person is not assumed to be manually implementing the code. Do not position
+phux as an editor alternative or make editor preference the reason to choose it.
+Editing capabilities remain factual reference information, not the sales frame.
+
+Show running
 agents, noticing a blocked pane, reviewing changes, using remote compute, and giving
 agents controls before explaining the server. `HOME` owns this presentation;
 `SITE.tagline` remains the technical identity used by documentation.
@@ -26,6 +33,8 @@ Explain useful behavior before resource kinds and wire layers. Distinguish
 emitted agent lifecycle state from terminal-based detection. Client rendering
 state is not a second running process. Crew requires its documented source-checkout
 setup and a compatible build; it is not a zero-setup autonomous coordinator.
+Surface Crew as the first-party lead-and-workers path, with those requirements
+visible next to its setup link, rather than burying orchestration below terminal UI choices.
 
 ## Readers and language
 
@@ -108,7 +117,8 @@ to an available install.
 
 ## Performance and comparisons
 
-Honest comparison tables are encouraged. Unsupported scorecards and universal
+Technical comparisons belong in documentation, not the homepage sales pitch.
+Do not add a competitor matrix to sell agent work. Unsupported scorecards and universal
 “fastest” claims are not. Include tmux, Herdr, and cmux where the question is
 meaningful, with exact versions and an explicit system boundary.
 
@@ -129,17 +139,17 @@ methodology link. Do not hide conditions behind tooltips.
 
 The landing at `src/pages/index.astro` stays minimal: a short top bar, an
 outcome-led headline with a direct live-demo link, one product tour with its
-sandbox invitation, six evidence-backed workflows, and the floating CLI / Desktop
+sandbox invitation, a short delegate/unblock/review loop, and the floating CLI / Desktop
 install switcher below the tour. Desktop is a download (`/download/desktop`, with the curl
 installer as the alternative). Desktop and terminal installs name their actual
 platform requirements, including the native Windows client's WSL 2 coordinator.
 Phone browsers retain TestFlight/Android beta access rather than a Mac download.
 The release-update signup lives on `/more`.
-The workflow grid replaces the old three capability links. A static agent-control
-example and a product-fit comparison explain the value without inventing a live
-feed. The Orca comparison covers 18 categories, cites primary sources and a check
-date, preserves real competitor advantages, and separates beta/source setup from
-published installs. Do not turn native implementation into an unmeasured speed claim.
+Show a concrete task for a configured Crew lead, not an essay or a competitor matrix.
+Keep technical commands in an optional disclosure. Label the example honestly;
+do not manufacture live activity or completed work. The first-party Crew setup
+requirements remain visible. Existing technical comparison documents stay separate
+from the agent-work story.
 
 `<HeroDemo client:load>` renders the product tour and owns the hosted
 terminal dialog. The tour (`src/components/tour/`) is a scripted
