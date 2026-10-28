@@ -54,12 +54,12 @@ export function parseFrontmatter(raw: string): SourceFm {
 /**
  * The hand-written pages, in nav order. Path is relative to DOCS_DIR.
  */
-const ORIENTATION: { file: string; slug: string; group: Group; order: number; title?: string; summary?: string }[] = [
+const ORIENTATION: { file: string; slug: string; group: Group; order: number }[] = [
   { file: "README.md", slug: "docs", group: "start", order: 9 },
   { file: "install.md", slug: "installation", group: "start", order: 2 },
   { file: "getting-started.md", slug: "getting-started", group: "start", order: 3 },
   { file: "concepts.md", slug: "concepts", group: "start", order: 4 },
-  { file: "compare.md", slug: "compare", group: "start", order: 5, title: "Compare phux with Orca, tmux, and more", summary: "Choose by workflow: sourced comparisons with Orca, tmux, Herdr, cmux, zellij, WezTerm, and Rex, including their strengths and phux’s limits." },
+  { file: "compare.md", slug: "compare", group: "start", order: 5 },
   { file: "config.md", slug: "config", group: "customize", order: 0 },
   { file: "keys.md", slug: "keys", group: "customize", order: 1 },
   { file: "tmux-import.md", slug: "tmux-import", group: "customize", order: 2 },

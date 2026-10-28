@@ -41,12 +41,12 @@ function render(body: string, entries = [entry]) {
 }
 
 describe("documentation discovery interface", () => {
-  test("names the website-owned comparison additions in the reader and search metadata", async () => {
+  test("keeps technical comparison metadata from the source rather than promoting another competitor pitch", async () => {
     await source("compare.md", "# phux vs tmux\n\nA source summary.\n\n## Next\n");
     const { entries } = await discover(docs);
     const comparison = entries.find(item => item.slug === "compare")!;
-    expect(comparison.title).toBe("Compare phux with Orca, tmux, and more");
-    expect(comparison.summary).toContain("including their strengths and phux’s limits");
+    expect(comparison.title).toBeUndefined();
+    expect(comparison.summary).toBeUndefined();
   });
   test("keeps canonical flat guides and ignores the historical archive", async () => {
     const guides = ["embedding", "organization", "desktop-capture", "desktop-changes", "desktop-panes"];

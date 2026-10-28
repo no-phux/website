@@ -85,13 +85,15 @@ owns the marketing headline/metadata; `SITE.tagline` retains the precise technic
 category for documentation. The share card uses the same outcome and real captures.
 Keep the download and the beginning of the product screenshot within the first screen.
 
-`WorkflowProof.astro` replaces the old three capability links with six documented
-workflows: attention, continuity, machines, review, project setup, and agent controls.
+`WorkflowProof.astro` shows three short steps: delegate the outcome, unblock the
+work, and review the result. A concrete task brief makes the Crew loop tangible.
 Use the existing neutral home tokens, open typographic grid, numbered entries, and
 real commands. No invented live activity, customer counts, performance rankings, or
-automatic sandbox claims. A static command example demonstrates the read/wait/prompt
-loop; a short product-fit section links to the sourced Orca comparison, including
-its advantages and phux limits. This content is plain HTML, with no new hydration,
+automatic sandbox claims. A native disclosure keeps the read/wait/prompt command
+example optional. The product-fit section surfaces **One lead. A visible crew.**
+with Crew's source-checkout/compatible-build/Python/agent requirements. Do not add
+a competitor pitch or feature matrix. Never use “keep your editor” or editor
+adoption as the homepage proposition. This content is plain HTML, with no new hydration,
 animation, or initial requests. The fox, install behavior, and lazy demo stay intact.
 
 The primary install action follows the visitor's OS, not viewport width.

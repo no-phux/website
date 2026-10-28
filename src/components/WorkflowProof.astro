@@ -2,66 +2,70 @@
 import { docsHref } from "../lib/site";
 
 const workflows = [
-  { title: "Know who needs you.", text: "Working, idle, or waiting for your answer. Agent state lives beside the pane, so the next decision is a jump away—not a tour of every tab.", detail: "phux agent list", href: "/agents", link: "Connect your agents" },
-  { title: "Leave the window. Keep the work.", text: "Shells and agents run on a background server. Detach the TUI, quit the desktop, then return to the same running session.", detail: "phux attach work", href: "/concepts#what-survives-what", link: "See what stays running" },
-  { title: "Put your other machines to work.", text: "Add a host over SSH, then attach directly over QUIC. Find your Tailscale machines from the desktop. No phux account or hosted control plane.", detail: "phux host add me@mini", href: "/remote", link: "Connect a machine" },
-  { title: "Review the work. Send it back.", text: "On macOS/Linux, read local diffs, stage selected lines, and commit beside your terminals. Add line notes for the agent. Open GitHub pull requests in the desktop’s Reviews view.", detail: "Changes + Reviews · Desktop", href: "/desktop-changes", link: "See the review workflow" },
-  { title: "Make a project repeatable.", text: "Keep tabs, panes, and startup commands in a checked-in recipe. Open each checkout in its own session, and group related work across machines.", detail: "phux project open", href: "/projects", link: "Set up your project" },
-  { title: "Let agents drive, too.", text: "Agents can read a pane, run a command, wait for a result, and hand work to another agent. Use the CLI, MCP, or an integration—not a second hidden workspace.", detail: "phux mcp", href: "/agent-quickstart", link: "Give your agent the controls" },
+  { title: "Delegate the outcome.", text: "Give a Crew lead the job, constraints, and what done means. It assigns work to visible mission workers.", href: "/distros#included-distros", link: "Set up your crew" },
+  { title: "Unblock the work.", text: "See who is working and who needs a decision. Answer the blocker, not every step along the way.", href: "/agents", link: "See agent attention" },
+  { title: "Review the result.", text: "Inspect the diff, checks, and review threads. Send precise feedback back to the agent.", href: "/desktop-reviews", link: "Review agent work" },
 ];
 ---
 <section class="workflow-proof" aria-labelledby="workflow-title">
   <div class="agent-fit">
-    <p>Bring your agents. Keep your editor.</p>
+    <p>Your agents are the workforce.</p>
     <p class="agent-names">Claude Code <span>·</span> Codex <span>·</span> OpenCode <span>·</span> pi <span>·</span> Oh My Pi <span>·</span> Grok</p>
     <a href={docsHref("/agents#agent-setup")}>Integrations, MCP, and any CLI agent <span aria-hidden="true">↗</span></a>
   </div>
-  <header><p class="eyebrow">From first prompt to reviewed code</p><h2 id="workflow-title">More work in flight.<br />Less work keeping track.</h2></header>
+  <header><p class="eyebrow">Delegate. Supervise. Unblock. Review.</p><h2 id="workflow-title">Give it the job.<br />Get the work back.</h2></header>
   <div class="workflow-grid">
     {workflows.map((workflow, index) => (
       <article>
         <span class="step" aria-hidden="true">0{index + 1}</span>
         <h3>{workflow.title}</h3>
         <p>{workflow.text}</p>
-        <code>{workflow.detail}</code>
         <a href={docsHref(workflow.href)}>{workflow.link} <span aria-hidden="true">↗</span></a>
       </article>
     ))}
   </div>
-  <p class="boundary">Work stays running while the server does. A server crash or machine reboot ends running programs. Agent integrations report lifecycle events; other agents can use terminal-based detection.</p>
+  <p class="boundary">Work continues while the server stays up. A server crash or machine reboot ends running programs.</p>
 </section>
 
-<section class="control-proof" aria-labelledby="control-title">
+<details class="control-proof">
+  <summary>The tools behind agent work <span aria-hidden="true">+</span></summary>
+  <div class="control-content">
   <div>
-    <p class="eyebrow">Human at the controls. Agents on the tools.</p>
+    <p class="eyebrow">Agents execute. You make the calls.</p>
     <h2 id="control-title">Stop polling tabs.<br />Wait for what matters.</h2>
-    <p>See the same terminals your agents can read and operate. Inspect the current state, wait for an agent to need you, then send a follow-up to its exact pane.</p>
+    <p>Agents inspect state, wait for changes, and hand work to each other through the same tools. You see the work in flight, answer the decisions that need you, and review the result.</p>
     <p>Need to step in? <code>phux take @7</code> gives you exclusive input. Automation cannot type into a pane you hold. Release it with <code>phux give @7</code>.</p>
     <a href={docsHref("/agents#driving-an-agent-in-a-pane")}>The agent control loop <span aria-hidden="true">↗</span></a>
   </div>
   <figure>
-    <figcaption>Real commands · an example workflow, not a live feed</figcaption>
+    <figcaption>Tools your agents use · an example, not a live feed</figcaption>
     <pre><code><span># See who is doing what</span>{"\n"}phux agent list{"\n\n"}<span># Wait for the next agent that needs you</span>{"\n"}phux agent wait --any --until blocked --timeout 600{"\n\n"}<span># Inspect its pane before sending input</span>{"\n"}phux snapshot @7{"\n\n"}<span># Send a follow-up to that exact agent</span>{"\n"}phux agent prompt @7 'Run the tests again'</code></pre>
     <p>Use the pane returned by your own agent list. A wait observes a new transition; a delivery receipt is not proof the work is finished.</p>
   </figure>
-</section>
+  </div>
+</details>
 
 <section class="product-fit" aria-labelledby="fit-title">
   <div>
-    <p class="eyebrow">Choosing your workspace</p>
-    <h2 id="fit-title">Your terminal is the workspace.<br />The window is your choice.</h2>
-    <p>Use a native desktop, stay in your terminal, or build on the same server with code. phux is for people who want agent-aware terminals without moving their whole workflow into another editor.</p>
+    <p class="eyebrow">Crew · first-party agent orchestration</p>
+    <h2 id="fit-title">One lead.<br />A visible crew.</h2>
+    <p>Give a lead agent the outcome. With Crew, it places workers in isolated Git worktrees and visible panes, supervises their missions, checks their evidence, and brings back the result.</p>
+    <a href={docsHref("/distros#included-distros")}>Set up Crew <span aria-hidden="true">↗</span></a>
+    <p class="crew-requirements">Crew requires a phux source checkout, a build with native missions, Python 3.9+, and configured agents. It is coordination, not a security sandbox or a promise of unattended completion.</p>
   </div>
-  <aside>
-    <h3>Considering Orca?</h3>
-    <p>Orca brings an editor, browser, worktrees, and task integrations together. phux puts the shared terminal server, native clients, and agent controls at the center. Both offer automation and remote sessions.</p>
-    <a href={docsHref("/compare#phux-vs-orca")}>Compare the workflows, category by category <span aria-hidden="true">↗</span></a>
-    <p class="fit-note">Sources and trade-offs for agents, review, remote work, automation, and platform support.</p>
-  </aside>
+  <figure class="mission-brief">
+    <figcaption>Example task for a configured Crew lead</figcaption>
+    <blockquote>Fix the flaky checkout test. Open a PR. Don’t merge it.</blockquote>
+    <ol>
+      <li><strong>Delegate</strong><span>Workers get their own worktrees and visible panes.</span></li>
+      <li><strong>Unblock</strong><span>Questions and permission prompts still come to you.</span></li>
+      <li><strong>Review</strong><span>The lead checks the evidence and brings back the result.</span></li>
+    </ol>
+  </figure>
 </section>
 
 <style>
-  section { margin-top: 72px; border-top: 1px solid var(--color-rule); padding-top: 48px; }
+  section, .control-proof { margin-top: 72px; border-top: 1px solid var(--color-rule); padding-top: 48px; }
   h2 { margin: 0; color: var(--color-fg); font-size: clamp(30px, 3.5vw, 44px); line-height: 1.12; font-weight: 500; letter-spacing: -.045em; }
   h3 { margin: 0; color: var(--color-fg); font-size: 23px; font-weight: 500; line-height: 1.2; letter-spacing: -.035em; }
   p { color: var(--color-muted); font-size: 14px; line-height: 1.7; }
@@ -78,31 +82,37 @@ const workflows = [
   article { display: flex; flex-direction: column; align-items: start; min-width: 0; }
   .step { margin-bottom: 16px; color: var(--color-dim); font: 12px var(--font-code); }
   article p { margin: 14px 0 18px; }
-  article code { margin-top: auto; color: var(--color-fg); font-size: 12px; overflow-wrap: anywhere; }
-  article a { color: var(--color-muted); }
+  article a { margin-top: auto; color: var(--color-muted); }
   .boundary { margin: 24px 0 0; max-width: 100ch; color: var(--color-dim); font-size: 12px; }
-  .control-proof, .product-fit { display: grid; grid-template-columns: 1fr 1.1fr; gap: 64px; align-items: center; }
-  .control-proof > div > p:not(.eyebrow), .product-fit > div > p:not(.eyebrow) { max-width: 48ch; margin: 20px 0 12px; }
+  .control-content, .product-fit { display: grid; grid-template-columns: 1fr 1.1fr; gap: 64px; align-items: center; }
+  .control-content > div > p:not(.eyebrow), .product-fit > div > p:not(.eyebrow) { max-width: 48ch; margin: 20px 0 12px; }
+  .control-proof { padding-top: 16px; }
+  .control-proof > summary { display: flex; justify-content: space-between; align-items: center; min-height: 44px; color: var(--color-muted); cursor: pointer; list-style: none; font-size: 13px; }
+  .control-proof > summary::-webkit-details-marker { display: none; }
+  .control-proof[open] > summary > span { transform: rotate(45deg); }
+  .control-content { padding-top: 24px; }
   figure { min-width: 0; margin: 0; padding: 24px; background: var(--color-surface); border: 1px solid var(--color-rule); border-radius: 10px; }
   figcaption, figure p { color: var(--color-muted); font-size: 12px; line-height: 1.7; }
   pre { margin: 24px 0; overflow-x: auto; font-size: 12px; line-height: 1.8; color: var(--color-fg); }
   pre span { color: var(--color-muted); }
   figure p { margin: 0; }
-  aside { padding-left: 32px; border-left: 1px solid var(--color-rule); }
-  aside p { margin: 16px 0 8px; }
-  aside .fit-note { color: var(--color-dim); font-size: 12px; }
-  @media (max-width: 900px) { .workflow-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 36px 28px; } .control-proof, .product-fit { gap: 28px; } }
+  blockquote { margin: 24px 0; color: var(--color-fg); font-size: clamp(22px, 2.5vw, 30px); line-height: 1.3; letter-spacing: -.025em; }
+  .mission-brief ol { display: grid; gap: 18px; margin: 0; padding: 0; list-style: none; }
+  .mission-brief li { display: grid; grid-template-columns: 76px 1fr; gap: 12px; font-size: 13px; line-height: 1.6; }
+  .mission-brief strong { color: var(--color-fg); font-weight: 500; }
+  .mission-brief li span { color: var(--color-muted); }
+  .product-fit > div > .crew-requirements { color: var(--color-dim); font-size: 12px; }
+  @media (max-width: 900px) { .workflow-grid { gap: 28px; } .control-content, .product-fit { gap: 28px; } }
   @media (max-width: 650px) {
     section { margin-top: 48px; padding-top: 32px; }
     .agent-fit { text-align: left; margin-bottom: 40px; }
     .agent-names span { padding-inline: 3px; }
-    .workflow-grid, .control-proof, .product-fit { grid-template-columns: 1fr; }
+    .workflow-grid, .control-content, .product-fit { grid-template-columns: 1fr; }
     .workflow-grid { gap: 28px; margin-top: 32px; }
     article { padding-bottom: 20px; border-bottom: 1px solid var(--color-rule); }
     article h3 { font-size: 25px; }
     .step { margin-bottom: 10px; }
     article p { margin-block: 12px; }
     figure { padding: 20px; }
-    aside { padding: 24px 0 0; border-left: 0; border-top: 1px solid var(--color-rule); }
   }
 </style>

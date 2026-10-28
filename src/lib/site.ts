@@ -18,7 +18,7 @@ export const SITE = {
   designMode: "terminal",
   // Names the /og.png artwork. Link previews cache by URL, so change this
   // whenever src/pages/og.png.ts draws a different picture.
-  previewArtwork: "agent-workspace",
+  previewArtwork: "agent-work-operations",
   // Set when the WS demo backend is deployed. When empty the terminal island
   // renders the static poster + a "coming online" state instead of dialing out.
   demoWsUrl: import.meta.env.PUBLIC_PHUX_DEMO_WS ?? "",
@@ -27,7 +27,7 @@ export const SITE = {
 /** Marketing leads with the job; documentation retains the precise product category. */
 export const HOME = {
   headline: "Run agents. Stay in control.",
-  description: "Run coding agents side by side, see who needs you, and review their work. One terminal workspace across your machines, with a native desktop, a TUI, and tools your agents can drive.",
+  description: "Delegate work, supervise agents, resolve blockers, and review results. phux brings agent state, work handoffs, native review, and your machines into one workspace.",
 } as const;
 
 /** Content-page <title>: the topic leads (it is what people search); the brand trails once. */

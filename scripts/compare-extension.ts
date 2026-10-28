@@ -1,5 +1,3 @@
-import { orcaComparison } from "./orca-comparison";
-
 /**
  * Website-owned rows appended to the synced compare page.
  * The phux repo keeps the tmux, Herdr, and cmux sections.
@@ -9,7 +7,7 @@ const CHECKED = "2026-10-27";
 
 export function extendComparePage(body: string, revision: string): string {
   const stripped = body.replaceAll("; phone apps in progress", "");
-  const block = `\n${orcaComparison(revision)}\n${compareExtension(revision)}\n`;
+  const block = `\n${compareExtension(revision)}\n`;
   const marker = "\n## Next\n";
   const index = stripped.indexOf(marker);
   if (index === -1) return `${stripped.replace(/\s*$/, "")}\n${block}`;
@@ -20,7 +18,7 @@ function compareExtension(revision: string): string {
   const license = `https://github.com/no-phux/phux/blob/${revision}/LICENSE`;
   return `## Compared with zellij and WezTerm
 
-Competitor facts in this section and the two after it were checked on ${CHECKED} against the pages linked in the cells. phux's Windows desktop availability was updated on 2026-10-28 against the [desktop v0.51.0 release assets](https://github.com/no-phux/phux/releases/tag/desktop-v0.51.0). These additions and the Orca section are maintained in the [website repository](https://github.com/no-phux/website); the earlier tmux, Herdr, and cmux sections come from phux's \`docs/compare.md\`.
+Competitor facts in this section and the two after it were checked on ${CHECKED} against the pages linked in the cells. phux's Windows desktop availability was updated on 2026-10-28 against the [desktop v0.51.0 release assets](https://github.com/no-phux/phux/releases/tag/desktop-v0.51.0). These additions are maintained in the [website repository](https://github.com/no-phux/website); the earlier tmux, Herdr, and cmux sections come from phux's \`docs/compare.md\`.
 
 | | zellij | WezTerm | phux |
 | --- | --- | --- | --- |
