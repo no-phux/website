@@ -20,7 +20,7 @@ function compareExtension(revision: string): string {
   const license = `https://github.com/no-phux/phux/blob/${revision}/LICENSE`;
   return `## Compared with zellij and WezTerm
 
-Facts in this section and the two after it were checked on ${CHECKED} against the pages linked in the cells. These additions and the Orca section are maintained in the [website repository](https://github.com/no-phux/website); the earlier tmux, Herdr, and cmux sections come from phux's \`docs/compare.md\`.
+Competitor facts in this section and the two after it were checked on ${CHECKED} against the pages linked in the cells. phux's Windows desktop availability was updated on 2026-10-28 against the [desktop v0.51.0 release assets](https://github.com/no-phux/phux/releases/tag/desktop-v0.51.0). These additions and the Orca section are maintained in the [website repository](https://github.com/no-phux/website); the earlier tmux, Herdr, and cmux sections come from phux's \`docs/compare.md\`.
 
 | | zellij | WezTerm | phux |
 | --- | --- | --- | --- |
