@@ -56,6 +56,7 @@ export const DOCS_PREFIXES = [
   "/protocol",
   "/compatibility",
   "/development",
+  "/windows-desktop-development",
   "/releasing",
   "/substrate",
   // Pre-2026-10 docs URLs. Nested paths still use Astro's HTML redirects.

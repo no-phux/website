@@ -11,7 +11,7 @@ const compare = {
   group: "start" as const,
   order: 5,
 };
-const linked = ["config", "plugins", "scripting", "clients", "concepts", "agents", "remote"].map((slug) => ({
+const linked = ["config", "plugins", "scripting", "clients", "concepts", "agents", "remote", "projects", "desktop-changes", "desktop-reviews", "protocol"].map((slug) => ({
   ...compare,
   repoPath: `docs/${slug}.md`,
   slug,
@@ -64,10 +64,33 @@ describe("compare page extension", () => {
     expect(text).toContain("sharing a live session with other people is built in from the start");
     expect(text).not.toContain("is still a young feature and is evolving rapidly");
     expect(text).toContain("native macOS/iOS applications");
-    expect(text).not.toContain("phone");
+    const olderComparisons = text.slice(text.indexOf("## Compared with zellij and WezTerm"));
+    expect(olderComparisons).not.toContain("phone");
     expect(text).not.toMatch(/Rex but better|better than Rex/i);
-    expect(text).not.toMatch(/TestFlight|iPhone|Android|seamless|supercharge|revolutionize|\bunlock\b|10x/i);
-    expect(text).not.toMatch(/phux.{0,80}iOS|iOS.{0,80}phux/s);
+    expect(olderComparisons).not.toMatch(/TestFlight|iPhone|Android|seamless|supercharge|revolutionize|\bunlock\b|10x/i);
+    expect(olderComparisons).not.toMatch(/phux.{0,80}iOS|iOS.{0,80}phux/s);
+  });
+
+  test("covers Orca's real workflows, source evidence, and phux limits without claiming universal superiority", () => {
+    const text = createPageRenderer(catalog, revision, versions)(source, compare);
+    expect(text).toContain("## phux vs Orca");
+    expect(text.indexOf("## phux vs Orca")).toBeLessThan(text.indexOf("## Compared with zellij"));
+    for (const category of ["Daily workspace", "Agents and attention", "Parallel tasks and worktrees", "Agent orchestration", "Close a client", "Remote machines", "Review and Git", "Task services", "Code editing and design", "Automation and integration", "Browser access", "Mobile availability", "Platforms", "Accounts, access, and telemetry", "License and price", "Performance"]) {
+      expect(text).toContain(`| ${category} |`);
+    }
+    expect(text).toContain("2026-10-28");
+    expect(text).toContain("stablyai/orca/blob/9588b5337a37c3f105020ca2e0acc365134ab0ba/README.md");
+    expect(text).toContain("[Changes](/desktop-changes)");
+    expect(text).toContain("[Reviews](/desktop-reviews)");
+    expect(text).toContain("[Projects](/projects)");
+    expect(text).toContain(`no-phux/phux/blob/${revision}/distros/crew/README.md`);
+    expect(text).toContain("This is not a phux-only feature");
+    expect(text).toContain("Automation is not a phux-only feature");
+    expect(text).toContain("a session alone is not file isolation");
+    expect(text).toContain("not a public App Store release");
+    expect(text).toContain("No speed or memory winner is asserted");
+    expect(text).toContain("**Choose Orca**");
+    expect(text).not.toMatch(/phux wins|faster than Orca|Orca cannot|Orca requires an account/i);
   });
 
   test("does not rewrite a different page", () => {

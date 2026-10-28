@@ -24,6 +24,7 @@ describe("device-first homepage installs", () => {
     }
     expect(installActions.android.target).toBe("mobile");
     expect(installActions.android.href).toBe("/more#testflight");
-    expect(installActions.windows.note).toContain("No native Windows app yet");
+    expect(installActions.windows.note).toContain("WSL 2 server required");
+    expect(installActions.windows.label).toBe("Install for Windows");
   });
 });

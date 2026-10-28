@@ -1,3 +1,5 @@
+import { orcaComparison } from "./orca-comparison";
+
 /**
  * Website-owned rows appended to the synced compare page.
  * The phux repo keeps the tmux, Herdr, and cmux sections.
@@ -7,7 +9,7 @@ const CHECKED = "2026-10-27";
 
 export function extendComparePage(body: string, revision: string): string {
   const stripped = body.replaceAll("; phone apps in progress", "");
-  const block = `\n${compareExtension(revision)}\n`;
+  const block = `\n${orcaComparison(revision)}\n${compareExtension(revision)}\n`;
   const marker = "\n## Next\n";
   const index = stripped.indexOf(marker);
   if (index === -1) return `${stripped.replace(/\s*$/, "")}\n${block}`;
@@ -18,7 +20,7 @@ function compareExtension(revision: string): string {
   const license = `https://github.com/no-phux/phux/blob/${revision}/LICENSE`;
   return `## Compared with zellij and WezTerm
 
-Facts in this section and the two after it were checked on ${CHECKED} against the pages linked in the cells. They are maintained in the [website repository](https://github.com/no-phux/website). The sections above are phux's \`docs/compare.md\`.
+Facts in this section and the two after it were checked on ${CHECKED} against the pages linked in the cells. These additions and the Orca section are maintained in the [website repository](https://github.com/no-phux/website); the earlier tmux, Herdr, and cmux sections come from phux's \`docs/compare.md\`.
 
 | | zellij | WezTerm | phux |
 | --- | --- | --- | --- |
@@ -28,7 +30,7 @@ Facts in this section and the two after it were checked on ${CHECKED} against th
 | Plugins | WebAssembly / WASI. Rust is the only language the plugin page says is officially supported. [Plugins](https://zellij.dev/documentation/plugins.html) | Lua plugins, loaded from a Git URL with \`wezterm.plugin.require\`. [Plugins](https://wezterm.org/config/plugins.html) | A directory with a \`phux-plugin.toml\` manifest. Commands run as separate processes. phux does not load plugin code into the server. [Plugins](./plugins.md) |
 | Driving it from code | \`zellij action\`, including \`zellij --session NAME action\`. Subscribe streams pane output. \`zellij watch\` is read-only. [CLI](https://zellij.dev/documentation/controlling-zellij-through-cli.html) | \`wezterm cli\` talks to a running GUI or multiplexer. Subcommands include \`spawn\`, \`split-pane\`, \`send-text\`, and \`get-text\`. [CLI](https://wezterm.org/cli/cli/index.html) | Commands with JSON output, an MCP server, and the protocol its clients use. [Scripting](./scripting.md) |
 | Clients | A built-in web server since version 0.43.0. Started with \`zellij web\`, it listens on \`http://127.0.0.1:8082\` by default. An SSL certificate is required to listen beyond the local machine. [Web client](https://zellij.dev/tutorials/web-client/) | The GUI. Unix, SSH, and TLS multiplexer domains are further configuration, not the out-of-the-box local tabs. [Multiplexing](https://wezterm.org/multiplexing.html) | Terminal UI and desktop app. A browser client is in the repository and is not shipped; its listeners are off by default. [Clients](./clients.md) |
-| Platforms | Prebuilt binaries for Linux, macOS, and Windows (\`zellij.exe\`). [Installation](https://zellij.dev/documentation/installation.html) | Linux, macOS, Windows 10, FreeBSD, and NetBSD. [Features](https://wezterm.org/features.html) | macOS on Apple silicon, and Linux x86_64 or arm64 with glibc. On Windows the CLI and TUI run under WSL 2. The native desktop build is not published yet. No Intel Mac build and no musl build. [Install](./install.md) |
+| Platforms | Prebuilt binaries for Linux, macOS, and Windows (\`zellij.exe\`). [Installation](https://zellij.dev/documentation/installation.html) | Linux, macOS, Windows 10, FreeBSD, and NetBSD. [Features](https://wezterm.org/features.html) | macOS on Apple silicon, and Linux x86_64 or arm64 with glibc. On Windows the CLI and TUI run under WSL 2; native desktop x64 uses that WSL coordinator (desktop 0.50.0+). No Intel Mac build and no musl build. [Install](./install.md) |
 | Close the window | \`zellij action detach\` leaves the session running in the background. [detach](https://zellij.dev/documentation/cli-actions.html#detach) | Out of the box, local tabs and windows persist until they are closed. [Multiplexing](https://wezterm.org/multiplexing.html) | Detach leaves programs running. [What survives what](./concepts.md#what-survives-what) |
 | After the server or machine stops | By default, session resurrection serializes the layout and the command in each pane, then re-runs those commands behind a "Press ENTER to run..." banner. The viewport and scrollback stay out unless the config turns them on. [Session resurrection](https://zellij.dev/documentation/session-resurrection.html) | The multiplexing page describes tabs and windows that persist until closed. It does not describe restoring programs after a reboot. | Sessions, tabs, and panes come back. Programs and scrollback do not. [What survives what](./concepts.md#what-survives-what) |
 | An agent waiting on you | Not described on the pages linked in this table. | Not described on the pages linked in this table. | \`blocked\` means that agent is waiting on you. [Coding agents](./agents.md) |
@@ -56,7 +58,7 @@ Checked on ${CHECKED}. The cells are what the linked pages say. Those pages do n
 ## Where phux isn't the answer
 
 - An Intel Mac, or musl libc. There is no build for either. [Install](./install.md)
-- Windows outside WSL 2. The published path is the CLI and TUI under WSL 2. The native desktop build is not published yet. Zellij publishes \`zellij.exe\`. WezTerm's feature list includes Windows 10, FreeBSD, and NetBSD.
+- Windows without WSL 2. The CLI, TUI, and native desktop's coordinator require WSL 2. Zellij publishes \`zellij.exe\`. WezTerm's feature list includes Windows 10, FreeBSD, and NetBSD.
 - Sharing a session between people. Several clients can show one session at once, and a machine you pair gets your full access, but a pane has one size for every viewer and the docs describe no invite or per-person flow. Zellij's README describes true multiplayer collaboration, and Superlogical's homepage says sharing a live session with other people is built in from the start.
 `;
 }

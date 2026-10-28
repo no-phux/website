@@ -20,7 +20,7 @@ Tailscale is optional, and the tailnet is your own. Without it, `phux host add m
 
 From a device that has only an SSH client, run `ssh -t user@host phux attach`. If that SSH session drops, the programs keep running, and so do the sessions and the scrollback. [What survives what](/concepts#what-survives-what). A server crash or a reboot ends the programs. Sessions, tabs, and panes come back without them. `phux restore` starts the programs again. The service from `phux host add` starts the server after a reboot. It does not start the programs.
 
-On Windows, the CLI and TUI run under WSL 2. The native desktop build is not published yet. [Windows (WSL)](/installation#windows-wsl).
+On Windows, the CLI and TUI run under WSL 2. Desktop 0.50.0+ also publishes a native Windows x64 client backed by that WSL coordinator. [Windows (WSL)](/installation#windows-wsl).
 
 phux has no accounts and no hosted service. Each machine runs its own server. A machine you add can do everything you can do on that server, including typing into panes. Only add machines you control. With no remote configuration, the server accepts only the local socket.
 
