@@ -1,6 +1,7 @@
 /** Reduced-motion and script-free homepage acceptance. */
 import assert from "node:assert/strict";
 import type { Browser } from "playwright-core";
+import { HOME } from "../src/lib/site";
 
 export async function verifyStaticHome(browser: Browser, base: string) {
   const stillContext = await browser.newContext({ reducedMotion: "reduce" });
@@ -22,8 +23,10 @@ export async function verifyStaticHome(browser: Browser, base: string) {
   assert.equal(await staticPage.locator(".download-primary [data-device-label]").innerText(), "Choose your platform", "without device detection, never guess Mac");
   assert.equal(await staticPage.locator(".download-primary").getAttribute("href"), "https://docs.phux.sh/installation", "the no-JS fallback is a real install guide");
   assert.ok(await staticPage.locator("[data-fox]").isVisible(), "the fox remains visible without JavaScript");
-  assert.equal((await staticPage.getByRole("heading", { level: 1 }).innerText()).trim(), "phux");
-  assert.equal((await staticPage.locator(".hero-description").innerText()).trim(), "A terminal multiplexer whose server you can drive from code.");
+  assert.equal((await staticPage.getByRole("heading", { level: 1 }).innerText()).replace(/\s+/g, " ").trim(), HOME.headline);
+  assert.equal((await staticPage.locator(".hero-description").innerText()).trim(), "Your agents. Your machines. One workspace.");
+  assert.equal(await staticPage.locator(".workflow-grid article").count(), 6, "the workflow story does not require hydration");
+  assert.ok(await staticPage.locator(".product-fit a").isVisible(), "the evidence-backed comparison is accessible without JavaScript");
   await staticPage.locator(".install-options > summary").click();
   assert.ok(await staticPage.locator("#install code").isVisible());
   assert.equal(await staticPage.getByRole("slider").count(), 0, "no-JS does not offer an inert slider");

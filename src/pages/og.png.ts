@@ -1,7 +1,7 @@
 import type { APIRoute } from "astro";
 import sharp from "sharp";
 import { resolve } from "node:path";
-import { SITE } from "../lib/site";
+import { HOME } from "../lib/site";
 
 const xml = (value: string) => value.replace(/[&<>"']/g, char => ({
   "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&apos;",
@@ -12,7 +12,8 @@ export const GET: APIRoute = async () => {
   const header = Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630">
     <rect width="1200" height="630" fill="#0c0f11"/>
     <g font-family="Helvetica Neue, Helvetica, Arial, sans-serif">
-      <text x="36" y="136" fill="#e7e2da" font-size="30" font-weight="600" letter-spacing="-0.6">${xml(SITE.tagline)}</text>
+      <text x="36" y="126" fill="#e7e2da" font-size="42" font-weight="600" letter-spacing="-1">${xml(HOME.headline)}</text>
+      <text x="36" y="155" fill="#adb8b0" font-size="18">Your agents. Your machines. One workspace.</text>
     </g>
   </svg>`);
   const desktop = resolve("public/product/desktop-workspace.webp");

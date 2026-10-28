@@ -1,7 +1,7 @@
 ---
 // Shared <head> contents — BaseLayout and DocsLayout both render this so
 // canonical/OG/Twitter behavior can't drift between the landing and the docs.
-import { SITE } from "../lib/site";
+import { HOME, SITE } from "../lib/site";
 import { softwareApplicationJson } from "../lib/software-application";
 import brand from "../../brand.lock.json";
 
@@ -30,7 +30,7 @@ const previewIdentity = encodeURIComponent(
 const ogUrl = new URL(image ?? "/og.png", image ? origin : SITE.url);
 ogUrl.searchParams.set("v", previewIdentity);
 const ogImage = ogUrl.href;
-const ogAlt = image ? title : `${SITE.name}: ${SITE.tagline}`;
+const ogAlt = image ? title : `${SITE.name}: ${HOME.headline} Real desktop and terminal workspace screenshots.`;
 const jsonLd = softwareApplicationJson();
 ---
 

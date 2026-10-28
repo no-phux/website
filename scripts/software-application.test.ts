@@ -13,7 +13,7 @@ describe("SoftwareApplication JSON-LD", () => {
     expect(application?.description).toBe(SITE.tagline);
     expect(application?.applicationCategory).toBe("DeveloperApplication");
     expect(application?.operatingSystem).toBe(SHIPPED_OPERATING_SYSTEM);
-    expect(application?.operatingSystem).toBe("macOS (Apple silicon), Linux, Windows via WSL 2");
+    expect(application?.operatingSystem).toBe("macOS (Apple silicon), Linux, Windows (native desktop with WSL 2 server; CLI/TUI in WSL 2)");
     expect(application?.license).toBe(APACHE_LICENSE);
     expect(application?.offers).toEqual({ "@type": "Offer", price: "0", priceCurrency: "USD" });
     expect(application).not.toHaveProperty("codeRepository");

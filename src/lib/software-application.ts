@@ -7,7 +7,7 @@ import { join } from "node:path";
 import { SITE } from "./site";
 
 /** Shipped installs. Phone apps stay out of this until they are public. */
-export const SHIPPED_OPERATING_SYSTEM = "macOS (Apple silicon), Linux, Windows via WSL 2";
+export const SHIPPED_OPERATING_SYSTEM = "macOS (Apple silicon), Linux, Windows (native desktop with WSL 2 server; CLI/TUI in WSL 2)";
 export const APACHE_LICENSE = "https://www.apache.org/licenses/LICENSE-2.0";
 export const SOFTWARE_ID = `${SITE.url}/#software`;
 

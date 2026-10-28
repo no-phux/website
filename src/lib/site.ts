@@ -1,7 +1,7 @@
 // Public identity lives here. Commands, package names and protocol identifiers
 // are separate contracts; changing the display name does not rename them.
 const name = "phux";
-// README line 3 of no-phux/phux. The landing title, description, and share card use this sentence.
+// Technical identity shared with the product README and documentation.
 const oneLiner = "A terminal multiplexer whose server you can drive from code.";
 
 export const SITE = {
@@ -18,10 +18,16 @@ export const SITE = {
   designMode: "terminal",
   // Names the /og.png artwork. Link previews cache by URL, so change this
   // whenever src/pages/og.png.ts draws a different picture.
-  previewArtwork: "demo-workspace",
+  previewArtwork: "agent-workspace",
   // Set when the WS demo backend is deployed. When empty the terminal island
   // renders the static poster + a "coming online" state instead of dialing out.
   demoWsUrl: import.meta.env.PUBLIC_PHUX_DEMO_WS ?? "",
+} as const;
+
+/** Marketing leads with the job; documentation retains the precise product category. */
+export const HOME = {
+  headline: "Run agents. Stay in control.",
+  description: "Run coding agents side by side, see who needs you, and review their work. One terminal workspace across your machines, with a native desktop, a TUI, and tools your agents can drive.",
 } as const;
 
 /** Content-page <title>: the topic leads (it is what people search); the brand trails once. */

@@ -17,10 +17,15 @@ Site chrome, page titles, demos, and the generated social card read that identit
 Changing it does not rename commands, packages, domains, protocol identifiers,
 or the canonical documentation. A product rename must migrate those deliberately.
 
+The homepage's marketing outcome is **Run agents. Stay in control.** Show running
+agents, noticing a blocked pane, reviewing changes, using remote compute, and giving
+agents controls before explaining the server. `HOME` owns this presentation;
+`SITE.tagline` remains the technical identity used by documentation.
+
 Explain useful behavior before resource kinds and wire layers. Distinguish
 emitted agent lifecycle state from terminal-based detection. Client rendering
-state is not a second running process. The durable coordinator is planned,
-not a shipped reason to install.
+state is not a second running process. Crew requires its documented source-checkout
+setup and a compatible build; it is not a zero-setup autonomous coordinator.
 
 ## Readers and language
 
@@ -124,11 +129,17 @@ methodology link. Do not hide conditions behind tooltips.
 
 The landing at `src/pages/index.astro` stays minimal: a short top bar, an
 outcome-led headline with a direct live-demo link, one product tour with its
-sandbox invitation, three capabilities, and the floating CLI / Desktop
+sandbox invitation, six evidence-backed workflows, and the floating CLI / Desktop
 install switcher below the tour. Desktop is a download (`/download/desktop`, with the curl
-installer as the alternative). The homepage names only the published installs:
-macOS, Linux, and Windows via WSL 2. The release-update signup lives on `/more`.
-Add a section only when it replaces one.
+installer as the alternative). Desktop and terminal installs name their actual
+platform requirements, including the native Windows client's WSL 2 coordinator.
+Phone browsers retain TestFlight/Android beta access rather than a Mac download.
+The release-update signup lives on `/more`.
+The workflow grid replaces the old three capability links. A static agent-control
+example and a product-fit comparison explain the value without inventing a live
+feed. The Orca comparison covers 18 categories, cites primary sources and a check
+date, preserves real competitor advantages, and separates beta/source setup from
+published installs. Do not turn native implementation into an unmeasured speed claim.
 
 `<HeroDemo client:load>` renders the product tour and owns the hosted
 terminal dialog. The tour (`src/components/tour/`) is a scripted

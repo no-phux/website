@@ -6,7 +6,8 @@ import ClientComparison from "../components/ClientComparison.astro";
 import Fox from "../components/fox/Fox.astro";
 import MobileAccessForm from "../components/MobileAccessForm.astro";
 import LiveWorkspaceSection from "../components/LiveWorkspaceSection.astro";
-import { SITE, docsHref } from "../lib/site";
+import WorkflowProof from "../components/WorkflowProof.astro";
+import { HOME, SITE, docsHref } from "../lib/site";
 import { cliInstall, desktopDownload, desktopFirstOpen, desktopInstall, installTargets } from "../lib/install";
 import release from "../lib/release.json";
 import brand from "../../brand.lock.json";
@@ -15,16 +16,17 @@ const installs = installTargets;
 const fallback = installActions.unknown;
 ---
 
-<BaseLayout minimal>
+<BaseLayout minimal title={`${SITE.name} — ${HOME.headline}`} description={HOME.description}>
   <AuthReturn slot="head" />
   <div class="home">
     <section class="hero" aria-labelledby="product-name">
       <div class="hero-intro">
         <div class="hero-copy">
-        <h1 id="product-name">phux</h1>
+        <p class="hero-eyebrow">A terminal workspace for coding agents</p>
+        <h1 id="product-name">Run agents.<br />Stay in control.</h1>
         <div class="hero-decision">
-          <p class="hero-description">A terminal multiplexer whose server you can drive from code.</p>
-          <p class="hero-body">Shells run in a background server. Attach from the terminal UI, the desktop app, or a script: every action is also a command with JSON output and an exit code. phux tracks which panes run a coding agent and whether it is waiting on you.</p>
+          <p class="hero-description">Your agents. Your machines. One workspace.</p>
+          <p class="hero-body">Run coding agents side by side. See who needs you. Review what they changed. Close the window without stopping the work.</p>
           <div class="download-actions">
             <a class="download-primary" data-device-install href={fallback.href}><span data-device-label>{fallback.label}</span> <span data-device-icon aria-hidden="true">{fallback.icon}</span></a>
             <a class="try-link" href="#live-workspace" aria-label="Open the browser demo">Try it first <span aria-hidden="true">↗</span></a>
@@ -76,33 +78,14 @@ const fallback = installActions.unknown;
       <ClientComparison />
     </section>
 
-    <section class="workflow-proof" aria-label="What phux does">
-      <a href={docsHref("/agents")}>
-        <svg class="proof-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="9" cy="8" r="3" /><path d="M3 20v-2a6 6 0 0 1 12 0v2M17 5a3 3 0 0 1 0 6M18 14a5 5 0 0 1 3 4v2" /></svg>
-        <h2>Agent status per pane.</h2>
-        <p>phux knows which pane runs Claude Code, pi, Oh My Pi, OpenCode or Grok, and whether it is working, idle or blocked on you.</p>
-        <span class="proof-link">Coding agents <span aria-hidden="true">↗</span></span>
-      </a>
-      <a href={docsHref("/remote")}>
-        <svg class="proof-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="3" y="4" width="18" height="13" rx="2" /><path d="M8 21h8M12 17v4" /></svg>
-        <h2>Remote machines.</h2>
-        <p><code>phux host add me@mini</code> adds another machine's server. No account.</p>
-        <span class="proof-link">Remote machines <span aria-hidden="true">↗</span></span>
-      </a>
-      <a href={docsHref("/clients")}>
-        <svg class="proof-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="3" y="4" width="14" height="12" rx="2" /><path d="M7 16v2a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2h-2" /></svg>
-        <h2>Detach and reattach.</h2>
-        <p>Close the TUI or the app; shells and agents keep running on the server. A crash or reboot ends them.</p>
-        <span class="proof-link">Clients <span aria-hidden="true">↗</span></span>
-      </a>
-    </section>
+    <WorkflowProof />
   </div>
 
   <LiveWorkspaceSection />
 
   <section class="closing home" aria-labelledby="closing-title">
     <div class="closing-copy">
-      <h2 id="closing-title">Install</h2>
+      <h2 id="closing-title">Give your agents a workspace.<br />Keep the controls.</h2>
       <p class="closing-command"><span class="install-prompt" aria-hidden="true">$</span> <code>{cliInstall}</code></p>
       <a class="download-final" data-device-install href={fallback.href}><span data-device-label>{fallback.label}</span> <span data-device-icon aria-hidden="true">{fallback.icon}</span></a>
       <a class="closing-platforms" href={docsHref("/installation")}>All platforms ↗</a>
@@ -173,7 +156,8 @@ const fallback = installActions.unknown;
   .hero-intro { display: grid; grid-template-columns: 1.05fr 1fr; align-items: center; gap: 12px; margin-bottom: 32px; }
   .hero-copy { position: relative; z-index: 1; padding-block: 22px; }
   .hero-art { margin: -24px -38px -20px -36px; pointer-events: none; overflow: clip; }
-  h1 { margin: 0 0 14px; color: #e7e2da; font-size: clamp(54px, 6.5vw, 88px); line-height: .99; font-weight: 450; letter-spacing: -.065em; }
+  .hero-eyebrow { margin: 0 0 18px; color: var(--color-muted); font-size: 12px; letter-spacing: .015em; }
+  h1 { margin: 0 0 18px; color: #e7e2da; font-size: clamp(44px, 5.5vw, 70px); line-height: 1.02; font-weight: 500; letter-spacing: -.06em; }
   .hero-description { margin: 0 0 12px; color: #bdc2be; font-size: clamp(16px, 1.5vw, 19px); line-height: 1.45; letter-spacing: -.015em; }
   .hero-body { margin: 0 0 18px; max-width: 62ch; color: #9ca79f; font-size: 15px; line-height: 1.5; }
   .download-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 12px 20px; }
@@ -207,14 +191,6 @@ const fallback = installActions.unknown;
   .copy-status { min-height: 20px; margin: 3px 0 0; color: #c3d6c6; font-size: 11px; }
   .release-links { display: flex; flex-wrap: wrap; gap: 4px 14px; margin: 10px 0 0; color: #8f9c92; font-size: 10px; }
   .release-links a { display: inline-flex; align-items: center; min-height: 32px; }
-  .workflow-proof { display: grid; grid-template-columns: repeat(3, 1fr); gap: 48px; margin: 72px 0 0; padding: 48px 0 8px; border-top: 1px solid #bccbc01f; }
-  .workflow-proof > a { display: flex; flex-direction: column; align-items: start; color: inherit; }
-  .proof-icon { display: block; width: 38px; height: 38px; padding: 8px; margin-bottom: 24px; border: 1px solid #c8d0c025; border-radius: 10px; background: #c8d0c006; color: #c7d8cb; }
-  .workflow-proof h2 { margin: 0; font-size: clamp(22px, 2.2vw, 29px); font-weight: 500; line-height: 1.2; letter-spacing: -.04em; color: #e7e2da; }
-  .workflow-proof p { margin: 16px 0 20px; max-width: 42ch; color: #9ca79f; font-size: 14px; line-height: 1.7; }
-  .workflow-proof code { color: #dce4dc; font-size: 12px; }
-  .proof-link { margin-top: auto; display: inline-flex; align-items: center; gap: 18px; min-height: 44px; color: #becfc2; font-size: 12px; }
-  .workflow-proof a:hover .proof-link { color: #f0ebe3; }
   .closing { display: flex; align-items: center; justify-content: space-between; gap: 40px; margin-top: 100px; padding-block: 62px; border-top: 1px solid #c8d0c025; border-bottom: 1px solid #c8d0c025; }
   .closing h2 { margin: 0; color: #e7e2da; font-size: clamp(32px, 4vw, 52px); line-height: 1.1; font-weight: 500; letter-spacing: -.05em; }
   .closing-command { display: flex; gap: 8px; align-items: baseline; margin: 18px 0 22px; color: #dce4dc; font-size: 13px; line-height: 1.5; }
@@ -232,10 +208,8 @@ const fallback = installActions.unknown;
     .home { padding-inline: 28px; }
     .hero-intro { gap: 0; grid-template-columns: 1.1fr 1fr; }
     .hero-art { margin-inline: -36px -20px; }
-    h1 { font-size: clamp(48px, 7vw, 68px); }
+    h1 { font-size: clamp(40px, 5.4vw, 60px); }
     .hero-description { font-size: 15px; }
-    .workflow-proof { gap: 28px; }
-    .workflow-proof h2 { font-size: 23px; }
     .closing-fox { width: 220px; height: 220px; }
   }
   @media (max-width: 650px) {
@@ -244,19 +218,14 @@ const fallback = installActions.unknown;
     .hero-intro { grid-template-columns: 1fr; gap: 0; margin-bottom: 24px; }
     .hero-copy { padding-block: 12px 0; }
     .hero-art { width: min(100%, 340px); margin: -20px auto -20px; }
-    h1 { font-size: clamp(52px, 11vw, 70px); }
+    h1 { font-size: clamp(36px, 10.2vw, 56px); }
+    .hero-eyebrow { margin-bottom: 12px; font-size: 11px; }
     .hero-description { margin-bottom: 10px; font-size: 16px; }
     .hero-body { margin-bottom: 14px; font-size: 14px; line-height: 1.45; }
     h1 { margin-bottom: 10px; }
     .download-actions { gap: 12px; }
     .download-primary { min-height: 52px; gap: 16px; padding-inline: 16px; }
     .download-note { margin-top: 10px; }
-    .workflow-proof { grid-template-columns: 1fr; gap: 32px; margin-top: 48px; padding-top: 32px; }
-    .workflow-proof > a { display: grid; grid-template-columns: 44px 1fr; gap: 0 18px; }
-    .proof-icon { grid-row: 1 / 4; margin: 2px 0 0; }
-    .workflow-proof h2 { font-size: 25px; }
-    .workflow-proof p { margin: 12px 0 8px; }
-    .proof-link { grid-column: 2; }
     .closing { position: relative; margin-top: 64px; padding-block: 40px; overflow: hidden; }
     .closing h2 { font-size: 34px; }
     .closing-fox { display: none; }

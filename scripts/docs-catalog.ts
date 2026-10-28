@@ -54,12 +54,12 @@ export function parseFrontmatter(raw: string): SourceFm {
 /**
  * The hand-written pages, in nav order. Path is relative to DOCS_DIR.
  */
-const ORIENTATION: { file: string; slug: string; group: Group; order: number }[] = [
+const ORIENTATION: { file: string; slug: string; group: Group; order: number; title?: string; summary?: string }[] = [
   { file: "README.md", slug: "docs", group: "start", order: 9 },
   { file: "install.md", slug: "installation", group: "start", order: 2 },
   { file: "getting-started.md", slug: "getting-started", group: "start", order: 3 },
   { file: "concepts.md", slug: "concepts", group: "start", order: 4 },
-  { file: "compare.md", slug: "compare", group: "start", order: 5 },
+  { file: "compare.md", slug: "compare", group: "start", order: 5, title: "Compare phux with Orca, tmux, and more", summary: "Choose by workflow: sourced comparisons with Orca, tmux, Herdr, cmux, zellij, WezTerm, and Rex, including their strengths and phux’s limits." },
   { file: "config.md", slug: "config", group: "customize", order: 0 },
   { file: "keys.md", slug: "keys", group: "customize", order: 1 },
   { file: "tmux-import.md", slug: "tmux-import", group: "customize", order: 2 },
@@ -91,6 +91,7 @@ const ORIENTATION: { file: string; slug: string; group: Group; order: number }[]
   { file: "compatibility.md", slug: "compatibility", group: "internals", order: 4 },
   { file: "embedding.md", slug: "embedding", group: "internals", order: 5 },
   { file: "development.md", slug: "development", group: "internals", order: 6 },
+  { file: "windows-desktop-development.md", slug: "windows-desktop-development", group: "internals", order: 6.5 },
   { file: "releasing.md", slug: "releasing", group: "internals", order: 7 },
   { file: "substrate.md", slug: "substrate", group: "internals", order: 8 },
   { file: "brand-assets.md", slug: "brand-assets", group: "internals", order: 9 },
