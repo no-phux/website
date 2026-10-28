@@ -137,7 +137,7 @@ Phone browsers retain TestFlight/Android beta access rather than a Mac download.
 The release-update signup lives on `/more`.
 The workflow grid replaces the old three capability links. A static agent-control
 example and a product-fit comparison explain the value without inventing a live
-feed. The Orca comparison covers 16 categories, cites primary sources and a check
+feed. The Orca comparison covers 18 categories, cites primary sources and a check
 date, preserves real competitor advantages, and separates beta/source setup from
 published installs. Do not turn native implementation into an unmeasured speed claim.
 

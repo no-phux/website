@@ -11,6 +11,7 @@ export async function verifyHomeContent(page: Page) {
   assert.match(await page.locator(".workflow-proof").innerText(), /A server crash or machine reboot ends running programs/);
   assert.match(await page.locator(".control-proof pre").innerText(), /phux agent wait --any --until blocked --timeout 600/);
   assert.match(await page.locator(".control-proof figcaption").innerText(), /not a live feed/);
+  assert.match(await page.locator(".control-proof").innerText(), /Automation cannot type into a pane you hold/);
   assert.equal(await page.locator('.product-fit a[href="https://docs.phux.sh/compare#phux-vs-orca"]').count(), 1);
   assert.equal(await page.locator(".try-link").getAttribute("aria-label"), "Open the browser demo");
   assert.equal((await page.locator("#workspace-title").innerText()).trim(), "Browser demo");

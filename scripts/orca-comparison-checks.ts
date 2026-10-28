@@ -9,7 +9,7 @@ export async function verifyOrcaComparison(browser: Browser, base: string) {
     await page.goto(`${base}/compare#phux-vs-orca`);
     const heading = page.getByRole("heading", { level: 2, name: "phux vs Orca", exact: true });
     const table = page.getByRole("table").filter({ has: page.getByRole("columnheader", { name: "Category", exact: true }) });
-    assert.equal(await table.getByRole("row").count(), 17, "sixteen comparison categories plus headers");
+    assert.equal(await table.getByRole("row").count(), 19, "eighteen comparison categories plus headers");
     assert.match(await table.innerText(), /native Windows x64 desktop with a required WSL 2 coordinator/);
     assert.match(await table.innerText(), /This is not a phux-only feature/);
     assert.match(await table.innerText(), /No speed or memory winner is asserted/);

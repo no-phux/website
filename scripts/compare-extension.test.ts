@@ -75,7 +75,7 @@ describe("compare page extension", () => {
     const text = createPageRenderer(catalog, revision, versions)(source, compare);
     expect(text).toContain("## phux vs Orca");
     expect(text.indexOf("## phux vs Orca")).toBeLessThan(text.indexOf("## Compared with zellij"));
-    for (const category of ["Daily workspace", "Agents and attention", "Parallel tasks and worktrees", "Agent orchestration", "Close a client", "Remote machines", "Review and Git", "Task services", "Code editing and design", "Automation and integration", "Browser access", "Mobile availability", "Platforms", "Accounts, access, and telemetry", "License and price", "Performance"]) {
+    for (const category of ["Daily workspace", "Agents and attention", "Human control", "Usage visibility", "Parallel tasks and worktrees", "Agent orchestration", "Close a client", "Remote machines", "Review and Git", "Task services", "Code editing and design", "Automation and integration", "Browser access", "Mobile availability", "Platforms", "Accounts, access, and telemetry", "License and price", "Performance"]) {
       expect(text).toContain(`| ${category} |`);
     }
     expect(text).toContain("2026-10-28");
