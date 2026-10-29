@@ -10,6 +10,7 @@ import { dirname, join, relative, resolve } from "node:path";
 import { phuxRoot } from "./phux-root";
 
 const LASTMOD = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/;
+const FUTURE_SLACK_MS = 24 * 60 * 60 * 1000;
 
 const shallow = new Map<string, boolean>();
 
@@ -29,9 +30,11 @@ export function repositoryShallow(repo: string): boolean {
   return value;
 }
 
-/** A W3C / ISO-8601 instant, or undefined when the text is not one. */
-export function validLastmod(value: string | undefined): string | undefined {
-  if (!value || !LASTMOD.test(value) || !Number.isFinite(Date.parse(value))) return undefined;
+/** A W3C / ISO-8601 instant that is not more than a day ahead of `now`. */
+export function validLastmod(value: string | undefined, now = Date.now()): string | undefined {
+  if (!value || !LASTMOD.test(value)) return undefined;
+  const parsed = Date.parse(value);
+  if (!Number.isFinite(parsed) || parsed > now + FUTURE_SLACK_MS) return undefined;
   return value;
 }
 
@@ -73,6 +76,30 @@ export function sourceCommitDate(file: string): string | undefined {
   const spec = relative(top, resolve(file)).split("\\").join("/");
   if (!spec || spec.startsWith("../")) return undefined;
   return sourceLastmod(top, spec);
+}
+
+/** Sitemap URLs whose lastmod is older than that path's source date. */
+export function urlsOlderThanSource(xml: string, dates: Map<string, string>): string[] {
+  const older: string[] = [];
+  for (const match of xml.matchAll(/<url>[\s\S]*?<\/url>/g)) {
+    const block = match[0];
+    const loc = block.match(/<loc>([^<]+)<\/loc>/)?.[1];
+    const lastmod = block.match(/<lastmod>([^<]+)<\/lastmod>/)?.[1];
+    if (!loc || !lastmod) continue;
+    let path: string;
+    try {
+      path = new URL(loc).pathname;
+    } catch {
+      continue;
+    }
+    const source = dates.get(path);
+    if (!source) continue;
+    const emitted = Date.parse(lastmod);
+    const git = Date.parse(source);
+    if (!Number.isFinite(emitted) || !Number.isFinite(git) || emitted >= git) continue;
+    older.push(loc);
+  }
+  return older;
 }
 
 /** `<loc>` values whose `<url>` or `<sitemap>` block has no lastmod. */

@@ -10,6 +10,8 @@ import {
   sourceCommitDate,
   sourceLastmod,
   urlsMissingLastmod,
+  urlsOlderThanSource,
+  validLastmod,
 } from "./sitemap-lastmod";
 
 const page = `---
@@ -30,6 +32,36 @@ describe("sitemap lastmod", () => {
     expect(repositoryShallow("/tmp/not-a-git-repo")).toBe(true);
     expect(sourceLastmod("/tmp/not-a-git-repo", "docs/install.md")).toBeUndefined();
     expect(sourceCommitDate("/tmp/not-a-git-repo/docs/install.md")).toBeUndefined();
+  });
+
+  test("rejects a lastmod more than a day ahead", () => {
+    const now = Date.parse("2026-10-29T00:00:00Z");
+    expect(validLastmod("2099-01-01T00:00:00Z", now)).toBeUndefined();
+    expect(validLastmod("2026-10-30T00:00:01Z", now)).toBeUndefined();
+    expect(validLastmod("2026-10-30T00:00:00Z", now)).toBe("2026-10-30T00:00:00Z");
+    expect(validLastmod("2026-10-27T08:41:11+00:00", now)).toBe("2026-10-27T08:41:11+00:00");
+  });
+
+  test("a future sourceMtime is not emitted", () => {
+    const root = mkdtempSync(join(tmpdir(), "lastmod-future-"));
+    const synced = join(root, "src/content/docs/_synced");
+    mkdirSync(synced, { recursive: true });
+    writeFileSync(join(synced, "plugins.md"), `---
+title: "Plugins"
+sourcePath: "src/site-docs/plugins.md"
+sourceBase: "https://github.com/no-phux/website"
+sourceMtime: "2099-01-01T00:00:00Z"
+---
+`);
+    expect(pageLastmods(root).has("/plugins")).toBe(false);
+  });
+
+  test("a lastmod older than the source file fails the staleness check", () => {
+    const dates = new Map([["/plugins", "2026-10-27T00:00:00Z"]]);
+    const stale = `<url><loc>https://docs.phux.sh/plugins</loc><lastmod>2020-01-01T00:00:00Z</lastmod></url>`;
+    const fresh = `<url><loc>https://docs.phux.sh/plugins</loc><lastmod>2026-10-27T00:00:00Z</lastmod></url>`;
+    expect(urlsOlderThanSource(stale, dates)).toEqual(["https://docs.phux.sh/plugins"]);
+    expect(urlsOlderThanSource(fresh, dates)).toEqual([]);
   });
 
   test("compares committer instants across offsets", () => {

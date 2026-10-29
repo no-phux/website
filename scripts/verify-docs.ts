@@ -12,7 +12,7 @@ import { AGENT_START, OVERVIEW, SITE } from "../src/lib/site";
 import { SHIPPED_OPERATING_SYSTEM } from "../src/lib/software-application";
 import { loadCompareMarkdown, measurementParagraphs, measurementsSection } from "../src/lib/performance-page";
 import { SITE_PAGE_CATALOG } from "./site-pages";
-import { urlsMissingLastmod } from "./sitemap-lastmod";
+import { pageLastmods, urlsMissingLastmod, urlsOlderThanSource } from "./sitemap-lastmod";
 
 const root = resolve(import.meta.dir, "../dist");
 const useWebKit = process.argv.includes("--webkit");
@@ -226,10 +226,14 @@ function assertLastmodsDiffer(xml: string, label: string) {
   }
 }
 
+const sourceDates = pageLastmods(resolve(import.meta.dir, ".."));
+
 function assertEveryLastmod(xml: string, label: string) {
   const missing = urlsMissingLastmod(xml);
   assert.deepEqual(missing, [], `${label}: missing lastmod for ${missing.join(", ")}`);
   assertLastmodsDiffer(xml, label);
+  const older = urlsOlderThanSource(xml, sourceDates);
+  assert.deepEqual(older, [], `${label}: lastmod older than the source file: ${older.join(", ")}`);
 }
 
 async function verifyPublishedContent() {
