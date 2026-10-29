@@ -12,6 +12,7 @@ import { AGENT_START, OVERVIEW, SITE } from "../src/lib/site";
 import { SHIPPED_OPERATING_SYSTEM } from "../src/lib/software-application";
 import { loadCompareMarkdown, measurementParagraphs, measurementsSection } from "../src/lib/performance-page";
 import { SITE_PAGE_CATALOG } from "./site-pages";
+import { urlsMissingLastmod } from "./sitemap-lastmod";
 
 const root = resolve(import.meta.dir, "../dist");
 const useWebKit = process.argv.includes("--webkit");
@@ -135,7 +136,12 @@ async function verifyDiscovery() {
   const llms = await readFile(resolve(root, "llms.txt"), "utf8");
   assert.ok(llms.startsWith(`# phux\n\n> ${SITE.tagline}\n`), "llms.txt leads with the canonical one-liner");
   assert.equal(llms.includes("programmable terminal runtime"), false, "llms.txt does not open on the old category line");
-  for (const path of ["/compare", "/tmux-import", "/performance"]) {
+  for (const path of [
+    "/compare", "/tmux-import", "/performance",
+    "/program-protocol", "/program-sequences", "/plugins",
+    "/embedding", "/protocol", "/agent-waiting",
+    "/pane-command", "/terminal-mcp", "/tailscale",
+  ]) {
     assert.ok(llms.includes(`https://${DOCS_HOST}${path}`), `llms.txt indexes ${path}`);
   }
   assert.ok(llms.includes("https://docs.phux.sh/agents.md"), "Markdown entrypoint is a published route");
@@ -207,6 +213,12 @@ function assertLastmodsDiffer(xml: string, label: string) {
   }
 }
 
+function assertEveryLastmod(xml: string, label: string) {
+  const missing = urlsMissingLastmod(xml);
+  assert.deepEqual(missing, [], `${label}: missing lastmod for ${missing.join(", ")}`);
+  assertLastmodsDiffer(xml, label);
+}
+
 async function verifyPublishedContent() {
   const index = JSON.parse(await readFile(resolve(root, "api/mcp-search.json"), "utf8"));
   const pages = index.pages as { url: string }[];
@@ -239,9 +251,12 @@ async function verifyCrawlMetadata(
   const docsSitemap = docsSitemaps.map((file) => file.xml).join("\n");
   for (const file of siteSitemaps) {
     assert.equal(file.xml.includes(`https://${DOCS_HOST}/`), false, `${file.name} lists no docs URLs`);
-    assertLastmodsDiffer(file.xml, file.name);
+    assertEveryLastmod(file.xml, file.name);
   }
-  for (const file of docsSitemaps) assertLastmodsDiffer(file.xml, file.name);
+  for (const file of docsSitemaps) assertEveryLastmod(file.xml, file.name);
+  for (const name of ["sitemap-index.xml", "sitemap-docs-index.xml"]) {
+    assertEveryLastmod(await readFile(resolve(root, name), "utf8"), name);
+  }
   assert.ok(docsSitemap.includes(`<loc>https://${DOCS_HOST}/performance</loc>`), "docs sitemap includes /performance");
   const docsIndex = await readFile(resolve(root, "sitemap-docs-index.xml"), "utf8");
   for (const file of docsSitemaps) {

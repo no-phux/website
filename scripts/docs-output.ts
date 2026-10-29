@@ -4,7 +4,15 @@ import { dirname, join } from "node:path";
 import { AGENT_START, OVERVIEW, SITE } from "../src/lib/site";
 import { GROUPS, type Entry } from "./docs-catalog";
 import { createPageRenderer, yamlString, type Versions } from "./docs-markdown";
+import { sourceCommitDate } from "./sitemap-lastmod";
 import { loadSitePages, SITE_PAGE_CATALOG } from "./site-pages";
+
+const SITE_ROOT = join(import.meta.dir, "..");
+
+function sourceMtimeLine(file: string): string | undefined {
+  const date = sourceCommitDate(file);
+  return date ? `sourceMtime: ${yamlString(date)}` : undefined;
+}
 
 const FOLDER_TITLES: Record<string, string> = {
   reference: "Reference",
@@ -138,12 +146,13 @@ async function writeSitePages(outDir: string, versions: Versions, siteRevision: 
       `sourcePath: ${yamlString(`src/site-docs/${page.file}`)}`,
       `sourceBase: ${yamlString("https://github.com/no-phux/website")}`,
       `sourceRevision: ${yamlString(siteRevision)}`,
+      sourceMtimeLine(join(SITE_ROOT, `src/site-docs/${page.file}`)),
       `protocolVersion: ${yamlString(versions.protocolVersion)}`,
       `projectVersion: ${yamlString(versions.projectVersion)}`,
       `stability: ${yamlString("stable")}`,
       "---",
       "",
-    ].join("\n");
+    ].filter((line): line is string => line !== undefined).join("\n");
     await writeFile(join(outDir, `${page.slug}.md`), fm + page.body, "utf8");
   }
   return pages.length;
@@ -197,12 +206,13 @@ ${AGENT_START.search.text} [${AGENT_START.search.example}](${AGENT_START.search.
     `sourcePath: ${yamlString("src/pages/overview.astro")}`,
     `sourceBase: ${yamlString("https://github.com/no-phux/website")}`,
     `sourceRevision: ${yamlString(siteRevision)}`,
+    sourceMtimeLine(join(SITE_ROOT, "src/pages/overview.astro")),
     `protocolVersion: ${yamlString(versions.protocolVersion)}`,
     `projectVersion: ${yamlString(versions.projectVersion)}`,
     `stability: ${yamlString("stable")}`,
     "---",
     "",
-  ].join("\n");
+  ].filter((line): line is string => line !== undefined).join("\n");
   await writeFile(join(outDir, "overview.md"), fm + body, "utf8");
   return 1;
 }

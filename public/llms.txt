@@ -81,6 +81,12 @@ npx skills add no-phux/skills                    # agent skills
 - [Architecture](https://docs.phux.sh/architecture): implementation and contributor reference.
 - [Historical decisions](https://github.com/no-phux/phux/tree/d21db2e345aeaff43a681b3a04dfd43f2cc082ca/docs/adr): immutable rationale archive, not current behavior. Live constraints and lookup commands are in Architecture.
 
+## Programs and plugins
+
+- [Program protocol](https://docs.phux.sh/program-protocol): OSC 7501, the program-status sequence a program in a pane writes so phux records and shows its state.
+- [Program sequences](https://docs.phux.sh/program-sequences): terminal sequences other than OSC 7501 that phux acts on, plus the pane's agent record and report commands.
+- [Plugins](https://docs.phux.sh/plugins): a phux-plugin.toml directory that adds actions, panes, widgets, themes, hooks, and agent declarations.
+
 ## Project
 
 - Source: https://github.com/no-phux/phux

@@ -35,6 +35,9 @@ const docs = defineCollection({
     // sourceBase to https://github.com/no-phux/website.
     sourcePath: z.string(),
     sourceBase: z.string().optional(),
+    // Committer date of the source file, recorded by sync-docs. Sitemap lastmod
+    // reads this when it is present. Omitted when that commit is not knowable.
+    sourceMtime: z.string().regex(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/).optional(),
     // Immutable provenance for the exact upstream checkout used by this build.
     sourceRevision: z.string().regex(/^[0-9a-f]{40}$/i),
     protocolVersion: z.string(),

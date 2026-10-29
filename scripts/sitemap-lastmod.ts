@@ -1,10 +1,15 @@
-// Per-URL sitemap dates. One `git log -1` for the whole repo stamps every URL
-// with the tip commit, and a shallow checkout makes that true even per file.
-// Omit lastmod when the file's own date is not knowable.
+// Per-URL sitemap dates. The date is the source file's own committer time
+// (`git log -1 --format=%cI`), or the same instant stored as sourceMtime when
+// sync-docs read that file. One `git log -1` of a shallow checkout stamps
+// every file with the tip commit, so a shallow repository yields no date.
+// CI and site-deploy check this repo out with fetch-depth: 0. Build time is
+// not a lastmod.
 import { execFileSync } from "node:child_process";
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
-import { join, relative } from "node:path";
+import { dirname, join, relative, resolve } from "node:path";
 import { phuxRoot } from "./phux-root";
+
+const LASTMOD = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/;
 
 const shallow = new Map<string, boolean>();
 
@@ -24,6 +29,21 @@ export function repositoryShallow(repo: string): boolean {
   return value;
 }
 
+/** A W3C / ISO-8601 instant, or undefined when the text is not one. */
+export function validLastmod(value: string | undefined): string | undefined {
+  if (!value || !LASTMOD.test(value) || !Number.isFinite(Date.parse(value))) return undefined;
+  return value;
+}
+
+/** The later instant. Offsets are compared as instants, not as text. */
+export function laterLastmod(current: string | undefined, next: string | undefined): string | undefined {
+  const left = validLastmod(current);
+  const right = validLastmod(next);
+  if (!left) return right;
+  if (!right) return left;
+  return Date.parse(left) >= Date.parse(right) ? left : right;
+}
+
 /** Committer date of `file` in `repo`, or undefined when history cannot say. */
 export function sourceLastmod(repo: string, file: string): string | undefined {
   if (repositoryShallow(repo)) return undefined;
@@ -32,10 +52,38 @@ export function sourceLastmod(repo: string, file: string): string | undefined {
       encoding: "utf8",
       stdio: ["ignore", "pipe", "ignore"],
     }).trim();
-    return date || undefined;
+    return validLastmod(date);
   } catch {
     return undefined;
   }
+}
+
+/** Committer date of an absolute source file, when its repository has history. */
+export function sourceCommitDate(file: string): string | undefined {
+  let top: string;
+  try {
+    top = execFileSync("git", ["-C", dirname(file), "rev-parse", "--show-toplevel"], {
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "ignore"],
+    }).trim();
+  } catch {
+    return undefined;
+  }
+  if (!top) return undefined;
+  const spec = relative(top, resolve(file)).split("\\").join("/");
+  if (!spec || spec.startsWith("../")) return undefined;
+  return sourceLastmod(top, spec);
+}
+
+/** `<loc>` values whose `<url>` or `<sitemap>` block has no lastmod. */
+export function urlsMissingLastmod(xml: string): string[] {
+  const missing: string[] = [];
+  for (const match of xml.matchAll(/<(url|sitemap)>[\s\S]*?<\/\1>/g)) {
+    const block = match[0];
+    if (block.match(/<lastmod>[^<]+<\/lastmod>/)) continue;
+    missing.push(block.match(/<loc>([^<]+)<\/loc>/)?.[1] ?? "(no loc)");
+  }
+  return missing;
 }
 
 export function frontmatterValue(text: string, key: string): string | undefined {
@@ -68,12 +116,12 @@ export function pageLastmods(siteRoot: string): Map<string, string> {
     if (!file.endsWith(".md")) continue;
     const text = readFileSync(file, "utf8");
     const sourcePath = frontmatterValue(text, "sourcePath");
-    if (!sourcePath) continue;
     const sourceBase = frontmatterValue(text, "sourceBase") ?? "";
-    const website = sourceBase.includes("github.com/no-phux/website") || sourcePath.startsWith("src/");
+    const website = sourceBase.includes("github.com/no-phux/website") || (sourcePath ?? "").startsWith("src/");
     const repo = website ? siteRoot : docsRoot;
-    if (!repo) continue;
-    const date = sourceLastmod(repo, sourcePath);
+    // sourceMtime is the committer date sync-docs recorded from the source file.
+    let date = validLastmod(frontmatterValue(text, "sourceMtime"));
+    if (sourcePath && repo) date = laterLastmod(date, sourceLastmod(repo, sourcePath));
     if (!date) continue;
     const slug = relative(synced, file).replace(/\\/g, "/").replace(/\.md$/, "").replace(/\/index$/, "");
     dates.set(`/${slug}`, date);
@@ -93,5 +141,16 @@ export function pageLastmods(siteRoot: string): Map<string, string> {
     const date = sourceLastmod(siteRoot, relative(siteRoot, file));
     if (date) dates.set(`/demos/${slug}`, date);
   }
+  // /performance publishes the measurements section of docs/compare.md.
+  // /overview's copy lives in src/lib/site.ts as well as the page template.
+  const performance = [
+    dates.get("/performance"),
+    sourceLastmod(siteRoot, "src/pages/performance.md.ts"),
+    sourceLastmod(siteRoot, "src/lib/performance-page.ts"),
+    docsRoot ? sourceLastmod(docsRoot, "docs/compare.md") : undefined,
+  ].reduce(laterLastmod, undefined);
+  if (performance) dates.set("/performance", performance);
+  const overview = laterLastmod(dates.get("/overview"), sourceLastmod(siteRoot, "src/lib/site.ts"));
+  if (overview) dates.set("/overview", overview);
   return dates;
 }
