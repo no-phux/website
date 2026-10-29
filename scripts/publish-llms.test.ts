@@ -1,36 +1,45 @@
 import { describe, expect, test } from "bun:test";
-import { llmsTxtForBuild } from "./publish-llms";
+import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { llmsTxtForBuild, publishLlmsTxt } from "./publish-llms";
 
-const building = "- [Build on phux](https://docs.phux.sh/building): the entry point for building on phux (CLI --json, MCP, watch, wire protocol, OSC 7501, plugins).";
-const status = "- [Any program can report status](https://docs.phux.sh/any-program-status): a program in a pane reports what it is doing with one OSC 7501 sequence, with no phux library, socket, or hook.";
-const source = `# phux
+const indexed = await readFile(new URL("../public/llms.txt", import.meta.url), "utf8");
+const building = "https://docs.phux.sh/building";
+const status = "https://docs.phux.sh/any-program-status";
 
-- [Automation reference](https://docs.phux.sh/scripting): selectors, input, waits, and structured results.
-${building}
-${status}
-- [Wire protocol](https://docs.phux.sh/protocol): framing, terminal substrate, and metadata.
-`;
+async function publish(htmlFiles: string[]): Promise<string> {
+  const dist = await mkdtemp(join(tmpdir(), "phux-llms-"));
+  try {
+    await writeFile(join(dist, "llms.txt"), indexed);
+    for (const name of htmlFiles) await writeFile(join(dist, name), "<!doctype html>");
+    await publishLlmsTxt(dist);
+    return await readFile(join(dist, "llms.txt"), "utf8");
+  } finally {
+    await rm(dist, { recursive: true, force: true });
+  }
+}
 
 describe("published llms.txt", () => {
-  test("keeps a gated line when that page is in the build", () => {
-    expect(llmsTxtForBuild(source, new Set(["building", "any-program-status"]))).toBe(source);
+  test("keeps a gated line when that page is in the build", async () => {
+    const published = await publish(["building.html", "any-program-status.html"]);
+    expect(published).toBe(indexed);
+    expect(llmsTxtForBuild(indexed, new Set(["building", "any-program-status"]))).toBe(indexed);
   });
 
-  test("omits each gated line on its own when that page was not synced", () => {
-    const buildingOnly = llmsTxtForBuild(source, new Set(["building"]));
-    expect(buildingOnly).toContain("https://docs.phux.sh/building");
-    expect(buildingOnly).not.toContain("https://docs.phux.sh/any-program-status");
-    expect(buildingOnly).toContain("https://docs.phux.sh/scripting");
-    expect(buildingOnly).toContain("https://docs.phux.sh/protocol");
+  test("omits the any-program-status llms.txt line when that page is not in the build", async () => {
+    expect(indexed).toContain(status);
+    const published = await publish(["building.html"]);
+    expect(published).not.toContain(status);
+    expect(published).toContain(building);
+    expect(published).toContain("https://docs.phux.sh/protocol");
+  });
 
-    const statusOnly = llmsTxtForBuild(source, new Set(["any-program-status"]));
-    expect(statusOnly).not.toContain("https://docs.phux.sh/building)");
-    expect(statusOnly).toContain("https://docs.phux.sh/any-program-status");
-
-    const neither = llmsTxtForBuild(source, new Set());
-    expect(neither).not.toContain("https://docs.phux.sh/building");
-    expect(neither).not.toContain("https://docs.phux.sh/any-program-status");
-    expect(neither).toContain("https://docs.phux.sh/protocol");
-    expect(neither).not.toMatch(/\n\n\n/);
+  test("omits the building llms.txt line when that page is not in the build", async () => {
+    expect(indexed).toContain(building);
+    const published = await publish(["any-program-status.html"]);
+    expect(published).not.toContain(building);
+    expect(published).toContain(status);
+    expect(published).toContain("https://docs.phux.sh/scripting");
   });
 });

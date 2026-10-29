@@ -204,6 +204,40 @@ describe("documentation discovery interface", () => {
     expect(status).toContain('sourcePath: "docs/any-program-status.md"');
   });
 
+  test("syncs when docs/any-program-status.md is not in the phux checkout yet", async () => {
+    await source("building.md", "# Build on phux\n\nPrograms that drive a phux server start here.\n");
+    await source("program-protocol.md", "# Program protocol\n\nOSC 7501 keys.\n");
+    const { entries } = await discover(docs);
+    expect(entries.some(({ slug }) => slug === "any-program-status")).toBe(false);
+    expect(warning).toHaveBeenCalledWith("  skip (missing): docs/any-program-status.md");
+    const out = join(root, "out");
+    await mkdir(out);
+    const result = await writeDocumentation(out, entries, revision, versions, siteRevision);
+    expect(result.failed).toEqual([]);
+    const pages = (await metadata(out)).pages as string[];
+    expect(pages).toContain("building");
+    expect(pages).toContain("program-protocol");
+    expect(pages).not.toContain("any-program-status");
+    expect(await readdir(out)).not.toContain("any-program-status.md");
+  });
+
+  test("syncs when docs/building.md is not in the phux checkout yet", async () => {
+    await source("any-program-status.md", "# Any program can report status\n\nA program reports with OSC 7501.\n");
+    await source("program-protocol.md", "# Program protocol\n\nOSC 7501 keys.\n");
+    const { entries } = await discover(docs);
+    expect(entries.some(({ slug }) => slug === "building")).toBe(false);
+    expect(warning).toHaveBeenCalledWith("  skip (missing): docs/building.md");
+    const out = join(root, "out");
+    await mkdir(out);
+    const result = await writeDocumentation(out, entries, revision, versions, siteRevision);
+    expect(result.failed).toEqual([]);
+    const pages = (await metadata(out)).pages as string[];
+    expect(pages).toContain("any-program-status");
+    expect(pages).toContain("program-protocol");
+    expect(pages).not.toContain("building");
+    expect(await readdir(out)).not.toContain("building.md");
+  });
+
   test("fails visibly for an uncatalogued authored flat page", async () => {
     await source("future-guide.md");
     await expect(discover(docs)).rejects.toThrow("uncatalogued documentation: docs/future-guide.md; add it to ORIENTATION and navigation");
