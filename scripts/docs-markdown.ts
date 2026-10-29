@@ -2,6 +2,7 @@
 import { dirname, join } from "node:path";
 import { extendComparePage } from "./compare-extension";
 import { GROUPS, isDeniedDocumentation, parseFrontmatter, type Entry } from "./docs-catalog";
+import { sourceCommitDate } from "./sitemap-lastmod";
 
 export interface Versions { protocolVersion: string; projectVersion: string }
 
@@ -175,6 +176,7 @@ export function createPageRenderer(entries: Entry[], revision: string, versions:
   return function renderSourcePage(raw: string, entry: Entry): string {
     const { body, title, summary, stability } = pageMetadata(raw, entry);
     const extended = entry.repoPath === "docs/compare.md" ? extendComparePage(body, revision) : body;
+    const sourceMtime = sourceCommitDate(entry.abs);
     const fm = [
       "---",
       `title: ${yamlString(title)}`,
@@ -184,6 +186,7 @@ export function createPageRenderer(entries: Entry[], revision: string, versions:
       `order: ${entry.order}`,
       `sourcePath: ${yamlString(entry.repoPath)}`,
       `sourceRevision: ${yamlString(revision)}`,
+      ...(sourceMtime ? [`sourceMtime: ${yamlString(sourceMtime)}`] : []),
       `protocolVersion: ${yamlString(versions.protocolVersion)}`,
       `projectVersion: ${yamlString(versions.projectVersion)}`,
       `stability: ${yamlString(stability)}`,

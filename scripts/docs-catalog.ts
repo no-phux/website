@@ -70,6 +70,7 @@ const ORIENTATION: { file: string; slug: string; group: Group; order: number; ti
   { file: "distros.md", slug: "distros", group: "customize", order: 7 },
   { file: "projects.md", slug: "projects", group: "customize", order: 8 },
   { file: "omarchy.md", slug: "omarchy", group: "customize", order: 9 },
+  { file: "public-api.md", slug: "public-api", group: "automate", order: -0.5 },
   { file: "agent-quickstart.md", slug: "agent-quickstart", group: "automate", order: 0 },
   { file: "scripting.md", slug: "scripting", group: "automate", order: 1 },
   { file: "agents.md", slug: "agents", group: "automate", order: 2 },
@@ -82,13 +83,13 @@ const ORIENTATION: { file: string; slug: string; group: Group; order: number; ti
   { file: "desktop-reviews.md", slug: "desktop-reviews", group: "connect", order: 5 },
   // Hub for driving phux. A checkout without the file skips it.
   { file: "building.md", slug: "building", group: "build", order: -1, title: "Build on phux" },
-  // OSC 7501 guide. A checkout without the file skips it.
   { file: "any-program-status.md", slug: "any-program-status", group: "build", order: -0.5, title: "Any program can report status" },
   { file: "program-protocol.md", slug: "program-protocol", group: "build", order: 0 },
   { file: "program-sequences.md", slug: "program-sequences", group: "build", order: 1 },
   { file: "host-services.md", slug: "host-services", group: "build", order: 2 },
   { file: "troubleshooting.md", slug: "troubleshooting", group: "help", order: 0 },
   { file: "architecture.md", slug: "architecture", group: "internals", order: 0 },
+  { file: "libghostty.md", slug: "libghostty", group: "internals", order: 0.5 },
   { file: "decisions.md", slug: "decisions", group: "internals", order: 1 },
   { file: "organization.md", slug: "organization", group: "internals", order: 2 },
   { file: "protocol.md", slug: "protocol", group: "internals", order: 3 },

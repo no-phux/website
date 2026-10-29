@@ -258,6 +258,20 @@ describe("documentation discovery interface", () => {
     expect(await readdir(out)).not.toContain("building.md");
   });
 
+  test("accepts the phux main pages that landed ahead of the catalog PRs and skips a missing building page", async () => {
+    const absent = await discover(docs);
+    expect(absent.entries.some(({ slug }) => slug === "building")).toBe(false);
+    expect(warning).toHaveBeenCalledWith("  skip (missing): docs/building.md");
+    await source("public-api.md", "# Public terminal workflow\n\nCreate a terminal.\n");
+    await source("any-program-status.md", "# Any program can report status\n\nOSC 7501.\n");
+    await source("libghostty.md", "# libghostty in phux\n\nThe terminal engine.\n");
+    const { entries } = await discover(docs);
+    expect(entries.find(({ slug }) => slug === "public-api")).toMatchObject({ group: "automate", order: -0.5 });
+    expect(entries.find(({ slug }) => slug === "any-program-status")).toMatchObject({ group: "build", order: -0.5, title: "Any program can report status" });
+    expect(entries.find(({ slug }) => slug === "libghostty")).toMatchObject({ group: "internals", order: 0.5 });
+    expect(entries.some(({ slug }) => slug === "building")).toBe(false);
+  });
+
   test("fails visibly for an uncatalogued authored flat page", async () => {
     await source("future-guide.md");
     await expect(discover(docs)).rejects.toThrow("uncatalogued documentation: docs/future-guide.md; add it to ORIENTATION and navigation");
@@ -378,11 +392,13 @@ describe("collection output interface", () => {
     });
     const overview = await readFile(join(out, "overview.md"), "utf8");
     expect(overview).toContain(`sourcePath: "src/pages/overview.astro"\nsourceBase: "https://github.com/no-phux/website"\nsourceRevision: "${siteRevision}"`);
+    expect(overview).toMatch(/sourceMtime: "\d{4}-\d{2}-\d{2}T[^"]+"/);
     expect(overview).toContain('protocolVersion: "1.2.3"\nprojectVersion: "0.4.5"');
     expect(overview).toContain("[Install phux](/installation)");
     const waiting = await readFile(join(out, "agent-waiting.md"), "utf8");
     expect(waiting).toContain('sourcePath: "src/site-docs/agent-waiting.md"\nsourceBase: "https://github.com/no-phux/website"');
     expect(waiting).toContain(`sourceRevision: "${siteRevision}"`);
+    expect(waiting).toMatch(/sourceMtime: "\d{4}-\d{2}-\d{2}T[^"]+"/);
     expect(waiting.split("---").at(-1) ?? "").not.toMatch(/^# /m);
   });
 
