@@ -3,6 +3,7 @@
 // listed once. Every sitemap-N.xml is split the same way.
 import { readdir, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
+import { laterLastmod } from "./sitemap-lastmod";
 
 const DOCS_HOST = "docs.phux.sh";
 const SITEMAP_FILE = /^sitemap-(\d+)\.xml$/;
@@ -20,9 +21,7 @@ export function stripDocsUrls(xml: string): string {
 export function latestLastmod(blocks: string[]): string | undefined {
   return blocks
     .map((block) => block.match(/<lastmod>([^<]+)<\/lastmod>/)?.[1])
-    .filter((value): value is string => Boolean(value))
-    .sort()
-    .at(-1);
+    .reduce<string | undefined>((latest, value) => laterLastmod(latest, value), undefined);
 }
 
 export function sitemapUrlset(blocks: string[]): string {

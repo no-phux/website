@@ -26,6 +26,10 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          # Per-file sitemap lastmod is each source file's own commit. A
+          # depth-1 checkout would date every file with the tip, which the
+          # generator rejects.
+          fetch-depth: 0
           persist-credentials: false
 
       # The version/pin tests must inspect the source used to build the image,

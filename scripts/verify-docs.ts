@@ -14,6 +14,7 @@ import { SHIPPED_OPERATING_SYSTEM } from "../src/lib/software-application";
 import { loadCompareMarkdown, measurementParagraphs, measurementsSection } from "../src/lib/performance-page";
 import { GATED_LLMS_PAGES, llmsTxtListsPage } from "./publish-llms";
 import { SITE_PAGE_CATALOG } from "./site-pages";
+import { pageLastmods, urlsMissingLastmod, urlsOlderThanSource } from "./sitemap-lastmod";
 
 const root = resolve(import.meta.dir, "../dist");
 const useWebKit = process.argv.includes("--webkit");
@@ -137,8 +138,26 @@ async function verifyDiscovery() {
   const llms = await readFile(resolve(root, "llms.txt"), "utf8");
   assert.ok(llms.startsWith(`# phux\n\n> ${SITE.tagline}\n`), "llms.txt leads with the canonical one-liner");
   assert.equal(llms.includes("programmable terminal runtime"), false, "llms.txt does not open on the old category line");
-  for (const path of ["/compare", "/tmux-import", "/performance"]) {
+  for (const path of [
+    "/compare", "/tmux-import", "/performance",
+    "/program-protocol", "/program-sequences", "/plugins",
+    "/embedding", "/protocol", "/agent-waiting",
+    "/pane-command", "/terminal-mcp", "/tailscale",
+  ]) {
     assert.ok(llms.includes(`https://${DOCS_HOST}${path}`), `llms.txt indexes ${path}`);
+  }
+  for (const line of [
+    "- [OSC 7501: report status from any program](https://docs.phux.sh/program-protocol): the Program Status Protocol sequence a program writes to report its status; phux records it and shows it per pane.",
+    "- [Program sequences and agent reports](https://docs.phux.sh/program-sequences): titles, `phux-ask` questions, OSC 133, OSC 52, and the other sequences phux reads, plus the agent record.",
+    "- [Plugin API](https://docs.phux.sh/plugins): a directory with a `phux-plugin.toml` manifest that adds actions, panes, sidebar sections, status-bar widgets, themes, hooks, and agent declarations.",
+    "- [Embed phux](https://docs.phux.sh/embedding): put a phux terminal in your own app with `phux-gpui`, `phux-client-runtime`, or `phux-client-ffi`. None is on crates.io yet.",
+    "- [Server protocol](https://docs.phux.sh/protocol): how a client talks to a phux server in length-prefixed frames, with the handshake, capabilities, and the 1.x compatibility rule.",
+    "- [See which coding agent is waiting on you](https://docs.phux.sh/agent-waiting): `phux agent list` prints each coding agent's state, and `blocked` means it is waiting on you.",
+    "- [Run a command in a pane and get its output and exit code](https://docs.phux.sh/pane-command): `phux run` types a command into a pane's shell, waits until it finishes, and exits with that command's status.",
+    "- [Give your agent a terminal over MCP](https://docs.phux.sh/terminal-mcp): `phux mcp` serves your local phux server as MCP tools on stdin and stdout.",
+    "- [Attach to phux on another machine over Tailscale](https://docs.phux.sh/tailscale): if your machines are on a Tailscale network you run, `phux host discover` lists them and `phux attach` connects to a phux server you added.",
+  ]) {
+    assert.ok(llms.includes(line), `llms.txt line: ${line}`);
   }
   assert.ok(llms.includes("https://docs.phux.sh/agents.md"), "Markdown entrypoint is a published route");
   for (const skill of skills.skills) {
@@ -219,6 +238,16 @@ function assertLastmodsDiffer(xml: string, label: string) {
   }
 }
 
+const sourceDates = pageLastmods(resolve(import.meta.dir, ".."));
+
+function assertEveryLastmod(xml: string, label: string) {
+  const missing = urlsMissingLastmod(xml);
+  assert.deepEqual(missing, [], `${label}: missing lastmod for ${missing.join(", ")}`);
+  assertLastmodsDiffer(xml, label);
+  const older = urlsOlderThanSource(xml, sourceDates);
+  assert.deepEqual(older, [], `${label}: lastmod older than the source file: ${older.join(", ")}`);
+}
+
 async function verifyPublishedContent() {
   const index = JSON.parse(await readFile(resolve(root, "api/mcp-search.json"), "utf8"));
   const pages = index.pages as { url: string }[];
@@ -251,9 +280,12 @@ async function verifyCrawlMetadata(
   const docsSitemap = docsSitemaps.map((file) => file.xml).join("\n");
   for (const file of siteSitemaps) {
     assert.equal(file.xml.includes(`https://${DOCS_HOST}/`), false, `${file.name} lists no docs URLs`);
-    assertLastmodsDiffer(file.xml, file.name);
+    assertEveryLastmod(file.xml, file.name);
   }
-  for (const file of docsSitemaps) assertLastmodsDiffer(file.xml, file.name);
+  for (const file of docsSitemaps) assertEveryLastmod(file.xml, file.name);
+  for (const name of ["sitemap-index.xml", "sitemap-docs-index.xml"]) {
+    assertEveryLastmod(await readFile(resolve(root, name), "utf8"), name);
+  }
   assert.ok(docsSitemap.includes(`<loc>https://${DOCS_HOST}/performance</loc>`), "docs sitemap includes /performance");
   const docsIndex = await readFile(resolve(root, "sitemap-docs-index.xml"), "utf8");
   for (const file of docsSitemaps) {

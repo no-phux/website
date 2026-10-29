@@ -400,11 +400,13 @@ describe("collection output interface", () => {
     });
     const overview = await readFile(join(out, "overview.md"), "utf8");
     expect(overview).toContain(`sourcePath: "src/pages/overview.astro"\nsourceBase: "https://github.com/no-phux/website"\nsourceRevision: "${siteRevision}"`);
+    expect(overview).toMatch(/sourceMtime: "\d{4}-\d{2}-\d{2}T[^"]+"/);
     expect(overview).toContain('protocolVersion: "1.2.3"\nprojectVersion: "0.4.5"');
     expect(overview).toContain("[Install phux](/installation)");
     const waiting = await readFile(join(out, "agent-waiting.md"), "utf8");
     expect(waiting).toContain('sourcePath: "src/site-docs/agent-waiting.md"\nsourceBase: "https://github.com/no-phux/website"');
     expect(waiting).toContain(`sourceRevision: "${siteRevision}"`);
+    expect(waiting).toMatch(/sourceMtime: "\d{4}-\d{2}-\d{2}T[^"]+"/);
     expect(waiting.split("---").at(-1) ?? "").not.toMatch(/^# /m);
   });
 
