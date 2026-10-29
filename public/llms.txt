@@ -64,28 +64,28 @@ npx skills add no-phux/skills                    # agent skills
 - [Performance](https://docs.phux.sh/performance): measurements published with the comparison.
 - [Use phux as an agent](https://docs.phux.sh/agent-quickstart): install phux and drive sessions from code.
 - [Run coding agents](https://docs.phux.sh/agents): choose an integration and verify it works.
-- [See which coding agent is waiting on you](https://docs.phux.sh/agent-waiting): list each pane's agent state, and wait until one is blocked.
-- [Run a command in a pane](https://docs.phux.sh/pane-command): run a shell command and read its output and exit code.
-- [Give your agent a terminal over MCP](https://docs.phux.sh/terminal-mcp): local stdio MCP tools for the phux server on this machine.
+- [See which coding agent is waiting on you](https://docs.phux.sh/agent-waiting): phux agent list prints each coding agent's state, and blocked means it is waiting on you.
+- [Run a command in a pane and get its output and exit code](https://docs.phux.sh/pane-command): phux run types a command into a pane's shell, waits until it finishes, and exits with that command's status.
+- [Give your agent a terminal over MCP](https://docs.phux.sh/terminal-mcp): phux mcp serves your local phux server as MCP tools on stdin and stdout.
 - [ACP-owned sessions](https://docs.phux.sh/acp): provider readiness, typed commands, human permissions, and uncertain outcomes.
 - [Terminal MCP adapter](https://docs.phux.sh/agents): connect to your running local phux server, not the hosted docs service.
 - [Remote access](https://docs.phux.sh/remote): connect machines and repair connections.
-- [Attach to phux on another machine over Tailscale](https://docs.phux.sh/tailscale): list tailnet machines and attach to a phux server on one.
+- [Attach to phux on another machine over Tailscale](https://docs.phux.sh/tailscale): If your machines are on a Tailscale network you run, phux host discover lists them and phux attach connects to a phux server you added.
 - [Clients](https://docs.phux.sh/clients): TUI, desktop, web, and native consumer paths.
-- [Embedding](https://docs.phux.sh/embedding): supported runtime ownership and renderer integration.
+- [Embed phux](https://docs.phux.sh/embedding): put a phux terminal in your own app with `phux-gpui`, `phux-client-runtime`, or `phux-client-ffi`. None is on crates.io yet.
 - [Troubleshoot](https://docs.phux.sh/troubleshooting): diagnostics, persistence boundaries, and recovery.
 - [Concepts](https://docs.phux.sh/concepts): running terminals, sessions, and shared control.
 - [Automation reference](https://docs.phux.sh/scripting): selectors, input, waits, and structured results.
 - [Command reference](https://docs.phux.sh/reference/cli): generated CLI documentation.
-- [Wire protocol](https://docs.phux.sh/protocol): framing, terminal substrate, and metadata.
+- [Server protocol](https://docs.phux.sh/protocol): how a client talks to a phux server in length-prefixed frames, with the handshake, capabilities, and the 1.x compatibility rule.
 - [Architecture](https://docs.phux.sh/architecture): implementation and contributor reference.
 - [Historical decisions](https://github.com/no-phux/phux/tree/d21db2e345aeaff43a681b3a04dfd43f2cc082ca/docs/adr): immutable rationale archive, not current behavior. Live constraints and lookup commands are in Architecture.
 
 ## Programs and plugins
 
-- [Program protocol](https://docs.phux.sh/program-protocol): OSC 7501, the program-status sequence a program in a pane writes so phux records and shows its state.
-- [Program sequences](https://docs.phux.sh/program-sequences): terminal sequences other than OSC 7501 that phux acts on, plus the pane's agent record and report commands.
-- [Plugins](https://docs.phux.sh/plugins): a phux-plugin.toml directory that adds actions, panes, widgets, themes, hooks, and agent declarations.
+- [OSC 7501: report status from any program](https://docs.phux.sh/program-protocol): the Program Status Protocol sequence a program writes to report its status; phux records it and shows it per pane.
+- [Program sequences and agent reports](https://docs.phux.sh/program-sequences): titles, `phux-ask` questions, OSC 133, OSC 52, and the other sequences phux reads, plus the agent record.
+- [Plugin API](https://docs.phux.sh/plugins): a directory with a `phux-plugin.toml` manifest that adds actions, panes, sidebar sections, status-bar widgets, themes, hooks, and agent declarations.
 
 ## Project
 
