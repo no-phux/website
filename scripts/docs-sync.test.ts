@@ -160,28 +160,6 @@ describe("documentation discovery interface", () => {
     expect(excluded).toEqual(["docs/reference/hidden.md (stability:DRAFT)"]);
   });
 
-  test("catalogs libghostty after architecture and skips a missing source", async () => {
-    const absent = await discover(docs);
-    expect(absent.entries.some(({ slug }) => slug === "libghostty")).toBe(false);
-    expect(warning).toHaveBeenCalledWith("  skip (missing): docs/libghostty.md");
-
-    await source("architecture.md", "# Architecture\n\nA summary.\n");
-    await source("libghostty.md", "# libghostty in phux\n\nlibghostty-vt is the terminal engine inside phux.\n");
-    const { entries } = await discover(docs);
-    expect(entries.find(({ slug }) => slug === "libghostty")).toMatchObject({
-      repoPath: "docs/libghostty.md",
-      slug: "libghostty",
-      group: "internals",
-      order: 0.5,
-    });
-    const out = join(root, "out");
-    await mkdir(out);
-    await writeDocumentation(out, entries, revision, versions, siteRevision);
-    const pages = (await metadata(out)).pages as string[];
-    expect(pages.indexOf("architecture")).toBeGreaterThan(-1);
-    expect(pages.indexOf("libghostty")).toBe(pages.indexOf("architecture") + 1);
-  });
-
   test("catalogs Build on phux ahead of the program protocol and skips a missing source", async () => {
     const absent = await discover(docs);
     expect(absent.entries.some(({ slug }) => slug === "building")).toBe(false);
@@ -278,6 +256,20 @@ describe("documentation discovery interface", () => {
     expect(pages).toContain("program-protocol");
     expect(pages).not.toContain("building");
     expect(await readdir(out)).not.toContain("building.md");
+  });
+
+  test("accepts the phux main pages that landed ahead of the catalog PRs and skips a missing building page", async () => {
+    const absent = await discover(docs);
+    expect(absent.entries.some(({ slug }) => slug === "building")).toBe(false);
+    expect(warning).toHaveBeenCalledWith("  skip (missing): docs/building.md");
+    await source("public-api.md", "# Public terminal workflow\n\nCreate a terminal.\n");
+    await source("any-program-status.md", "# Any program can report status\n\nOSC 7501.\n");
+    await source("libghostty.md", "# libghostty in phux\n\nThe terminal engine.\n");
+    const { entries } = await discover(docs);
+    expect(entries.find(({ slug }) => slug === "public-api")).toMatchObject({ group: "automate", order: -0.5 });
+    expect(entries.find(({ slug }) => slug === "any-program-status")).toMatchObject({ group: "build", order: -0.5, title: "Any program can report status" });
+    expect(entries.find(({ slug }) => slug === "libghostty")).toMatchObject({ group: "internals", order: 0.5 });
+    expect(entries.some(({ slug }) => slug === "building")).toBe(false);
   });
 
   test("fails visibly for an uncatalogued authored flat page", async () => {

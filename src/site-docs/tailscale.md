@@ -1,7 +1,7 @@
 ---
-title: Attach to phux on another machine over Tailscale
-summary: If your machines are on a Tailscale network you run, phux host discover lists them and phux attach connects to a phux server you added. Tailscale is optional; phux host add also works over plain SSH.
-description: List the machines on your tailnet and attach to a phux server you added.
+title: Reach your coding agents over Tailscale and SSH
+summary: Reach the coding agents on another machine over Tailscale, or over the SSH access you already have. phux host discover lists tailnet machines, and phux attach connects to a phux server you added.
+description: Reach your coding agents over Tailscale or SSH.
 ---
 
 ```sh
@@ -27,4 +27,4 @@ phux has no accounts and no hosted service. Each machine runs its own server. A 
 ## Next
 
 - [Remote machines](/remote)
-- [See which coding agent is waiting on you](/agent-waiting)
+- [Know when Claude Code or Codex is waiting for you](/agent-waiting)
