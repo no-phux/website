@@ -46,6 +46,7 @@ export const DOCS_PREFIXES = [
   "/desktop-panes",
   "/embedding",
   "/building",
+  "/any-program-status",
   "/program-protocol",
   "/program-sequences",
   "/host-services",

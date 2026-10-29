@@ -77,6 +77,7 @@ npx skills add no-phux/skills                    # agent skills
 - [Concepts](https://docs.phux.sh/concepts): running terminals, sessions, and shared control.
 - [Automation reference](https://docs.phux.sh/scripting): selectors, input, waits, and structured results.
 - [Build on phux](https://docs.phux.sh/building): the entry point for building on phux (CLI --json, MCP, watch, wire protocol, OSC 7501, plugins).
+- [Any program can report status](https://docs.phux.sh/any-program-status): a program in a pane reports what it is doing with one OSC 7501 sequence, with no phux library, socket, or hook.
 - [Command reference](https://docs.phux.sh/reference/cli): generated CLI documentation.
 - [Wire protocol](https://docs.phux.sh/protocol): framing, terminal substrate, and metadata.
 - [Architecture](https://docs.phux.sh/architecture): implementation and contributor reference.

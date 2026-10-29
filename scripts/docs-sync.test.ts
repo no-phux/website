@@ -163,9 +163,12 @@ describe("documentation discovery interface", () => {
   test("catalogs Build on phux ahead of the program protocol and skips a missing source", async () => {
     const absent = await discover(docs);
     expect(absent.entries.some(({ slug }) => slug === "building")).toBe(false);
+    expect(absent.entries.some(({ slug }) => slug === "any-program-status")).toBe(false);
     expect(warning).toHaveBeenCalledWith("  skip (missing): docs/building.md");
+    expect(warning).toHaveBeenCalledWith("  skip (missing): docs/any-program-status.md");
 
     await source("building.md", "# Build on phux\n\nPrograms that drive a phux server start here.\n");
+    await source("any-program-status.md", "# Any program can report status\n\nA program reports with OSC 7501.\n");
     for (const file of ["program-protocol.md", "scripting.md", "agents.md", "protocol.md"]) await source(file);
     const { entries } = await discover(docs);
     expect(entries.find(({ slug }) => slug === "building")).toMatchObject({
@@ -175,6 +178,13 @@ describe("documentation discovery interface", () => {
       order: -1,
       title: "Build on phux",
     });
+    expect(entries.find(({ slug }) => slug === "any-program-status")).toMatchObject({
+      repoPath: "docs/any-program-status.md",
+      slug: "any-program-status",
+      group: "build",
+      order: -0.5,
+      title: "Any program can report status",
+    });
     const out = join(root, "out");
     await mkdir(out);
     await writeDocumentation(out, entries, revision, versions, siteRevision);
@@ -183,11 +193,15 @@ describe("documentation discovery interface", () => {
     expect(pages.indexOf("agents")).toBeGreaterThan(pages.indexOf("scripting"));
     expect(pages.indexOf("---Build for phux---")).toBeGreaterThan(pages.indexOf("agents"));
     expect(pages.indexOf("building")).toBe(pages.indexOf("---Build for phux---") + 1);
-    expect(pages.indexOf("program-protocol")).toBeGreaterThan(pages.indexOf("building"));
+    expect(pages.indexOf("any-program-status")).toBe(pages.indexOf("building") + 1);
+    expect(pages.indexOf("program-protocol")).toBe(pages.indexOf("any-program-status") + 1);
     expect(pages.indexOf("protocol")).toBeGreaterThan(pages.indexOf("building"));
     const guide = await readFile(join(out, "building.md"), "utf8");
     expect(guide).toContain('title: "Build on phux"');
     expect(guide).toContain('sourcePath: "docs/building.md"');
+    const status = await readFile(join(out, "any-program-status.md"), "utf8");
+    expect(status).toContain('title: "Any program can report status"');
+    expect(status).toContain('sourcePath: "docs/any-program-status.md"');
   });
 
   test("fails visibly for an uncatalogued authored flat page", async () => {

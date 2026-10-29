@@ -82,6 +82,8 @@ const ORIENTATION: { file: string; slug: string; group: Group; order: number; ti
   { file: "desktop-reviews.md", slug: "desktop-reviews", group: "connect", order: 5 },
   // Hub for driving phux. A checkout without the file skips it.
   { file: "building.md", slug: "building", group: "build", order: -1, title: "Build on phux" },
+  // OSC 7501 guide. A checkout without the file skips it.
+  { file: "any-program-status.md", slug: "any-program-status", group: "build", order: -0.5, title: "Any program can report status" },
   { file: "program-protocol.md", slug: "program-protocol", group: "build", order: 0 },
   { file: "program-sequences.md", slug: "program-sequences", group: "build", order: 1 },
   { file: "host-services.md", slug: "host-services", group: "build", order: 2 },
