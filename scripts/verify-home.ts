@@ -203,7 +203,8 @@ try {
   assert.match(macDesktop, /macOS 26 or later/);
   assert.match(macDesktop, /The app includes the phux CLI and server/);
   assert.match(macDesktop, /Developer ID signed and Apple-notarized/);
-  assert.doesNotMatch(macDesktop, /macOS 27|ad-hoc|not Apple-notarized|Homebrew/i);
+  assert.ok(macDesktop.includes("Homebrew: brew install --cask no-phux/tap/phux-desktop"));
+  assert.doesNotMatch(macDesktop, /macOS 27|ad-hoc|not Apple-notarized/i);
   await page.goto(`${base}/privacy`);
   assert.equal(await page.getByRole("link", { name: "join the beta" }).getAttribute("href"), "/more#beta");
   assert.equal(await page.getByRole("link", { name: "request access to phux for iPhone" }).getAttribute("href"), "/more#testflight");
