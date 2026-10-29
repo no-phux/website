@@ -2,16 +2,16 @@ import { describe, expect, test } from "bun:test";
 import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { llmsTxtForBuild, publishLlmsTxt } from "./publish-llms";
+import { GATED_LLMS_PAGES, llmsTxtListsPage, publishLlmsTxt } from "./publish-llms";
 
 const indexed = await readFile(new URL("../public/llms.txt", import.meta.url), "utf8");
-const building = "https://docs.phux.sh/building";
-const status = "https://docs.phux.sh/any-program-status";
+const building = "/building";
+const status = "/any-program-status";
 
-async function publish(htmlFiles: string[]): Promise<string> {
+async function publish(htmlFiles: string[], source = indexed): Promise<string> {
   const dist = await mkdtemp(join(tmpdir(), "phux-llms-"));
   try {
-    await writeFile(join(dist, "llms.txt"), indexed);
+    await writeFile(join(dist, "llms.txt"), source);
     for (const name of htmlFiles) await writeFile(join(dist, name), "<!doctype html>");
     await publishLlmsTxt(dist);
     return await readFile(join(dist, "llms.txt"), "utf8");
@@ -21,25 +21,55 @@ async function publish(htmlFiles: string[]): Promise<string> {
 }
 
 describe("published llms.txt", () => {
-  test("keeps a gated line when that page is in the build", async () => {
-    const published = await publish(["building.html", "any-program-status.html"]);
-    expect(published).toBe(indexed);
-    expect(llmsTxtForBuild(indexed, new Set(["building", "any-program-status"]))).toBe(indexed);
+  test("publishes neither gated llms.txt line when neither page is built", async () => {
+    expect(llmsTxtListsPage(indexed, building)).toBe(true);
+    expect(llmsTxtListsPage(indexed, status)).toBe(true);
+    const published = await publish([]);
+    expect(llmsTxtListsPage(published, building)).toBe(false);
+    expect(llmsTxtListsPage(published, status)).toBe(false);
+    expect(published).toContain("https://docs.phux.sh/protocol");
+    expect(published).toContain("https://docs.phux.sh/scripting");
   });
 
-  test("omits the any-program-status llms.txt line when that page is not in the build", async () => {
-    expect(indexed).toContain(status);
+  test("publishes only the building llms.txt line when only that page is built", async () => {
     const published = await publish(["building.html"]);
-    expect(published).not.toContain(status);
-    expect(published).toContain(building);
+    expect(llmsTxtListsPage(published, building)).toBe(true);
+    expect(llmsTxtListsPage(published, status)).toBe(false);
     expect(published).toContain("https://docs.phux.sh/protocol");
   });
 
-  test("omits the building llms.txt line when that page is not in the build", async () => {
-    expect(indexed).toContain(building);
+  test("publishes only the any-program-status llms.txt line when only that page is built", async () => {
     const published = await publish(["any-program-status.html"]);
-    expect(published).not.toContain(building);
-    expect(published).toContain(status);
+    expect(llmsTxtListsPage(published, building)).toBe(false);
+    expect(llmsTxtListsPage(published, status)).toBe(true);
     expect(published).toContain("https://docs.phux.sh/scripting");
+  });
+
+  test("publishes both gated llms.txt lines when both pages are built", async () => {
+    const published = await publish(["building.html", "any-program-status.html"]);
+    expect(published).toBe(indexed);
+    expect(llmsTxtListsPage(published, building)).toBe(true);
+    expect(llmsTxtListsPage(published, status)).toBe(true);
+  });
+
+  test("omits a fragment link when that page HTML is absent", async () => {
+    const source = indexed.replace(
+      "](https://docs.phux.sh/building)",
+      "](https://docs.phux.sh/building#entry-points)",
+    );
+    expect(llmsTxtListsPage(source, building)).toBe(true);
+    const published = await publish(["any-program-status.html"], source);
+    expect(llmsTxtListsPage(published, building)).toBe(false);
+    expect(llmsTxtListsPage(published, status)).toBe(true);
+  });
+
+  test("the docs build calls publishLlmsTxt", async () => {
+    const config = await readFile(new URL("../astro.config.mjs", import.meta.url), "utf8");
+    expect(config).toContain("import { publishLlmsTxt } from \"./scripts/publish-llms.ts\"");
+    expect(config).toMatch(/await publishLlmsTxt\(out\)/);
+    expect(GATED_LLMS_PAGES.map((page) => page.html)).toEqual([
+      "building.html",
+      "any-program-status.html",
+    ]);
   });
 });
