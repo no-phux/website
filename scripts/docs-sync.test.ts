@@ -160,6 +160,36 @@ describe("documentation discovery interface", () => {
     expect(excluded).toEqual(["docs/reference/hidden.md (stability:DRAFT)"]);
   });
 
+  test("catalogs Build on phux ahead of the program protocol and skips a missing source", async () => {
+    const absent = await discover(docs);
+    expect(absent.entries.some(({ slug }) => slug === "building")).toBe(false);
+    expect(warning).toHaveBeenCalledWith("  skip (missing): docs/building.md");
+
+    await source("building.md", "# Build on phux\n\nPrograms that drive a phux server start here.\n");
+    for (const file of ["program-protocol.md", "scripting.md", "agents.md", "protocol.md"]) await source(file);
+    const { entries } = await discover(docs);
+    expect(entries.find(({ slug }) => slug === "building")).toMatchObject({
+      repoPath: "docs/building.md",
+      slug: "building",
+      group: "build",
+      order: -1,
+      title: "Build on phux",
+    });
+    const out = join(root, "out");
+    await mkdir(out);
+    await writeDocumentation(out, entries, revision, versions, siteRevision);
+    const pages = (await metadata(out)).pages as string[];
+    expect(pages.indexOf("scripting")).toBeGreaterThan(-1);
+    expect(pages.indexOf("agents")).toBeGreaterThan(pages.indexOf("scripting"));
+    expect(pages.indexOf("---Build for phux---")).toBeGreaterThan(pages.indexOf("agents"));
+    expect(pages.indexOf("building")).toBe(pages.indexOf("---Build for phux---") + 1);
+    expect(pages.indexOf("program-protocol")).toBeGreaterThan(pages.indexOf("building"));
+    expect(pages.indexOf("protocol")).toBeGreaterThan(pages.indexOf("building"));
+    const guide = await readFile(join(out, "building.md"), "utf8");
+    expect(guide).toContain('title: "Build on phux"');
+    expect(guide).toContain('sourcePath: "docs/building.md"');
+  });
+
   test("fails visibly for an uncatalogued authored flat page", async () => {
     await source("future-guide.md");
     await expect(discover(docs)).rejects.toThrow("uncatalogued documentation: docs/future-guide.md; add it to ORIENTATION and navigation");

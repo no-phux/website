@@ -76,6 +76,7 @@ npx skills add no-phux/skills                    # agent skills
 - [Troubleshoot](https://docs.phux.sh/troubleshooting): diagnostics, persistence boundaries, and recovery.
 - [Concepts](https://docs.phux.sh/concepts): running terminals, sessions, and shared control.
 - [Automation reference](https://docs.phux.sh/scripting): selectors, input, waits, and structured results.
+- [Build on phux](https://docs.phux.sh/building): the entry point for building on phux (CLI --json, MCP, watch, wire protocol, OSC 7501, plugins).
 - [Command reference](https://docs.phux.sh/reference/cli): generated CLI documentation.
 - [Wire protocol](https://docs.phux.sh/protocol): framing, terminal substrate, and metadata.
 - [Architecture](https://docs.phux.sh/architecture): implementation and contributor reference.
