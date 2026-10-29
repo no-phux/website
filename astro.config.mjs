@@ -14,6 +14,7 @@ import {
 } from "fumadocs-core/mdx-plugins";
 import { buildSearchIndex } from "./scripts/build-search.mjs";
 import { isDocsPath, isEmbedPath, isVgpuConceptPath } from "./host/routes.ts";
+import { publishLlmsTxt } from "./scripts/publish-llms.ts";
 import { splitDocsSitemap } from "./scripts/split-sitemaps.ts";
 import { pageLastmods } from "./scripts/sitemap-lastmod.ts";
 import { wgslVitePlugin } from "@vgpu/wgsl/loader-vite";
@@ -180,7 +181,9 @@ export default defineConfig({
       name: "phux-host-sitemaps",
       hooks: {
         "astro:build:done": async ({ dir }) => {
-          await splitDocsSitemap(fileURLToPath(dir));
+          const out = fileURLToPath(dir);
+          await splitDocsSitemap(out);
+          await publishLlmsTxt(out);
         },
       },
     },

@@ -2,6 +2,7 @@
 /** Agent-facing docs acceptance against built assets, never a user's phux server. */
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
+import { existsSync } from "node:fs";
 import { mkdir, readdir, readFile } from "node:fs/promises";
 import { extname, resolve } from "node:path";
 import { chromium, webkit, type Page } from "playwright-core";
@@ -11,6 +12,7 @@ import { htmlToMarkdown } from "../host/markdown";
 import { AGENT_START, OVERVIEW, SITE } from "../src/lib/site";
 import { SHIPPED_OPERATING_SYSTEM } from "../src/lib/software-application";
 import { loadCompareMarkdown, measurementParagraphs, measurementsSection } from "../src/lib/performance-page";
+import { GATED_LLMS_PAGES, llmsTxtListsPage } from "./publish-llms";
 import { SITE_PAGE_CATALOG } from "./site-pages";
 import { pageLastmods, urlsMissingLastmod, urlsOlderThanSource } from "./sitemap-lastmod";
 
@@ -161,6 +163,16 @@ async function verifyDiscovery() {
   for (const skill of skills.skills) {
     assert.ok(catalog.entries.some((entry: { url: string }) => entry.url.endsWith(skill.url)));
     assert.ok(llms.includes(skill.name));
+  }
+  for (const page of GATED_LLMS_PAGES) {
+    const built = existsSync(resolve(root, page.html));
+    assert.equal(
+      llmsTxtListsPage(llms, page.pathname),
+      built,
+      built
+        ? `llms.txt lists ${page.pathname}`
+        : `llms.txt omits ${page.pathname} until ${page.html} is built`,
+    );
   }
   for (const match of llms.matchAll(/\]\((https:\/\/(?:docs\.)?phux\.sh[^)]+)\)/g)) {
     const path = new URL(match[1]!).pathname;
