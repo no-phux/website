@@ -11,7 +11,7 @@ phux agent wait --any --until blocked --timeout 600
 
 `phux agent list` prints one line per pane: the agent's kind, its address, and its state. `--json` prints the same facts as a document. The states are `working`, `blocked`, `idle`, `done`, and `unknown`. What each state means, and the order of evidence phux uses, is the table on [Coding agents](/agents#agent-states).
 
-`blocked` is a permission prompt or a question. Screen rules ship for Claude Code, Codex, OpenCode, Aider, and the other programs named on that page. A screen that matches no rule reads as `idle`, never `blocked`.
+`blocked` is a permission prompt or a question. Screen rules ship for Claude Code, Codex, OpenCode, Aider, and the other programs named on that page. fx is identified by its executable, but its screen has no verified state rules yet; use the built-in `fx acp` profile for structured state. A screen that matches no rule reads as `idle`, never `blocked`.
 
 `phux agent wait` returns when an agent moves into the state you name. It does not succeed because the agent is already in that state. An agent that is already `blocked` when the wait starts times out with exit 124. Read the current state with `phux agent list` or `phux agent show @7`.
 
