@@ -21,7 +21,7 @@ This server can type into your panes. The hosted server at [phux.sh/mcp](https:/
 
 ## Tool names
 
-The ones most agents use: `phux_snapshot`, `phux_send_keys`, `phux_run`, `phux_wait`, `phux_agent_list`, `phux_agent_wait`. [CLI and MCP parity](/reference/parity) lists every tool, and `phux mcp --schema` prints each input schema.
+Start with: `phux_snapshot`, `phux_send_keys`, `phux_run`, `phux_wait`, `phux_agent_list`, `phux_agent_wait`. [CLI and MCP parity](/reference/parity) lists every tool, and `phux mcp --schema` prints each input schema.
 
 ## Next
 
