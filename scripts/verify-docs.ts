@@ -150,10 +150,10 @@ async function verifyDiscovery() {
     "- [Plugin API](https://docs.phux.sh/plugins): a directory with a `phux-plugin.toml` manifest that adds actions, panes, sidebar sections, status-bar widgets, themes, hooks, and agent declarations.",
     "- [Embed phux](https://docs.phux.sh/embedding): put a phux terminal in your own app with `phux-gpui`, `phux-client-runtime`, or `phux-client-ffi`. None is on crates.io yet.",
     "- [Server protocol](https://docs.phux.sh/protocol): how a client talks to a phux server in length-prefixed frames, with the handshake, capabilities, and the 1.x compatibility rule.",
-    "- [See which coding agent is waiting on you](https://docs.phux.sh/agent-waiting): phux agent list prints each coding agent's state, and blocked means it is waiting on you.",
-    "- [Run a command in a pane and get its output and exit code](https://docs.phux.sh/pane-command): phux run types a command into a pane's shell, waits until it finishes, and exits with that command's status.",
-    "- [Give your agent a terminal over MCP](https://docs.phux.sh/terminal-mcp): phux mcp serves your local phux server as MCP tools on stdin and stdout.",
-    "- [Attach to phux on another machine over Tailscale](https://docs.phux.sh/tailscale): If your machines are on a Tailscale network you run, phux host discover lists them and phux attach connects to a phux server you added.",
+    "- [See which coding agent is waiting on you](https://docs.phux.sh/agent-waiting): `phux agent list` prints each coding agent's state, and `blocked` means it is waiting on you.",
+    "- [Run a command in a pane and get its output and exit code](https://docs.phux.sh/pane-command): `phux run` types a command into a pane's shell, waits until it finishes, and exits with that command's status.",
+    "- [Give your agent a terminal over MCP](https://docs.phux.sh/terminal-mcp): `phux mcp` serves your local phux server as MCP tools on stdin and stdout.",
+    "- [Attach to phux on another machine over Tailscale](https://docs.phux.sh/tailscale): if your machines are on a Tailscale network you run, `phux host discover` lists them and `phux attach` connects to a phux server you added.",
   ]) {
     assert.ok(llms.includes(line), `llms.txt line: ${line}`);
   }
