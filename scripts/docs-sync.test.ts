@@ -160,6 +160,28 @@ describe("documentation discovery interface", () => {
     expect(excluded).toEqual(["docs/reference/hidden.md (stability:DRAFT)"]);
   });
 
+  test("catalogs libghostty after architecture and skips a missing source", async () => {
+    const absent = await discover(docs);
+    expect(absent.entries.some(({ slug }) => slug === "libghostty")).toBe(false);
+    expect(warning).toHaveBeenCalledWith("  skip (missing): docs/libghostty.md");
+
+    await source("architecture.md", "# Architecture\n\nA summary.\n");
+    await source("libghostty.md", "# libghostty in phux\n\nlibghostty-vt is the terminal engine inside phux.\n");
+    const { entries } = await discover(docs);
+    expect(entries.find(({ slug }) => slug === "libghostty")).toMatchObject({
+      repoPath: "docs/libghostty.md",
+      slug: "libghostty",
+      group: "internals",
+      order: 0.5,
+    });
+    const out = join(root, "out");
+    await mkdir(out);
+    await writeDocumentation(out, entries, revision, versions, siteRevision);
+    const pages = (await metadata(out)).pages as string[];
+    expect(pages.indexOf("architecture")).toBeGreaterThan(-1);
+    expect(pages.indexOf("libghostty")).toBe(pages.indexOf("architecture") + 1);
+  });
+
   test("fails visibly for an uncatalogued authored flat page", async () => {
     await source("future-guide.md");
     await expect(discover(docs)).rejects.toThrow("uncatalogued documentation: docs/future-guide.md; add it to ORIENTATION and navigation");

@@ -51,6 +51,7 @@ export const DOCS_PREFIXES = [
   "/troubleshooting",
   "/reference",
   "/architecture",
+  "/libghostty",
   "/decisions",
   "/organization",
   "/protocol",
