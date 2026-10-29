@@ -1,10 +1,10 @@
-import { detectPhone, type Phone } from "./beta";
-import { desktopDownload, iosDownload } from "./install";
+import { detectPhone } from "./beta";
+import { desktopDownload } from "./install";
 import { docsHref } from "./site";
 
 export type InstallPlatform = "iphone" | "ipad" | "android" | "mac" | "linux" | "windows" | "unknown";
 type Visitor = Parameters<typeof detectPhone>[0];
-type InstallAction = { label: string; href: string; note: string; icon: string; target?: "mobile" | "cli"; phone?: Phone };
+type InstallAction = { label: string; href: string; note: string; icon: string; target?: "cli" };
 
 export function detectInstallPlatform(visitor: Visitor): InstallPlatform {
   const phone = detectPhone(visitor);
@@ -17,16 +17,24 @@ export function detectInstallPlatform(visitor: Visitor): InstallPlatform {
   return "unknown";
 }
 
-const ios = { href: iosDownload, note: "iOS beta · Join in TestFlight", icon: "→", phone: "ios" } as const;
+const choosePlatform = {
+  label: "Choose your platform",
+  href: docsHref("/installation"),
+  note: "macOS, Linux, Windows via WSL 2",
+  icon: "↗",
+} as const;
 export const installActions: Record<InstallPlatform, InstallAction> = {
-  iphone: { ...ios, label: "Get for iPhone" },
-  ipad: { ...ios, label: "Get for iPad", note: "iPadOS beta · Join in TestFlight" },
-  android: { label: "Get for Android", href: "/more#testflight", note: "Android beta · Google Play access by email", icon: "→", target: "mobile", phone: "android" },
+  iphone: choosePlatform,
+  ipad: choosePlatform,
+  android: choosePlatform,
   mac: { label: "Download for Mac", href: desktopDownload, note: "Apple silicon · macOS 26 or later · Apache-2.0 · No account", icon: "↓" },
   linux: { label: "Install for Linux", href: docsHref("/installation"), note: "Linux · CLI and desktop · Apache-2.0 · No account", icon: "→", target: "cli" },
   windows: { label: "Install with WSL", href: docsHref("/installation"), note: "Windows: use the CLI in WSL2 · No native Windows app yet", icon: "↗" },
-  unknown: { label: "Choose your platform", href: docsHref("/installation"), note: "macOS, Linux, Windows via WSL 2", icon: "↗" },
+  unknown: choosePlatform,
 };
+
+const phonePlatform = (platform: InstallPlatform) =>
+  platform === "iphone" || platform === "ipad" || platform === "android";
 
 /** Shared hero and closing actions; never guess Mac from the viewport width. */
 export function wireDeviceInstall() {
@@ -46,22 +54,12 @@ export function wireDeviceInstall() {
   });
   document.querySelector<HTMLElement>(".download-note")!.textContent = action.note;
   // A phone cannot run the shell command displayed in the closing desktop CTA.
-  document.querySelector<HTMLElement>(".closing-command")!.hidden = Boolean(action.phone) || platform === "windows";
+  document.querySelector<HTMLElement>(".closing-command")!.hidden = phonePlatform(platform) || platform === "windows";
 }
 
 function openInstall(action: InstallAction) {
   const details = document.querySelector<HTMLDetailsElement>("#install-options")!;
   details.open = true;
   details.querySelector<HTMLButtonElement>(`[data-install-target="${action.target}"]`)!.click();
-  const form = details.querySelector<HTMLFormElement>("#beta-form")!;
-  if (action.phone && form.dataset.phone !== action.phone) {
-    details.querySelector<HTMLButtonElement>("#beta-phone")!.click();
-  }
-  if (action.target === "mobile") {
-    // Opening access is not consent to summon the keyboard. Let the visitor choose email.
-    details.querySelector<HTMLElement>("[data-email-invite] > summary")!.focus({ preventScroll: true });
-    details.scrollIntoView({ block: "center", behavior: "instant" });
-    return;
-  }
   details.querySelector<HTMLElement>(".install-copy")!.focus();
 }

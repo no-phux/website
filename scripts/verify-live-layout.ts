@@ -4,7 +4,7 @@ import assert from "node:assert/strict";
 import { mkdir } from "node:fs/promises";
 import { extname, resolve } from "node:path";
 import { chromium, type FrameLocator } from "playwright-core";
-import { verifyParentKeyboard } from "./home-keyboard-checks";
+import { homepageInstallPromise } from "./home-content-checks";
 
 const root = resolve(import.meta.dir, "../dist");
 const server = Bun.serve({ hostname: "127.0.0.1", port: 0, async fetch(request) {
@@ -56,11 +56,6 @@ try {
       await route.fulfill({ response: await route.fetch({ url: `${base}${url.pathname}${url.search}` }) });
     });
     const page = await context.newPage();
-    let submitted = "", platform = "";
-    await page.route("**/api/beta", route => {
-      ({ email: submitted, platform } = route.request().postDataJSON());
-      return route.fulfill({ json: { ok: true, status: "invited" } });
-    });
     await page.goto("https://phux.sh/?hero=light");
     const hero = page.frameLocator("#home-light iframe");
     await hero.locator(".install-hook").waitFor();
@@ -83,39 +78,11 @@ try {
     assert.equal(await hero.locator(".install-hook").getByRole("status").innerText(), "Copied.", "copy feedback stays concise");
     await hero.getByRole("button", { name: "CLI", exact: true }).click();
     assert.equal(await hero.locator(".install-hook-line code").innerText(), "curl -fsSL https://phux.sh/install | sh");
-    await hero.getByRole("button", { name: "iPhone", exact: true }).click();
-    assert.equal(await hero.getByRole("link", { name: "Open TestFlight" }).getAttribute("href"), "/download/ios");
-    await hero.locator("[data-email-invite] > summary").click();
-    const input = hero.getByRole("textbox", { name: "Email address for the TestFlight invite" });
-    const geometry = await input.evaluate(node => {
-      const box = node.getBoundingClientRect(), style = getComputedStyle(node);
-      const form = node.closest("form")!.getBoundingClientRect();
-      return { height: box.height, width: box.width, font: style.fontSize, appearance: style.appearance, formHeight: form.height, overflow: document.documentElement.scrollWidth > innerWidth };
-    });
-    await page.screenshot({ path: `${artifacts}iphone-${baseline ? "before" : "after"}-${width}.png` });
-    console.log(JSON.stringify({ viewport: width, ...geometry }));
+    assert.deepEqual(await hero.locator(".install-hook-tabs button").allInnerTexts(), ["CLI", "Desktop"], "the live hook offers CLI and Desktop");
+    assert.doesNotMatch(await hero.locator(".install-hook").innerText(), homepageInstallPromise, "the live hook does not name a phone");
     if (!baseline) {
-      assert.equal(geometry.overflow, false, `no frame overflow at ${width}`);
       assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false, `no page overflow at ${width}`);
-      assert.ok(geometry.height >= 44 && geometry.height <= 52, `compact accessible email height at ${width}`);
-      assert.ok(geometry.formHeight <= 64, `signup uses one compact shared surface at ${width}`);
-      assert.equal(geometry.appearance, "none", "email controls do not use the platform's native inset style");
-      assert.ok(parseFloat(geometry.font) >= 16, "email entry does not trigger iPhone focus zoom");
-      await verifyParentKeyboard(page, hero);
-      await input.fill("layout@example.com");
-      await hero.getByRole("button", { name: "Request access", exact: true }).click();
-      await hero.getByRole("status").filter({ hasText: "Invite sent" }).waitFor();
-      assert.equal(submitted, "layout@example.com", "signup still posts the entered address");
-      assert.equal(platform, "ios", "a computer is offered the iPhone beta first");
-      assert.ok(await input.evaluate(node => Boolean(node.closest(".live-primary"))), "email entry is inside the terminal");
-      assert.equal(await hero.locator(".live-terminal-dialog[open]").count(), 0, "copy/signup do not open or type into the terminal");
-      await verifyWorkspaceLayout(hero, width);
-      await hero.getByRole("button", { name: "Android instead", exact: true }).click();
-      assert.equal(await hero.getByRole("button", { name: "Android", exact: true }).getAttribute("aria-pressed"), "true", "the mobile target follows the chosen phone");
-      await hero.getByRole("textbox", { name: "Email address for the Google Play test" }).fill("android@example.com");
-      await hero.getByRole("button", { name: "Request access", exact: true }).click();
-      await hero.getByRole("status").filter({ hasText: "Google Play" }).waitFor();
-      assert.equal(platform, "android", "the Android request says so");
+      assert.equal(await hero.locator(".live-terminal-dialog[open]").count(), 0, "copy does not open or type into the terminal");
       await verifyWorkspaceLayout(hero, width);
     }
     if (process.env.HERO_LIVE === "1") {

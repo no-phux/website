@@ -7,7 +7,7 @@ test("the dry run is the same installer told to install nothing",()=>{
   expect(dryRun(cliInstall)).toBe("curl -fsSL https://phux.sh/install | sh -s -- --dry-run");
   expect(dryRun(desktopInstall)).toBe("curl -fsSL https://phux.sh/install-desktop | sh -s -- --dry-run");
   expect(dryRun("")).toBe("");
-  expect(installTargets.map(t=>t.id)).toEqual(["cli","desktop","mobile"]);
+  expect(installTargets.map(t=>t.id)).toEqual(["cli","desktop"]);
   expect(installTargets.find(t=>t.id==="desktop")?.note).toBe("Apple-silicon Mac · or install from a terminal on macOS or Linux. Installs the phux CLI too if none is found.");
   expect(desktopFirstOpen).toBe("First open: macOS asks to confirm an app downloaded from the internet. Choose Open.");
 });

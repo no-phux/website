@@ -6,6 +6,28 @@ import HeroDemo from "../src/components/HeroDemo";
 import Tour from "../src/components/tour/Tour";
 import { illustratedCopy } from "../src/components/tour/script";
 
+/** Homepage install copy must not promise a phone, TestFlight, or Google Play. */
+export const homepageInstallPromise = /phone|testflight|google play/i;
+
+/** Tab labels, stored notes, and the note currently shown in the picker. */
+export async function assertInstallPickerCopy(page: Page) {
+  const copy = await page.locator("#install").evaluate((root) => {
+    const tabs = [...root.querySelectorAll<HTMLButtonElement>("[data-install-target]")];
+    return {
+      labels: tabs.map((tab) => (tab.textContent ?? "").trim()),
+      notes: [
+        ...tabs.map((tab) => tab.getAttribute("data-install-note") ?? ""),
+        root.querySelector("#install-note")?.textContent ?? "",
+      ],
+    };
+  });
+  for (const label of copy.labels) {
+    assert.doesNotMatch(label, homepageInstallPromise, `homepage install tab: ${label}`);
+    assert.doesNotMatch(label, /mobile/i, `homepage install tab: ${label}`);
+  }
+  for (const text of copy.notes) assert.doesNotMatch(text, homepageInstallPromise, `homepage install picker: ${text}`);
+}
+
 /** Product copy and metadata must agree, including the script-free document. */
 export async function verifyHomeContent(page: Page) {
   assert.equal((await page.getByRole("heading", { level: 1 }).innerText()).trim(), "phux");
@@ -30,4 +52,5 @@ export async function verifyHomeContent(page: Page) {
     illustratedCopy(),
   ].join("\n");
   assert.doesNotMatch(heroCopy, /phone/i, "the homepage does not name a phone");
+  await assertInstallPickerCopy(page);
 }
