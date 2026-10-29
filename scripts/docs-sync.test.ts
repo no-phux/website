@@ -182,6 +182,104 @@ describe("documentation discovery interface", () => {
     expect(pages.indexOf("libghostty")).toBe(pages.indexOf("architecture") + 1);
   });
 
+  test("catalogs Build on phux ahead of the program protocol and skips a missing source", async () => {
+    const absent = await discover(docs);
+    expect(absent.entries.some(({ slug }) => slug === "building")).toBe(false);
+    expect(absent.entries.some(({ slug }) => slug === "any-program-status")).toBe(false);
+    expect(warning).toHaveBeenCalledWith("  skip (missing): docs/building.md");
+    expect(warning).toHaveBeenCalledWith("  skip (missing): docs/any-program-status.md");
+
+    await source("building.md", "# Build on phux\n\nPrograms that drive a phux server start here.\n");
+    await source("any-program-status.md", "# Any program can report status\n\nA program reports with OSC 7501.\n");
+    for (const file of ["program-protocol.md", "scripting.md", "agents.md", "protocol.md"]) await source(file);
+    const { entries } = await discover(docs);
+    expect(entries.find(({ slug }) => slug === "building")).toMatchObject({
+      repoPath: "docs/building.md",
+      slug: "building",
+      group: "build",
+      order: -1,
+      title: "Build on phux",
+    });
+    expect(entries.find(({ slug }) => slug === "any-program-status")).toMatchObject({
+      repoPath: "docs/any-program-status.md",
+      slug: "any-program-status",
+      group: "build",
+      order: -0.5,
+      title: "Any program can report status",
+    });
+    const out = join(root, "out");
+    await mkdir(out);
+    await writeDocumentation(out, entries, revision, versions, siteRevision);
+    const pages = (await metadata(out)).pages as string[];
+    expect(pages.indexOf("scripting")).toBeGreaterThan(-1);
+    expect(pages.indexOf("agents")).toBeGreaterThan(pages.indexOf("scripting"));
+    expect(pages.indexOf("---Build for phux---")).toBeGreaterThan(pages.indexOf("agents"));
+    expect(pages.indexOf("building")).toBe(pages.indexOf("---Build for phux---") + 1);
+    expect(pages.indexOf("any-program-status")).toBe(pages.indexOf("building") + 1);
+    expect(pages.indexOf("program-protocol")).toBe(pages.indexOf("any-program-status") + 1);
+    expect(pages.indexOf("protocol")).toBeGreaterThan(pages.indexOf("building"));
+    const guide = await readFile(join(out, "building.md"), "utf8");
+    expect(guide).toContain('title: "Build on phux"');
+    expect(guide).toContain('sourcePath: "docs/building.md"');
+    const status = await readFile(join(out, "any-program-status.md"), "utf8");
+    expect(status).toContain('title: "Any program can report status"');
+    expect(status).toContain('sourcePath: "docs/any-program-status.md"');
+  });
+
+  test("syncs when neither new docs page is in the phux checkout yet", async () => {
+    await source("program-protocol.md", "# Program protocol\n\nOSC 7501 keys.\n");
+    const { entries } = await discover(docs);
+    expect(entries.some(({ slug }) => slug === "building")).toBe(false);
+    expect(entries.some(({ slug }) => slug === "any-program-status")).toBe(false);
+    expect(warning).toHaveBeenCalledWith("  skip (missing): docs/building.md");
+    expect(warning).toHaveBeenCalledWith("  skip (missing): docs/any-program-status.md");
+    const out = join(root, "out");
+    await mkdir(out);
+    const result = await writeDocumentation(out, entries, revision, versions, siteRevision);
+    expect(result.failed).toEqual([]);
+    const pages = (await metadata(out)).pages as string[];
+    expect(pages).toContain("program-protocol");
+    expect(pages).not.toContain("building");
+    expect(pages).not.toContain("any-program-status");
+    const written = await readdir(out);
+    expect(written).not.toContain("building.md");
+    expect(written).not.toContain("any-program-status.md");
+  });
+
+  test("syncs when docs/any-program-status.md is not in the phux checkout yet", async () => {
+    await source("building.md", "# Build on phux\n\nPrograms that drive a phux server start here.\n");
+    await source("program-protocol.md", "# Program protocol\n\nOSC 7501 keys.\n");
+    const { entries } = await discover(docs);
+    expect(entries.some(({ slug }) => slug === "any-program-status")).toBe(false);
+    expect(warning).toHaveBeenCalledWith("  skip (missing): docs/any-program-status.md");
+    const out = join(root, "out");
+    await mkdir(out);
+    const result = await writeDocumentation(out, entries, revision, versions, siteRevision);
+    expect(result.failed).toEqual([]);
+    const pages = (await metadata(out)).pages as string[];
+    expect(pages).toContain("building");
+    expect(pages).toContain("program-protocol");
+    expect(pages).not.toContain("any-program-status");
+    expect(await readdir(out)).not.toContain("any-program-status.md");
+  });
+
+  test("syncs when docs/building.md is not in the phux checkout yet", async () => {
+    await source("any-program-status.md", "# Any program can report status\n\nA program reports with OSC 7501.\n");
+    await source("program-protocol.md", "# Program protocol\n\nOSC 7501 keys.\n");
+    const { entries } = await discover(docs);
+    expect(entries.some(({ slug }) => slug === "building")).toBe(false);
+    expect(warning).toHaveBeenCalledWith("  skip (missing): docs/building.md");
+    const out = join(root, "out");
+    await mkdir(out);
+    const result = await writeDocumentation(out, entries, revision, versions, siteRevision);
+    expect(result.failed).toEqual([]);
+    const pages = (await metadata(out)).pages as string[];
+    expect(pages).toContain("any-program-status");
+    expect(pages).toContain("program-protocol");
+    expect(pages).not.toContain("building");
+    expect(await readdir(out)).not.toContain("building.md");
+  });
+
   test("fails visibly for an uncatalogued authored flat page", async () => {
     await source("future-guide.md");
     await expect(discover(docs)).rejects.toThrow("uncatalogued documentation: docs/future-guide.md; add it to ORIENTATION and navigation");
