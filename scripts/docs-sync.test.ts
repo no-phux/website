@@ -176,7 +176,8 @@ describe("documentation discovery interface", () => {
       slug: "building",
       group: "build",
       order: -1,
-      title: "Build on phux",
+      title: "Build on phux: JSON CLI, MCP, wire protocol, OSC 7501 and plugins",
+      description: "Entry points for a program that drives a phux server or reports status into a pane: JSON CLI, MCP, the wire protocol, OSC 7501, and plugins.",
     });
     expect(entries.find(({ slug }) => slug === "any-program-status")).toMatchObject({
       repoPath: "docs/any-program-status.md",
@@ -197,7 +198,10 @@ describe("documentation discovery interface", () => {
     expect(pages.indexOf("program-protocol")).toBe(pages.indexOf("any-program-status") + 1);
     expect(pages.indexOf("protocol")).toBeGreaterThan(pages.indexOf("building"));
     const guide = await readFile(join(out, "building.md"), "utf8");
-    expect(guide).toContain('title: "Build on phux"');
+    expect(guide).toContain('title: "Build on phux: JSON CLI, MCP, wire protocol, OSC 7501 and plugins"');
+    expect(guide).toContain('description: "Entry points for a program that drives a phux server or reports status into a pane: JSON CLI, MCP, the wire protocol, OSC 7501, and plugins."');
+    expect(guide).toContain('summary: "Programs that drive a phux server start here."');
+    expect(guide).not.toMatch(/SDK|multi-client|hooks edge/i);
     expect(guide).toContain('sourcePath: "docs/building.md"');
     const status = await readFile(join(out, "any-program-status.md"), "utf8");
     expect(status).toContain('title: "Any program can report status"');
@@ -268,8 +272,48 @@ describe("documentation discovery interface", () => {
     const { entries } = await discover(docs);
     expect(entries.find(({ slug }) => slug === "public-api")).toMatchObject({ group: "automate", order: -0.5 });
     expect(entries.find(({ slug }) => slug === "any-program-status")).toMatchObject({ group: "build", order: -0.5, title: "Any program can report status" });
-    expect(entries.find(({ slug }) => slug === "libghostty")).toMatchObject({ group: "internals", order: 0.5 });
+    expect(entries.find(({ slug }) => slug === "libghostty")).toMatchObject({
+      group: "internals",
+      order: 0.5,
+      title: "A terminal multiplexer built on libghostty — phux",
+    });
     expect(entries.some(({ slug }) => slug === "building")).toBe(false);
+    const out = join(root, "out");
+    await mkdir(out);
+    await writeDocumentation(out, entries, revision, versions, siteRevision);
+    const guide = await readFile(join(out, "libghostty.md"), "utf8");
+    expect(guide).toContain('title: "A terminal multiplexer built on libghostty — phux"');
+    expect(guide).toContain('summary: "The terminal engine."');
+    expect(guide).not.toMatch(/\bSDK\b/);
+  });
+
+  test("catalogs phux vs Rex beside compare and skips a missing source", async () => {
+    const absent = await discover(docs);
+    expect(absent.entries.some(({ slug }) => slug === "phux-vs-rex")).toBe(false);
+    expect(warning).toHaveBeenCalledWith("  skip (missing): docs/phux-vs-rex.md");
+
+    await source("compare.md", "# phux vs tmux\n\nA source summary.\n\n## Next\n");
+    await source("phux-vs-rex.md", "# phux vs Rex\n\nRex is Superlogical's terminal multiplexer.\n");
+    const { entries } = await discover(docs);
+    expect(entries.find(({ slug }) => slug === "phux-vs-rex")).toMatchObject({
+      repoPath: "docs/phux-vs-rex.md",
+      slug: "phux-vs-rex",
+      group: "start",
+      order: 6,
+      title: "phux vs Rex (Superlogical)",
+    });
+    const start = entries.filter(({ group }) => group === "start").sort((a, b) => a.order - b.order);
+    expect(start.map(({ slug }) => slug)).toEqual(["compare", "phux-vs-rex"]);
+    const out = join(root, "out");
+    await mkdir(out);
+    const result = await writeDocumentation(out, entries, revision, versions, siteRevision);
+    expect(result.failed).toEqual([]);
+    const pages = (await metadata(out)).pages as string[];
+    expect(pages.indexOf("phux-vs-rex")).toBe(pages.indexOf("compare") + 1);
+    const guide = await readFile(join(out, "phux-vs-rex.md"), "utf8");
+    expect(guide).toContain('title: "phux vs Rex (Superlogical)"');
+    expect(guide).toContain('sourcePath: "docs/phux-vs-rex.md"');
+    expect(guide).toContain('summary: "Rex is Superlogical\'s terminal multiplexer."');
   });
 
   test("fails visibly for an uncatalogued authored flat page", async () => {

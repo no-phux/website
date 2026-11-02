@@ -28,6 +28,8 @@ export interface Entry {
   title?: string;
   /** Metadata summary override for virtual pages. */
   summary?: string;
+  /** Meta description override. The visible lede stays the source summary. */
+  description?: string;
 }
 
 // ── frontmatter ──────────────────────────────────────────────────────────
@@ -54,12 +56,14 @@ export function parseFrontmatter(raw: string): SourceFm {
 /**
  * The hand-written pages, in nav order. Path is relative to DOCS_DIR.
  */
-const ORIENTATION: { file: string; slug: string; group: Group; order: number; title?: string }[] = [
+const ORIENTATION: { file: string; slug: string; group: Group; order: number; title?: string; description?: string }[] = [
   { file: "README.md", slug: "docs", group: "start", order: 9 },
   { file: "install.md", slug: "installation", group: "start", order: 2 },
   { file: "getting-started.md", slug: "getting-started", group: "start", order: 3 },
   { file: "concepts.md", slug: "concepts", group: "start", order: 4 },
   { file: "compare.md", slug: "compare", group: "start", order: 5 },
+  // Rex comparison. A checkout without the file skips it, same as building.md.
+  { file: "phux-vs-rex.md", slug: "phux-vs-rex", group: "start", order: 6, title: "phux vs Rex (Superlogical)" },
   { file: "config.md", slug: "config", group: "customize", order: 0 },
   { file: "keys.md", slug: "keys", group: "customize", order: 1 },
   { file: "tmux-import.md", slug: "tmux-import", group: "customize", order: 2 },
@@ -82,14 +86,21 @@ const ORIENTATION: { file: string; slug: string; group: Group; order: number; ti
   { file: "desktop-panes.md", slug: "desktop-panes", group: "connect", order: 4 },
   { file: "desktop-reviews.md", slug: "desktop-reviews", group: "connect", order: 5 },
   // Hub for driving phux. A checkout without the file skips it.
-  { file: "building.md", slug: "building", group: "build", order: -1, title: "Build on phux" },
+  {
+    file: "building.md",
+    slug: "building",
+    group: "build",
+    order: -1,
+    title: "Build on phux: JSON CLI, MCP, wire protocol, OSC 7501 and plugins",
+    description: "Entry points for a program that drives a phux server or reports status into a pane: JSON CLI, MCP, the wire protocol, OSC 7501, and plugins.",
+  },
   { file: "any-program-status.md", slug: "any-program-status", group: "build", order: -0.5, title: "Any program can report status" },
   { file: "program-protocol.md", slug: "program-protocol", group: "build", order: 0 },
   { file: "program-sequences.md", slug: "program-sequences", group: "build", order: 1 },
   { file: "host-services.md", slug: "host-services", group: "build", order: 2 },
   { file: "troubleshooting.md", slug: "troubleshooting", group: "help", order: 0 },
   { file: "architecture.md", slug: "architecture", group: "internals", order: 0 },
-  { file: "libghostty.md", slug: "libghostty", group: "internals", order: 0.5 },
+  { file: "libghostty.md", slug: "libghostty", group: "internals", order: 0.5, title: "A terminal multiplexer built on libghostty — phux" },
   { file: "decisions.md", slug: "decisions", group: "internals", order: 1 },
   { file: "organization.md", slug: "organization", group: "internals", order: 2 },
   { file: "protocol.md", slug: "protocol", group: "internals", order: 3 },

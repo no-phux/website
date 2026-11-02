@@ -24,10 +24,18 @@ export const SITE = {
   demoWsUrl: import.meta.env.PUBLIC_PHUX_DEMO_WS ?? "",
 } as const;
 
-/** Marketing leads with the job; documentation retains the precise product category. */
+const headline = "Run agents. Stay in control.";
+
+/**
+ * Marketing leads with the job; documentation retains the precise product category.
+ * `title` is the document title (og:title and twitter:title mirror it). The visible
+ * h1 stays `headline`. The category phrase and the headline together are 82
+ * characters: neither phrase fits beside the other inside a 65-character snippet.
+ */
 export const HOME = {
-  headline: "Run agents. Stay in control.",
-  description: "Delegate work, supervise agents, resolve blockers, and review results. phux brings agent state, work handoffs, native review, and your machines into one workspace.",
+  headline,
+  title: `${name} — the terminal multiplexer for AI coding agents. ${headline}`,
+  description: "A terminal multiplexer for AI coding agents. Delegate work, supervise agents, resolve blockers, and review results. Your agents. Your machines. One workspace.",
 } as const;
 
 /** Content-page <title>: the topic leads (it is what people search); the brand trails once. */

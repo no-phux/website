@@ -20,6 +20,7 @@ export const DOCS_PREFIXES = [
   "/getting-started",
   "/concepts",
   "/compare",
+  "/phux-vs-rex",
   "/config",
   "/keys",
   "/tmux-import",
@@ -47,6 +48,8 @@ export const DOCS_PREFIXES = [
   "/embedding",
   "/public-api",
   "/building",
+  // Alias of /building. The worker 301s the page; Astro's redirect is the fallback.
+  "/build-on",
   "/any-program-status",
   "/program-protocol",
   "/program-sequences",
@@ -142,6 +145,11 @@ export function routeRequest(host: string, url: URL): HostRoute {
     if (isRetiredQuickstartPage(path)) {
       return redirectOn(DOCS_HOST, "/getting-started", url.search);
     }
+    // Astro emits /build-on as a 200 meta-refresh. Answer the alias with a
+    // real permanent redirect before that page can be served.
+    if (isBuildOnAlias(path)) {
+      return redirectOn(DOCS_HOST, "/building", url.search);
+    }
     if (isMarketingOnlyPath(path)) {
       return redirectOn(SITE_HOST, path, url.search);
     }
@@ -165,6 +173,15 @@ export function isEmbedPath(pathname: string): boolean {
 export function isVgpuConceptPath(pathname: string): boolean {
   const path = stripPageSuffix(pathname);
   return path === "/concepts/vgpu" || path.startsWith("/concepts/vgpu/");
+}
+
+function isBuildOnAlias(pathname: string): boolean {
+  return (
+    pathname === "/build-on" ||
+    pathname === "/build-on/" ||
+    pathname === "/build-on.html" ||
+    pathname === "/build-on/index.html"
+  );
 }
 
 function isRetiredQuickstartPage(pathname: string): boolean {
