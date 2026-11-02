@@ -287,35 +287,6 @@ describe("documentation discovery interface", () => {
     expect(guide).not.toMatch(/\bSDK\b/);
   });
 
-  test("catalogs phux vs Rex beside compare and skips a missing source", async () => {
-    const absent = await discover(docs);
-    expect(absent.entries.some(({ slug }) => slug === "phux-vs-rex")).toBe(false);
-    expect(warning).toHaveBeenCalledWith("  skip (missing): docs/phux-vs-rex.md");
-
-    await source("compare.md", "# phux vs tmux\n\nA source summary.\n\n## Next\n");
-    await source("phux-vs-rex.md", "# phux vs Rex\n\nRex is Superlogical's terminal multiplexer.\n");
-    const { entries } = await discover(docs);
-    expect(entries.find(({ slug }) => slug === "phux-vs-rex")).toMatchObject({
-      repoPath: "docs/phux-vs-rex.md",
-      slug: "phux-vs-rex",
-      group: "start",
-      order: 6,
-      title: "phux vs Rex (Superlogical)",
-    });
-    const start = entries.filter(({ group }) => group === "start").sort((a, b) => a.order - b.order);
-    expect(start.map(({ slug }) => slug)).toEqual(["compare", "phux-vs-rex"]);
-    const out = join(root, "out");
-    await mkdir(out);
-    const result = await writeDocumentation(out, entries, revision, versions, siteRevision);
-    expect(result.failed).toEqual([]);
-    const pages = (await metadata(out)).pages as string[];
-    expect(pages.indexOf("phux-vs-rex")).toBe(pages.indexOf("compare") + 1);
-    const guide = await readFile(join(out, "phux-vs-rex.md"), "utf8");
-    expect(guide).toContain('title: "phux vs Rex (Superlogical)"');
-    expect(guide).toContain('sourcePath: "docs/phux-vs-rex.md"');
-    expect(guide).toContain('summary: "Rex is Superlogical\'s terminal multiplexer."');
-  });
-
   test("fails visibly for an uncatalogued authored flat page", async () => {
     await source("future-guide.md");
     await expect(discover(docs)).rejects.toThrow("uncatalogued documentation: docs/future-guide.md; add it to ORIENTATION and navigation");

@@ -20,7 +20,6 @@ export const DOCS_PREFIXES = [
   "/getting-started",
   "/concepts",
   "/compare",
-  "/phux-vs-rex",
   "/config",
   "/keys",
   "/tmux-import",

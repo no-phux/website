@@ -23,9 +23,11 @@ export async function verifyHomeContent(page: Page) {
   assert.equal((await page.locator("#workspace-title").innerText()).trim(), "Browser demo");
   assert.equal((await page.locator(".workspace-heading p").innerText()).trim(), "A disposable phux shell in your browser.");
   assert.equal((await page.locator(".closing-platforms").innerText()).trim(), "All platforms ↗");
+  assert.match((await page.getByRole("heading", { level: 1 }).innerText()).replace(/\s+/g, " "), /Run agents\. Stay in control\./);
   assert.equal(await page.title(), HOME.title);
-  assert.match(HOME.title, /terminal multiplexer for AI coding agents/);
-  assert.match(HOME.title, /Run agents\. Stay in control\./);
+  assert.equal(HOME.title, "phux — a terminal multiplexer for AI coding agents");
+  assert.match(HOME.title, /a terminal multiplexer for AI coding agents/);
+  assert.equal(HOME.description, "A terminal multiplexer for AI coding agents. Delegate work, supervise agents, resolve blockers, and review results on your own machines.");
   assert.equal(await page.locator('meta[property="og:title"]').getAttribute("content"), HOME.title);
   assert.equal(await page.locator('meta[name="twitter:title"]').getAttribute("content"), HOME.title);
   assert.match(HOME.description, /terminal multiplexer/);

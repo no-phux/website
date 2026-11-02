@@ -62,8 +62,6 @@ const ORIENTATION: { file: string; slug: string; group: Group; order: number; ti
   { file: "getting-started.md", slug: "getting-started", group: "start", order: 3 },
   { file: "concepts.md", slug: "concepts", group: "start", order: 4 },
   { file: "compare.md", slug: "compare", group: "start", order: 5 },
-  // Rex comparison. A checkout without the file skips it, same as building.md.
-  { file: "phux-vs-rex.md", slug: "phux-vs-rex", group: "start", order: 6, title: "phux vs Rex (Superlogical)" },
   { file: "config.md", slug: "config", group: "customize", order: 0 },
   { file: "keys.md", slug: "keys", group: "customize", order: 1 },
   { file: "tmux-import.md", slug: "tmux-import", group: "customize", order: 2 },
