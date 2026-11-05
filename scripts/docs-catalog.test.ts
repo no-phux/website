@@ -200,6 +200,7 @@ describe("documentation discovery interface", () => {
     const page = await readFile(join(out, "libghostty.md"), "utf8");
     expect(page).toContain('title: "A terminal multiplexer built on libghostty — phux"');
     expect(page).toContain('summary: "The terminal engine phux renders with."');
+    expect(page).not.toMatch(/\bSDK\b/);
   });
 
   test("syncs when neither new docs page is in the phux checkout yet", async () => {
