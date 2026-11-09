@@ -11,7 +11,7 @@
  * tripwire traps on hostile-bait paths (host/tripwire-paths.ts →
  * host/tripwire.ts).
  */
-import { routeRequest, sitemapIndexAsset } from "./routes";
+import { markdownFallbackPath, routeRequest, sitemapIndexAsset } from "./routes";
 import { handleAssociationRequest } from "./pairing";
 import { APP_RELEASE_PATH, handleAppRelease } from "./app-release";
 import type { TestFlightEnv } from "./testflight";
@@ -158,6 +158,14 @@ export default {
     ) {
       asset = await demoVideoRange(request, asset);
     }
+    // Retired nested docs URLs are HTML redirects, not collection pages, so
+    // they have no markdown twin. Answer `<path>.md` with the HTML page.
+    const markdownFallback = await missingMarkdownRedirect(url, asset, env);
+    if (markdownFallback) {
+      recordEvents(env.TELEMETRY, ctx, classifyRequest(request, markdownFallback));
+      observe(env, ctx, request, markdownFallback);
+      return markdownFallback;
+    }
     const contentType = asset.headers.get("content-type") ?? "";
     if (!asset.ok || !contentType.includes("text/html")) {
       recordEvents(env.TELEMETRY, ctx, classifyRequest(request, asset));
@@ -196,6 +204,25 @@ export default {
     return html;
   },
 };
+
+/** 301 a docs-host `<path>.md` with no built twin to `<path>` when that HTML page exists. */
+async function missingMarkdownRedirect(url: URL, asset: Response, env: Env): Promise<Response | undefined> {
+  const path = markdownFallbackPath(url.hostname, url.pathname);
+  if (!path || asset.status !== 404) return undefined;
+  const pageUrl = new URL(url);
+  pageUrl.pathname = path;
+  const page = await env.ASSETS.fetch(new Request(pageUrl));
+  const type = page.headers.get("content-type") ?? "";
+  if (!page.ok || !type.includes("text/html")) {
+    await page.body?.cancel();
+    return undefined;
+  }
+  await page.body?.cancel();
+  await asset.body?.cancel();
+  const location = new URL(url);
+  location.pathname = path;
+  return Response.redirect(location.href, 301);
+}
 
 // Workers static assets ignore Range. The native Cache API slices a stored
 // Content-Length response without buffering the entire film in JavaScript.

@@ -125,6 +125,9 @@ export async function verifyCrawlMetadata(
     assertEveryLastmod(file.xml, file.name);
   }
   for (const file of docsSitemaps) assertEveryLastmod(file.xml, file.name);
+  for (const file of [...siteSitemaps, ...docsSitemaps]) {
+    assert.equal(/<loc>[^<]*\.md<\/loc>/.test(file.xml), false, `${file.name} lists a markdown URL`);
+  }
   for (const name of ["sitemap-index.xml", "sitemap-docs-index.xml"]) {
     assertEveryLastmod(await readFile(resolve(root, name), "utf8"), name);
   }
@@ -195,4 +198,12 @@ export async function verifyCrawlMetadata(
   const performance = await handler.fetch(new Request(`https://${DOCS_HOST}/performance.md`), env);
   assert.equal(performance.status, 200, "/performance.md serves");
   assert.match(performance.headers.get("content-type") ?? "", /markdown/);
+  for (const path of ["/quickstart/install.md", "/consumers/getting-started.md", "/wire/l1.md"]) {
+    const response = await handler.fetch(new Request(`https://${DOCS_HOST}${path}?from=cite`), env);
+    assert.equal(response.status, 301, `${path} redirects to its HTML page`);
+    assert.equal(response.headers.get("location"), `https://${DOCS_HOST}${path.slice(0, -3)}?from=cite`);
+  }
+  const installation = await handler.fetch(new Request(`https://${DOCS_HOST}/installation.md`), env);
+  assert.equal(installation.status, 200, "/installation.md twin stays");
+  assert.match(installation.headers.get("content-type") ?? "", /markdown/);
 }

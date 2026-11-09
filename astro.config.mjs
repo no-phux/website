@@ -166,7 +166,8 @@ export default defineConfig({
     react(),
     mdx({ extendMarkdownConfig: true, syntaxHighlight: false }),
     sitemap({
-      filter: (page) => !isEmbedPath(new URL(page).pathname) && !isVgpuConceptPath(new URL(page).pathname) && !isConnectPath(new URL(page).pathname),
+      // Markdown twins are alternates of the HTML routes. Do not list them.
+      filter: (page) => !new URL(page).pathname.endsWith(".md") && !isEmbedPath(new URL(page).pathname) && !isVgpuConceptPath(new URL(page).pathname) && !isConnectPath(new URL(page).pathname),
       serialize(item) {
         const url = new URL(item.url);
         const docs = isDocsPath(url.pathname);

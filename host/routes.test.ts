@@ -7,6 +7,7 @@ import {
   isDocsHost,
   isDocsPath,
   isMarketingOnlyPath,
+  markdownFallbackPath,
   routeRequest,
 } from "./routes";
 
@@ -313,8 +314,25 @@ describe("sitemap exclusions", () => {
     }
     const filter = readFileSync(new URL("../astro.config.mjs", import.meta.url), "utf8")
       .match(/filter: \(page\) => ([^\n]+)/)?.[1];
+    expect(filter).toContain('!new URL(page).pathname.endsWith(".md")');
     expect(filter).toContain("!isEmbedPath(new URL(page).pathname)");
     expect(filter).toContain("!isVgpuConceptPath(new URL(page).pathname)");
     expect(filter).toContain("!isConnectPath(new URL(page).pathname)");
+  });
+});
+
+describe("missing markdown twins", () => {
+  test("docs-host markdown URLs for HTML routes can fall back to the page", () => {
+    for (const path of ["/quickstart/install.md", "/consumers/getting-started.md", "/wire/l1.md", "/consumers/tui/commands.md"]) {
+      expect(markdownFallbackPath(DOCS_HOST, path)).toBe(path.slice(0, -".md".length));
+    }
+    expect(markdownFallbackPath(DOCS_HOST, "/installation.md")).toBe("/installation");
+  });
+
+  test("leaves real misses and other hosts alone", () => {
+    expect(markdownFallbackPath(DOCS_HOST, "/quickstart/missing")).toBeUndefined();
+    expect(markdownFallbackPath(DOCS_HOST, "/notes.md")).toBeUndefined();
+    expect(markdownFallbackPath(DOCS_HOST, "/concepts/vgpu.md")).toBeUndefined();
+    expect(markdownFallbackPath(SITE_HOST, "/quickstart/install.md")).toBeUndefined();
   });
 });

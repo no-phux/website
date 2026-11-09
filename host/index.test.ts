@@ -124,6 +124,67 @@ describe("markdown negotiation", () => {
     );
   });
 
+  test("a missing docs markdown twin redirects to the HTML page", async () => {
+    for (const path of ["/quickstart/install.md", "/consumers/getting-started.md", "/wire/l1.md"]) {
+      const requested: string[] = [];
+      const response = await handler.fetch(new Request(`https://docs.phux.sh${path}?from=cite`), {
+        ASSETS: {
+          fetch: async (request) => {
+            const pathname = new URL(request.url).pathname;
+            requested.push(pathname);
+            if (pathname.endsWith(".md")) return new Response("missing", { status: 404 });
+            return new Response("<!doctype html><title>Redirecting</title>", {
+              headers: { "content-type": "text/html; charset=utf-8" },
+            });
+          },
+        },
+      });
+      expect(response.status).toBe(301);
+      expect(response.headers.get("location")).toBe(`https://docs.phux.sh${path.slice(0, -3)}?from=cite`);
+      expect(requested).toEqual([path, path.slice(0, -3)]);
+      expect(await response.text()).toBe("");
+    }
+  });
+
+  test("an existing markdown twin is served", async () => {
+    let calls = 0;
+    const response = await handler.fetch(new Request("https://docs.phux.sh/installation.md"), {
+      ASSETS: {
+        fetch: async () => {
+          calls += 1;
+          return new Response("# Install\n", { headers: { "content-type": "text/markdown; charset=utf-8" } });
+        },
+      },
+    });
+    expect(calls).toBe(1);
+    expect(response.status).toBe(200);
+    expect(response.headers.get("content-type")).toContain("text/markdown");
+    expect(await response.text()).toBe("# Install\n");
+  });
+
+  test("a markdown URL with no HTML page stays a 404", async () => {
+    const requested: string[] = [];
+    const response = await handler.fetch(new Request("https://docs.phux.sh/quickstart/missing.md"), {
+      ASSETS: {
+        fetch: async (request) => {
+          requested.push(new URL(request.url).pathname);
+          return new Response("missing", { status: 404, headers: { "content-type": "text/plain" } });
+        },
+      },
+    });
+    expect(response.status).toBe(404);
+    expect(await response.text()).toBe("missing");
+    expect(requested).toEqual(["/quickstart/missing.md", "/quickstart/missing"]);
+  });
+
+  test("phux.sh still sends the markdown URL to the docs host", async () => {
+    const response = await handler.fetch(new Request("https://phux.sh/quickstart/install.md?from=cite"), {
+      ASSETS: { fetch: async () => { throw new Error("host split must happen before the markdown fallback"); } },
+    });
+    expect(response.status).toBe(301);
+    expect(response.headers.get("location")).toBe("https://docs.phux.sh/quickstart/install.md?from=cite");
+  });
+
   test("docs.phux.sh/quickstart redirects before assets are fetched", async () => {
     const response = await handler.fetch(
       new Request("https://docs.phux.sh/quickstart?from=search", {
