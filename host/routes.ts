@@ -7,6 +7,8 @@
  * Pure functions so unit tests do not need a Cloudflare runtime.
  */
 
+import { WORKER_DOC_ALIASES, docsRedirects } from "./docs-redirects";
+
 export const SITE_HOST = "phux.sh";
 export const DOCS_HOST = "docs.phux.sh";
 export const SITE_ALIASES = ["phux.computer", "www.phux.computer"] as const;
@@ -153,15 +155,11 @@ export function routeRequest(host: string, url: URL): HostRoute {
     if (path === "/" || path === "/index.html" || path === "") {
       return redirectOn(DOCS_HOST, "/overview", url.search);
     }
-    // Astro emits /quickstart as a 200 meta-refresh. Answer the retired URL
-    // with a real permanent redirect before that page can be served.
-    if (isRetiredQuickstartPage(path)) {
-      return redirectOn(DOCS_HOST, "/getting-started", url.search);
-    }
-    // Astro emits /build-on as a 200 meta-refresh. Answer the alias with a
-    // real permanent redirect before that page can be served.
-    if (isBuildOnAlias(path)) {
-      return redirectOn(DOCS_HOST, "/building", url.search);
+    // Astro emits these two as 200 meta-refresh pages. The target comes from
+    // the same redirect map the HTML build uses.
+    const aliasTarget = workerHtmlAliasTarget(path);
+    if (aliasTarget) {
+      return redirectOn(DOCS_HOST, aliasTarget, url.search);
     }
     if (isMarketingOnlyPath(path)) {
       return redirectOn(SITE_HOST, path, url.search);
@@ -194,22 +192,20 @@ export function isVgpuConceptPath(pathname: string): boolean {
   return path === "/concepts/vgpu" || path.startsWith("/concepts/vgpu/");
 }
 
-function isBuildOnAlias(pathname: string): boolean {
-  return (
-    pathname === "/build-on" ||
-    pathname === "/build-on/" ||
-    pathname === "/build-on.html" ||
-    pathname === "/build-on/index.html"
-  );
-}
-
-function isRetiredQuickstartPage(pathname: string): boolean {
-  return (
-    pathname === "/quickstart" ||
-    pathname === "/quickstart/" ||
-    pathname === "/quickstart.html" ||
-    pathname === "/quickstart/index.html"
-  );
+/** HTML forms of the worker aliases. Targets are `docsRedirects()`, not a second copy of the paths. */
+function workerHtmlAliasTarget(pathname: string): string | undefined {
+  const redirects = docsRedirects(true);
+  for (const alias of Object.keys(WORKER_DOC_ALIASES)) {
+    if (
+      pathname === alias ||
+      pathname === `${alias}/` ||
+      pathname === `${alias}.html` ||
+      pathname === `${alias}/index.html`
+    ) {
+      return redirects[alias];
+    }
+  }
+  return undefined;
 }
 
 function redirectOn(host: string, path: string, search: string): HostRoute {

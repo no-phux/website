@@ -206,7 +206,7 @@ export default {
   },
 };
 
-/** 301 a docs-host alias `<path>.md` to its canonical twin, or to that page when the twin is missing. */
+/** Redirect a docs-host alias `<path>.md` to its canonical twin, or to that HTML page when the twin is missing. */
 async function missingMarkdownRedirect(request: Request, asset: Response, env: Env): Promise<Response | undefined> {
   if (request.method !== "GET" && request.method !== "HEAD") return undefined;
   if (asset.status !== 404) return undefined;
@@ -214,9 +214,10 @@ async function missingMarkdownRedirect(request: Request, asset: Response, env: E
   const path = markdownFallbackPath(url.hostname, url.pathname);
   if (!path) return undefined;
   const candidates = docAliasCandidates(path);
+  // See docAliasCandidates: this one target is chosen per request, so do not cache it.
+  const status = path === "/concepts/when-to-use" ? 302 : 301;
   if (candidates.length > 0) {
-    for (let index = 0; index < candidates.length; index++) {
-      const target = candidates[index]!;
+    for (const target of candidates) {
       const twinUrl = new URL(url);
       twinUrl.pathname = `${target}.md`;
       const twin = await env.ASSETS.fetch(new Request(twinUrl, { method: "GET" }));
@@ -224,38 +225,44 @@ async function missingMarkdownRedirect(request: Request, asset: Response, env: E
       if (twin.ok && twinType.includes("text/markdown")) {
         await twin.body?.cancel();
         await asset.body?.cancel();
-        return redirectTo(url, `${target}.md`);
+        return redirectTo(url, `${target}.md`, status);
       }
       await twin.body?.cancel();
       // A 200 that is not the markdown twin must not become a cached redirect.
       if (twin.ok) return undefined;
       if (twin.status !== 404) return undefined;
-      if (index === candidates.length - 1) {
+      const page = await fetchHtmlPage(url, target, env);
+      if (page) {
         await asset.body?.cancel();
-        return redirectTo(url, target);
+        return redirectTo(url, target, status);
       }
     }
-  }
-  const pageUrl = new URL(url);
-  pageUrl.pathname = path;
-  const page = await env.ASSETS.fetch(new Request(pageUrl, { method: "GET" }));
-  const type = page.headers.get("content-type") ?? "";
-  if (!page.ok || !type.includes("text/html")) {
-    await page.body?.cancel();
     return undefined;
   }
-  await page.body?.cancel();
-  await asset.body?.cancel();
-  return redirectTo(url, path);
+  if (await fetchHtmlPage(url, path, env)) {
+    await asset.body?.cancel();
+    return redirectTo(url, path, 301);
+  }
+  return undefined;
 }
 
-function redirectTo(url: URL, pathname: string): Response {
+/** True when `<pathname>` is an HTML document. Cancels the body either way. */
+async function fetchHtmlPage(url: URL, pathname: string, env: Env): Promise<boolean> {
+  const pageUrl = new URL(url);
+  pageUrl.pathname = pathname;
+  const page = await env.ASSETS.fetch(new Request(pageUrl, { method: "GET" }));
+  const type = page.headers.get("content-type") ?? "";
+  await page.body?.cancel();
+  return page.ok && type.includes("text/html");
+}
+
+function redirectTo(url: URL, pathname: string, status: 301 | 302): Response {
   if (!pathname.startsWith("/") || pathname.startsWith("//") || pathname.includes("\\")) {
     return new Response(null, { status: 404 });
   }
   const location = new URL(url);
   location.pathname = pathname;
-  return Response.redirect(location.href, 301);
+  return Response.redirect(location.href, status);
 }
 
 // Workers static assets ignore Range. The native Cache API slices a stored

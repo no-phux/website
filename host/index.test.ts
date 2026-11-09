@@ -166,7 +166,28 @@ describe("markdown negotiation", () => {
     expect(response.headers.get("location")).toBe("https://docs.phux.sh/installation.md");
   });
 
-  test("a missing canonical twin redirects to the canonical page, not the refresh stub", async () => {
+  test("a missing canonical twin redirects to the canonical HTML page, not the refresh stub", async () => {
+    const requested: string[] = [];
+    const response = await handler.fetch(new Request("https://docs.phux.sh/quickstart/install.md"), {
+      ASSETS: {
+        fetch: async (request) => {
+          const pathname = new URL(request.url).pathname;
+          requested.push(pathname);
+          if (pathname === "/installation") {
+            return new Response("<!doctype html><title>Install</title>", {
+              headers: { "content-type": "text/html; charset=utf-8" },
+            });
+          }
+          return new Response("missing", { status: 404 });
+        },
+      },
+    });
+    expect(response.status).toBe(301);
+    expect(response.headers.get("location")).toBe("https://docs.phux.sh/installation");
+    expect(requested).toEqual(["/quickstart/install.md", "/installation.md", "/installation"]);
+  });
+
+  test("a missing twin and a missing page stay a 404", async () => {
     const requested: string[] = [];
     const response = await handler.fetch(new Request("https://docs.phux.sh/quickstart/install.md"), {
       ASSETS: {
@@ -176,9 +197,26 @@ describe("markdown negotiation", () => {
         },
       },
     });
-    expect(response.status).toBe(301);
-    expect(response.headers.get("location")).toBe("https://docs.phux.sh/installation");
-    expect(requested).toEqual(["/quickstart/install.md", "/installation.md"]);
+    expect(response.status).toBe(404);
+    expect(response.headers.get("location")).toBeNull();
+    expect(await response.text()).toBe("missing");
+    expect(requested).toEqual(["/quickstart/install.md", "/installation.md", "/installation"]);
+  });
+
+  test("when-to-use markdown is a temporary redirect", async () => {
+    const response = await handler.fetch(new Request("https://docs.phux.sh/concepts/when-to-use.md"), {
+      ASSETS: {
+        fetch: async (request) => {
+          const pathname = new URL(request.url).pathname;
+          if (pathname === "/concepts.md") {
+            return new Response("# Concepts\n", { headers: { "content-type": "text/markdown; charset=utf-8" } });
+          }
+          return new Response("missing", { status: 404 });
+        },
+      },
+    });
+    expect(response.status).toBe(302);
+    expect(response.headers.get("location")).toBe("https://docs.phux.sh/concepts.md");
   });
 
   test("a 200 non-HTML check does not redirect", async () => {

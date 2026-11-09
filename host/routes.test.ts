@@ -10,7 +10,7 @@ import {
   markdownFallbackPath,
   routeRequest,
 } from "./routes";
-import { DOC_REDIRECTS, WORKER_DOC_ALIASES, docAliasCandidates, docsRedirects } from "./docs-redirects";
+import { WORKER_DOC_ALIASES, docAliasCandidates, docsRedirects } from "./docs-redirects";
 
 function urlOn(host: string, path: string): URL {
   return new URL(path, `https://${host}`);
@@ -331,10 +331,20 @@ describe("missing markdown twins", () => {
     expect(docAliasCandidates("/quickstart")).toEqual(["/getting-started"]);
     expect(docAliasCandidates("/build-on")).toEqual(["/building"]);
     expect(docAliasCandidates("/concepts/when-to-use")).toEqual(["/compare", "/concepts"]);
-    expect(WORKER_DOC_ALIASES["/quickstart"]).toBe(DOC_REDIRECTS["/quickstart"]);
-    expect(WORKER_DOC_ALIASES["/build-on"]).toBe(DOC_REDIRECTS["/build-on"]);
     expect(docsRedirects(true)["/concepts/when-to-use"]).toBe("/compare");
     expect(docsRedirects(false)["/concepts/when-to-use"]).toBe("/concepts");
+    const redirects = docsRedirects(true);
+    for (const alias of Object.keys(WORKER_DOC_ALIASES)) {
+      const target = redirects[alias];
+      for (const path of [alias, `${alias}/`, `${alias}.html`, `${alias}/index.html`]) {
+        expect(routeRequest(DOCS_HOST, urlOn(DOCS_HOST, `${path}?from=search`))).toEqual({
+          kind: "redirect",
+          location: `https://docs.phux.sh${target}?from=search`,
+          status: 301,
+        });
+      }
+      expect(routeRequest(DOCS_HOST, urlOn(DOCS_HOST, `${alias}.md`))).toEqual({ kind: "asset" });
+    }
   });
 
   test("leaves real misses, encoded suffixes, and other hosts alone", () => {

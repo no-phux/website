@@ -84,7 +84,13 @@ export const DOC_REDIRECTS = {
 
 export type DocRedirectPath = keyof typeof DOC_REDIRECTS;
 
-/** Canonical pages to try, in order. The compare guide is optional. */
+/**
+ * Pages to try for a markdown alias, in order.
+ * `/concepts/when-to-use` is probed here on each request. `docsRedirects`
+ * picks that same choice once, when the HTML stub is built. The markdown
+ * response is therefore a 302: a cached 301 to `/concepts.md` would outlive
+ * the compare page shipping.
+ */
 export function docAliasCandidates(pathname: string): readonly string[] {
   if (pathname === "/concepts/when-to-use") return ["/compare", "/concepts"];
   const target = DOC_REDIRECTS[pathname as DocRedirectPath];

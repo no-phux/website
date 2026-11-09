@@ -5,6 +5,7 @@ import { createHash } from "node:crypto";
 import { existsSync } from "node:fs";
 import { readdir, readFile } from "node:fs/promises";
 import { extname, resolve } from "node:path";
+import { docsRedirects } from "../host/docs-redirects";
 import handler from "../host/index";
 import { DOCS_HOST, SITE_HOST } from "../host/routes";
 import { SITE } from "../src/lib/site";
@@ -198,16 +199,16 @@ export async function verifyCrawlMetadata(
   const performance = await handler.fetch(new Request(`https://${DOCS_HOST}/performance.md`), env);
   assert.equal(performance.status, 200, "/performance.md serves");
   assert.match(performance.headers.get("content-type") ?? "", /markdown/);
-  for (const [path, target] of [
-    ["/quickstart/install.md", "/installation.md"],
-    ["/consumers/getting-started.md", "/agents.md"],
-    ["/wire/l1.md", "/protocol.md"],
-    ["/quickstart.md", "/getting-started.md"],
-    ["/build-on.md", "/building.md"],
-  ]) {
-    const response = await handler.fetch(new Request(`https://${DOCS_HOST}${path}?from=cite`), env);
-    assert.equal(response.status, 301, `${path} redirects to its canonical twin`);
-    assert.equal(response.headers.get("location"), `https://${DOCS_HOST}${target}?from=cite`);
+  const redirects = docsRedirects(existsSync(resolve(root, "compare.md")));
+  const aliasPaths = new Set(Object.keys(redirects));
+  for (const [path, target] of Object.entries(redirects)) {
+    assert.equal(aliasPaths.has(target), false, `${path} redirects to alias ${target}`);
+    assert.equal(existsSync(resolve(root, `.${target}.md`)), true, `${target}.md is built`);
+    assert.equal(existsSync(resolve(root, `.${target}.html`)), true, `${target}.html is built`);
+    const response = await handler.fetch(new Request(`https://${DOCS_HOST}${path}.md?from=cite`), env);
+    const status = path === "/concepts/when-to-use" ? 302 : 301;
+    assert.equal(response.status, status, `${path}.md redirects to its canonical twin`);
+    assert.equal(response.headers.get("location"), `https://${DOCS_HOST}${target}.md?from=cite`);
   }
   const installation = await handler.fetch(new Request(`https://${DOCS_HOST}/installation.md`), env);
   assert.equal(installation.status, 200, "/installation.md twin stays");
