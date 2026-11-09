@@ -10,6 +10,7 @@ import {
   markdownFallbackPath,
   routeRequest,
 } from "./routes";
+import { DOC_REDIRECTS, WORKER_DOC_ALIASES, docAliasCandidates, docsRedirects } from "./docs-redirects";
 
 function urlOn(host: string, path: string): URL {
   return new URL(path, `https://${host}`);
@@ -322,17 +323,28 @@ describe("sitemap exclusions", () => {
 });
 
 describe("missing markdown twins", () => {
-  test("docs-host markdown URLs for HTML routes can fall back to the page", () => {
-    for (const path of ["/quickstart/install.md", "/consumers/getting-started.md", "/wire/l1.md", "/consumers/tui/commands.md"]) {
-      expect(markdownFallbackPath(DOCS_HOST, path)).toBe(path.slice(0, -".md".length));
-    }
-    expect(markdownFallbackPath(DOCS_HOST, "/installation.md")).toBe("/installation");
+  test("docs-host markdown URLs name the alias, and the alias names its canonical page", () => {
+    expect(markdownFallbackPath(DOCS_HOST, "/quickstart/install.md")).toBe("/quickstart/install");
+    expect(docAliasCandidates("/quickstart/install")).toEqual(["/installation"]);
+    expect(markdownFallbackPath(DOCS_HOST, "/consumers/getting-started.md")).toBe("/consumers/getting-started");
+    expect(docAliasCandidates("/consumers/getting-started")).toEqual(["/agents"]);
+    expect(docAliasCandidates("/quickstart")).toEqual(["/getting-started"]);
+    expect(docAliasCandidates("/build-on")).toEqual(["/building"]);
+    expect(docAliasCandidates("/concepts/when-to-use")).toEqual(["/compare", "/concepts"]);
+    expect(WORKER_DOC_ALIASES["/quickstart"]).toBe(DOC_REDIRECTS["/quickstart"]);
+    expect(WORKER_DOC_ALIASES["/build-on"]).toBe(DOC_REDIRECTS["/build-on"]);
+    expect(docsRedirects(true)["/concepts/when-to-use"]).toBe("/compare");
+    expect(docsRedirects(false)["/concepts/when-to-use"]).toBe("/concepts");
   });
 
-  test("leaves real misses and other hosts alone", () => {
+  test("leaves real misses, encoded suffixes, and other hosts alone", () => {
     expect(markdownFallbackPath(DOCS_HOST, "/quickstart/missing")).toBeUndefined();
     expect(markdownFallbackPath(DOCS_HOST, "/notes.md")).toBeUndefined();
     expect(markdownFallbackPath(DOCS_HOST, "/concepts/vgpu.md")).toBeUndefined();
+    expect(markdownFallbackPath(DOCS_HOST, "/quickstart/install.MD")).toBeUndefined();
+    expect(markdownFallbackPath(DOCS_HOST, "/quickstart/install%2Emd")).toBeUndefined();
+    expect(markdownFallbackPath(DOCS_HOST, "/x.md.md")).toBeUndefined();
+    expect(markdownFallbackPath(DOCS_HOST, "//evil.com.md")).toBeUndefined();
     expect(markdownFallbackPath(SITE_HOST, "/quickstart/install.md")).toBeUndefined();
   });
 });

@@ -68,7 +68,7 @@ export const DOCS_PREFIXES = [
   "/substrate",
   // Pre-2026-10 docs URLs. Nested paths still use Astro's HTML redirects.
   // /quickstart itself is a worker 301 onto /getting-started.
-  // A missing `<path>.md` twin 301s to `<path>` when that HTML page exists.
+  // A missing `<path>.md` for one of these aliases 301s to the canonical twin.
   "/quickstart",
   "/consumers",
   "/remote-access",
@@ -111,15 +111,16 @@ export function isDocsPath(pathname: string): boolean {
   return DOCS_PREFIXES.some((prefix) => path === prefix || path.startsWith(`${prefix}/`));
 }
 
+/** One lowercase `.md` suffix on a single-slash docs path. Encoded or doubled suffixes are not aliases. */
+const LITERAL_MARKDOWN_PATH = /^\/(?:[a-z0-9-]+\/)*[a-z0-9-]+\.md$/;
+
 /**
  * Extensionless path for a docs-host `*.md` request that names a documentation
- * HTML route. Catalog twins are built by `src/pages/[...slug].md.ts`; this is
- * only the candidate the worker checks after that asset 404s.
+ * route. Catalog twins are built by `src/pages/[...slug].md.ts`.
  */
 export function markdownFallbackPath(host: string, pathname: string): string | undefined {
-  if (!isDocsHost(host) || !pathname.endsWith(".md")) return undefined;
+  if (!isDocsHost(host) || !LITERAL_MARKDOWN_PATH.test(pathname)) return undefined;
   const path = pathname.slice(0, -".md".length);
-  if (!path.startsWith("/") || path.length < 2 || path.endsWith("/")) return undefined;
   if (!isDocsPath(path) || isMarketingOnlyPath(path)) return undefined;
   return path;
 }

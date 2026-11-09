@@ -198,10 +198,16 @@ export async function verifyCrawlMetadata(
   const performance = await handler.fetch(new Request(`https://${DOCS_HOST}/performance.md`), env);
   assert.equal(performance.status, 200, "/performance.md serves");
   assert.match(performance.headers.get("content-type") ?? "", /markdown/);
-  for (const path of ["/quickstart/install.md", "/consumers/getting-started.md", "/wire/l1.md"]) {
+  for (const [path, target] of [
+    ["/quickstart/install.md", "/installation.md"],
+    ["/consumers/getting-started.md", "/agents.md"],
+    ["/wire/l1.md", "/protocol.md"],
+    ["/quickstart.md", "/getting-started.md"],
+    ["/build-on.md", "/building.md"],
+  ]) {
     const response = await handler.fetch(new Request(`https://${DOCS_HOST}${path}?from=cite`), env);
-    assert.equal(response.status, 301, `${path} redirects to its HTML page`);
-    assert.equal(response.headers.get("location"), `https://${DOCS_HOST}${path.slice(0, -3)}?from=cite`);
+    assert.equal(response.status, 301, `${path} redirects to its canonical twin`);
+    assert.equal(response.headers.get("location"), `https://${DOCS_HOST}${target}?from=cite`);
   }
   const installation = await handler.fetch(new Request(`https://${DOCS_HOST}/installation.md`), env);
   assert.equal(installation.status, 200, "/installation.md twin stays");
