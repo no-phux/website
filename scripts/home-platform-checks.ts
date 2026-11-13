@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import type { Browser, Page } from "playwright-core";
 import { platformVisitors } from "./home-platform-fixtures";
+import { declineAnalytics } from "./home-consent-checks";
 import { installActions, type InstallPlatform } from "../src/lib/home-platform";
 import type { Phone } from "../src/lib/beta";
 
@@ -25,6 +26,7 @@ export async function verifyDeviceInstalls(browser: Browser, base: string, artif
     });
     try {
       await page.goto(base);
+      await declineAnalytics(page);
       await page.waitForFunction(expected => document.documentElement.dataset.installPlatform === expected, platform);
       assert.deepEqual(await page.locator("[data-device-label]").allTextContents(), [action.label, action.label], `${device}: both primary actions match the actual OS`);
       assert.equal(await page.locator(".download-primary").getAttribute("href"), href);
@@ -89,6 +91,7 @@ export async function verifyLinuxRune(browser: Browser, base: string, artifacts:
     const page = await context.newPage();
     try {
       await page.goto(base);
+      await declineAnalytics(page);
       await page.waitForFunction(() => document.querySelector<HTMLElement>("[data-linux-rune]")?.dataset.linuxArch);
       const panel = page.locator("[data-linux-rune]");
       assert.ok(await panel.isVisible(), `${name}: Linux shows Rune in the hero`);
