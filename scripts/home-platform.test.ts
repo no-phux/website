@@ -26,6 +26,7 @@ describe("device-first homepage installs", () => {
     expect(installActions.android.phone).toBe("android");
     expect(installActions.android.href).toBe(installActions.unknown.href);
     expect(installActions.android.label).toBe(installActions.unknown.label);
+    expect(installActions.unknown.note).toBe("Mac, Linux & Windows · iPhone beta on TestFlight");
     expect(installActions.android.note).toBe(installActions.unknown.note);
     expect(installActions.android.note).not.toMatch(/Android|Google Play|Play Store/i);
     expect(installActions.windows.note).toContain("WSL 2 server required");

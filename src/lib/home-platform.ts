@@ -43,7 +43,7 @@ export async function detectLinuxArch(visitor: LinuxVisitor | undefined): Promis
 }
 
 const ios = { href: iosDownload, note: "iOS beta · Join in TestFlight", icon: "→", phone: "ios" } as const;
-const choosePlatform = { label: "Choose your platform", href: docsHref("/installation"), note: "Mac, Linux & Windows · Mobile beta available", icon: "↗" } as const;
+const choosePlatform = { label: "Choose your platform", href: docsHref("/installation"), note: "Mac, Linux & Windows · iPhone beta on TestFlight", icon: "↗" } as const;
 export const installActions: Record<InstallPlatform, InstallAction> = {
   iphone: { ...ios, label: "Get for iPhone" },
   ipad: { ...ios, label: "Get for iPad", note: "iPadOS beta · Join in TestFlight" },

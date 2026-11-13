@@ -183,7 +183,8 @@ try {
   assert.equal(await page.locator("dialog[open]").count(), 0);
   assert.ok(await page.getByRole("link", { name: "Open demo", exact: true }).evaluate((link) => link === document.activeElement), "closing restores focus");
   await page.goto(`${base}/more`);
-  assert.equal(await page.locator("#testflight > p").first().innerText(), "Drive the same terminals from your phone. In beta on TestFlight.");
+  assert.equal(await page.locator("#testflight > h2").innerText(), "phux on iPhone");
+  assert.equal(await page.locator("#testflight > p").first().innerText(), "Drive the same terminals from your iPhone. In beta on TestFlight.");
   assert.doesNotMatch(await page.locator("#testflight").innerText(), /Google Play|Play Store|Android/i);
   assert.equal(await page.getByRole("link", { name: /Built for automation/ }).getAttribute("href"), "https://docs.phux.sh/agents");
   assert.ok(await page.locator("#testflight form").isHidden(), "email is optional and does not summon a keyboard");
