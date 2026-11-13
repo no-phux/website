@@ -5,13 +5,14 @@ import { createHash } from "node:crypto";
 import { mkdir } from "node:fs/promises";
 import { extname, resolve } from "node:path";
 import { chromium } from "playwright-core";
+import { monoWordmarkUrl } from "../src/lib/brand";
 
 const root = resolve(import.meta.dir, "../dist");
 const lock = await Bun.file(resolve(import.meta.dir, "../brand.lock.json")).json();
 const server = Bun.serve({
   hostname: "127.0.0.1", port: 0,
   async fetch(request) {
-    const pathname = new URL(request.url).pathname;
+    const pathname = new URL(request.url).pathname.replace(/^\/$/, "/index.html");
     let path = resolve(root, `.${pathname}`);
     if (!path.startsWith(`${root}/`)) return new Response(null, { status: 403 });
     if (!(await Bun.file(path).exists()) && !extname(path)) path += ".html";
@@ -21,7 +22,10 @@ const server = Bun.serve({
   },
 });
 const base = `http://127.0.0.1:${server.port}`;
-const browser = await chromium.launch({ channel: "chrome", headless: true });
+const browser = await chromium.launch({
+  ...(process.env.CHROME_PATH ? { executablePath: process.env.CHROME_PATH } : { channel: "chrome" }),
+  headless: true,
+});
 try {
   const artifactRoot = resolve(import.meta.dir, "../.home-check");
   await mkdir(artifactRoot, { recursive: true });
@@ -56,6 +60,24 @@ try {
   await page.getByText("Verify this download", { exact: true }).focus();
   await page.keyboard.press("Enter");
   assert.ok(await page.locator("details").evaluate(element => element instanceof HTMLDetailsElement && element.open), "checksum disclosure works from the keyboard");
+  for (const width of [390, 1440]) {
+    await page.setViewportSize({ width, height: 1000 });
+    for (const route of ["/", "/overview", "/embed", "/concepts/vgpu"]) {
+      await page.goto(`${base}${route}`, { waitUntil: "networkidle" });
+      const logo = page.locator(".phux-wordmark:visible").first();
+      await logo.waitFor();
+      const bounds = await logo.boundingBox();
+      assert.ok(bounds && bounds.width > 0 && bounds.height > 0, `${route}: visible wordmark`);
+      if (monoWordmarkUrl()) {
+        assert.ok(await logo.evaluate(element => getComputedStyle(element).maskImage !== "none"), `${route}: canonical artwork mask`);
+        const image = logo.locator("img");
+        assert.equal(await image.getAttribute("src"), monoWordmarkUrl());
+        assert.ok(await image.evaluate(element => element instanceof HTMLImageElement && element.complete && element.naturalWidth > 0), `${route}: release SVG loads`);
+      }
+      assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), `${route}: no horizontal overflow`);
+      await page.screenshot({ path: resolve(artifactRoot, `wordmark-${route.replace(/\W/g, "") || "home"}-${width}.png`) });
+    }
+  }
   assert.deepEqual(errors, []);
   await context.close();
   console.log(`PASS brand kit: responsive previews, keyboard disclosure, retained release, and SHA-256 ${checksum}`);

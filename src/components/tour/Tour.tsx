@@ -285,7 +285,7 @@ function Phone({ frame }: { frame: Frame }) {
             </div>
           </>
         ) : (
-          <div className="tour-phone-idle"><b>phux</b><span>studio · paired</span></div>
+          <div className="tour-phone-idle"><b><Wordmark /></b><span>studio · paired</span></div>
         )}
       </div>
     </Node>
@@ -447,3 +447,4 @@ export default function Tour({ prepare, suspended = false }: { prepare?: () => v
     </div>
   );
 }
+import { Wordmark } from "../Wordmark";

@@ -13,6 +13,10 @@
       "destination": "public/brand/images/mobile.png",
       "sha256": "dc8c6666c45a6f38afca9e1606cab48fdd8ed9558debcf6f75c4d52e578b7ff0"
     },
+    "logos/docs-wordmark.png": {
+      "destination": "public/brand/images/wordmark.png",
+      "sha256": "cb98b384bc38c309edcff441d845fd2232bf3d0e9ae66cf528c21808c4f51a18"
+    },
     "logos/docs-wordmark.svg": {
       "destination": "public/brand/images/wordmark.svg",
       "sha256": "6bc7d8192283ea1dfb9dc9ab9da82af5846cfdb18b77770924304311b4694c59"

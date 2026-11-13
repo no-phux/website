@@ -3,6 +3,7 @@ import type { APIRoute } from "astro";
 import sharp from "sharp";
 import { resolve } from "node:path";
 import { SITE } from "../../lib/site";
+import { monoWordmarkUrl, MONO_WORDMARK_DESTINATION } from "../../lib/brand";
 
 // Per-page social cards: the reader's paper and ink, the page title and summary.
 export async function getStaticPaths() {
@@ -45,16 +46,22 @@ export const GET: APIRoute = async ({ props }) => {
   const summary = wrap(page.data.summary || page.data.description || SITE.description, 60, 3);
   const titleY = 250;
   const summaryY = titleY + (title.length - 1) * 78 + 86;
+  const wordmark = monoWordmarkUrl() ? await sharp(resolve(MONO_WORDMARK_DESTINATION))
+    .resize({ height: 28 }).ensureAlpha().linear([0, 0, 0, 1], [18, 19, 16, 0])
+    .png().toBuffer({ resolveWithObject: true }) : undefined;
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
   <rect width="${W}" height="${H}" fill="#f5f5f3"/>
 
-  <text x="${PAD + 60}" y="${PAD + 18}" font-family="${SANS}" font-size="28" fill="#121310" font-weight="600">${xml(SITE.name)}<tspan dx="9" fill="#6b6c66" font-weight="400">docs</tspan></text>
+  <text x="${PAD + 60 + (wordmark ? wordmark.info.width + 9 : 0)}" y="${PAD + 18}" font-family="${SANS}" font-size="28" fill="#121310" font-weight="600">${wordmark ? "" : xml(SITE.name)}<tspan dx="9" fill="#6b6c66" font-weight="400">docs</tspan></text>
   <text x="${PAD}" y="${titleY}" font-family="${SANS}" font-size="68" fill="#121310" font-weight="500" letter-spacing="-1.4">${tspans(title, PAD, 78)}</text>
   <text x="${PAD}" y="${summaryY}" font-family="${SANS}" font-size="30" fill="#5d5e58">${tspans(summary, PAD, 42)}</text>
   <path d="M${PAD} ${H - PAD - 34}H${W - PAD}" stroke="#1b1c19" stroke-opacity="0.12" stroke-width="2"/>
   <text x="${PAD}" y="${H - PAD + 6}" font-family="${MONO}" font-size="24" fill="#6b6c66">${xml(`${SITE.docsDomain}/${page.id}`)}</text>
 </svg>`;
   const fox = await sharp(resolve("public/brand/images/mark-dark.svg")).resize(52, 52).png().toBuffer();
-  const image = await sharp(Buffer.from(svg)).composite([{ input: fox, left: PAD, top: PAD - 16 }]).png().toBuffer();
+  const image = await sharp(Buffer.from(svg)).composite([
+    { input: fox, left: PAD, top: PAD - 16 },
+    ...(wordmark ? [{ input: wordmark.data, left: PAD + 60, top: PAD - 10 }] : []),
+  ]).png().toBuffer();
   return new Response(new Uint8Array(image), { headers: { "content-type": "image/png" } });
 };

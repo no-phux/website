@@ -1,0 +1,39 @@
+/* Use the release SVG's intrinsic ratio; never redraw or stretch the glyphs. */
+.phux-wordmark {
+  display: inline-block;
+  flex: none;
+  line-height: 1;
+  vertical-align: middle;
+}
+
+.phux-wordmark-art {
+  background: currentColor;
+  mask: var(--wordmark-source) center / contain no-repeat;
+}
+
+.phux-wordmark-art > img {
+  display: block;
+  width: auto;
+  height: 1em;
+  max-width: none;
+  visibility: hidden;
+}
+
+/* These surfaces style their adjacent span labels, not the logo itself. */
+.light-lab .lab-brand > .phux-wordmark,
+.mini-combo b > .phux-wordmark {
+  display: inline-block;
+  font: inherit;
+  line-height: 1;
+  color: inherit;
+  letter-spacing: inherit;
+}
+
+.live-title b > .phux-wordmark { color: inherit; }
+
+@media (forced-colors: active) {
+  .phux-wordmark-art {
+    forced-color-adjust: none;
+    background: CanvasText;
+  }
+}

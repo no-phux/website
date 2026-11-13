@@ -47,7 +47,7 @@
   background: url("/favicon.svg") center / cover;
   box-shadow: 0 0 0 1px var(--color-rule);
 }
-.reader-brand span {
+.reader-brand > span:not(.phux-wordmark) {
   margin-left: -0.3rem;
   color: var(--color-subtle);
   font-weight: 400;

@@ -31,3 +31,22 @@ Old archives remain available for restoring older app pins. Normal builds
 require no access to the private source library. `bun run brand:restore`
 restores the current pin; use `python3 scripts/brand.py sync --archive PATH
 --sha256 SHA256` to install an explicitly checksummed release or rollback.
+
+The shared `src/components/Wordmark.tsx` uses the approved transparent mono SVG
+installed at `public/brand/images/mono-wordmark.svg`. Map the release's canonical
+mono export to that destination in `brand.config.json`, then synchronize the
+checksummed archive; do not copy geometry or private source artwork into the
+site. Until the pinned release includes it, the component preserves the existing
+text wordmark. Its mask inherits the surrounding text color, keeps the SVG's
+intrinsic proportions, and does not change body or code fonts. The home and docs
+social cards use the same pin when available, retaining their separate fox marks.
+The documentation SVG and PNG remain separate downloadable assets.
+
+After installing a release, retain its approved ZIP, manifest and `SHA256SUMS`
+under `public/brand/releases/VERSION/` and add its checksum to
+`public/brand/index.json`; never remove old archives. Run `bun run brand:check`,
+`bun run check`, `bun run test`, `bun run build`, and `bun run verify:brand`.
+For a system Chromium rather than Google Chrome, use
+`CHROME_PATH=/usr/bin/chromium bun run verify:brand`. This checks responsive
+wordmarks on home, docs, embed and concepts, and writes screenshots to
+`.home-check/`; review both light/dark mono previews on `/brand` after a pin update.
