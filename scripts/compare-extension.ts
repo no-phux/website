@@ -18,7 +18,7 @@ function compareExtension(revision: string): string {
   const license = `https://github.com/no-phux/phux/blob/${revision}/LICENSE`;
   return `## Compared with zellij and WezTerm
 
-Competitor facts in this section and the two after it were checked on ${CHECKED} against the pages linked in the cells. phux's Windows desktop availability was updated on 2026-10-28 against the [desktop v0.51.0 release assets](https://github.com/no-phux/phux/releases/tag/desktop-v0.51.0). These additions are maintained in the [website repository](https://github.com/no-phux/website); the earlier tmux, Herdr, and cmux sections come from phux's \`docs/compare.md\`.
+Competitor facts in this section and in Where phux isn't the answer were checked on ${CHECKED} against the pages linked in the cells. phux's Windows desktop availability was updated on 2026-10-28 against the [desktop v0.51.0 release assets](https://github.com/no-phux/phux/releases/tag/desktop-v0.51.0). These additions are maintained in the [website repository](https://github.com/no-phux/website); the earlier tmux, Herdr, and cmux sections come from phux's \`docs/compare.md\`.
 
 | | zellij | WezTerm | phux |
 | --- | --- | --- | --- |
@@ -39,24 +39,14 @@ WezTerm is the better choice for a GUI on Windows 10, FreeBSD, or NetBSD, a Lua 
 
 phux is the choice for a background server you drive with commands and JSON, a recorded agent state, or \`phux host add\` and then a QUIC attach. [Remote machines](./remote.md). The desktop and terminal UI draw with libghostty, the same emulator the server uses. [Clients](./clients.md).
 
-## phux and Rex
+## Other multiplexers
 
-Rex is [Superlogical's](https://www.superlogical.com) terminal multiplexer. Their site says they are building "the multiplexer for all work," and that they will begin with a terminal multiplexer.
-
-Checked on ${CHECKED}. The cells are what the linked pages say. Those pages do not state a license for Rex, so this table does not add one.
-
-| | Rex, as Superlogical's pages describe it | phux |
-| --- | --- | --- |
-| Who publishes it | Superlogical | phux, under Apache-2.0. [LICENSE](${license}) |
-| Account | Free, no account, and self-hostable. The docs index says "no account or license checks." [Public testing, 5 Oct 2026](https://www.superlogical.com/updates/public-testing-beginning), [docs index](https://www.superlogical.com/rex/docs.md) | No accounts and no hosted service. Each machine runs its own server. [Remote machines](./remote.md) |
-| What you can install today | The macOS app is available to all testers. The Linux server goes to Linux testing waves. Invites go to the mailing list. [Installation](https://www.superlogical.com/rex/docs/installation.md), [public testing](https://www.superlogical.com/updates/public-testing-beginning) | Install today on macOS Apple silicon and Linux. On Windows the CLI and TUI run under WSL 2. [Install phux](https://phux.sh/install). [Platforms](./install.md) |
-| Sharing a live session | The homepage says: "Sessions can be accessed through the web and native macOS/iOS applications, and sharing a live session with other people is built in from the start." That sentence is in the plan on the homepage. | Several clients can show one session at once. A machine you pair can do everything you can. [Concepts](./concepts.md#clients), [Remote machines](./remote.md#who-can-do-what) |
-| Another machine | Not stated on the pages linked in this table. | \`phux host add\`, then attach over QUIC. \`phux host discover\` lists machines already on a Tailscale tailnet. [Remote machines](./remote.md) |
+[Rex](https://www.superlogical.com/) is Superlogical's terminal multiplexer.
 
 ## Where phux isn't the answer
 
 - An Intel Mac, or musl libc. There is no build for either. [Install](./install.md)
 - Windows without WSL 2. The CLI, TUI, and native desktop's coordinator require WSL 2. Zellij publishes \`zellij.exe\`. WezTerm's feature list includes Windows 10, FreeBSD, and NetBSD.
-- Sharing a session between people. Several clients can show one session at once, and a machine you pair gets your full access, but a pane has one size for every viewer and the docs describe no invite or per-person flow. Zellij's README describes true multiplayer collaboration, and Superlogical's homepage says sharing a live session with other people is built in from the start.
+- Sharing a session between people. Several clients can show one session at once, and a machine you pair gets your full access, but a pane has one size for every viewer and the docs describe no invite or per-person flow. Zellij's README describes true multiplayer collaboration.
 `;
 }
