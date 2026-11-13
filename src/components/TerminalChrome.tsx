@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { SITE } from "../lib/site";
+import { Wordmark } from "./Wordmark";
 import type { SessionBackend } from "./terminal/core";
 
 export type TerminalPhase = "idle" | "checking" | "unlock" | "connecting" | "live" | "closed" | "error";
@@ -15,7 +16,7 @@ export function TerminalHeader({ phase, backend, timeLeft, actions, children }: 
   actions?: ReactNode; children?: ReactNode;
 }) {
   return <header className="pterm-head">
-    <span className="pterm-mark">{SITE.name}</span>
+    <span className="pterm-mark"><Wordmark /></span>
     <span className="pterm-state" aria-live="polite">{phaseLabels[phase]}</span>
     <span className="pterm-head-spacer" />
     {!actions && backend && <span>{backend === "native" ? "Linux" : "Demo"}</span>}

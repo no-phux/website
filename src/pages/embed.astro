@@ -3,6 +3,7 @@ import "../styles/global.css";
 import AuthReturn from "../components/AuthReturn.astro";
 import PhuxTerminal from "../components/PhuxTerminal";
 import GitHubBadge from "../components/GitHubBadge.astro";
+import { Wordmark } from "../components/Wordmark";
 import { SITE } from "../lib/site";
 ---
 
@@ -21,7 +22,7 @@ import { SITE } from "../lib/site";
     <main>
       <div class="embed-frame" data-configured={String(Boolean(SITE.demoWsUrl))}>
         <nav class="embed-nav" aria-label="Terminal navigation">
-          <a class="embed-brand" href="/">← phux</a>
+          <a class="embed-brand" href="/" aria-label="PHUX home">← <Wordmark decorative /></a>
           <GitHubBadge />
         </nav>
         <div class="embed-intro"><p>Browser client / disposable workspace</p><h1>Your phux shell.</h1></div>

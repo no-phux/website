@@ -1,0 +1,21 @@
+{
+  "schema": 1,
+  "name": "PHUX Grid",
+  "text": "phux",
+  "origin": "Original PHUX project artwork, drawn on a modular grid in November 2026. The general idea of grid-built branding is a reference, not a source of letter outlines. No OpenCode artwork, font, or other third-party glyph data is incorporated.",
+  "rights": "PHUX project artwork; brand usage guidelines apply. No third-party font license required.",
+  "grid": 1,
+  "advance": 8,
+  "stroke": 2,
+  "clearSpace": 2,
+  "minimumWidth": 108,
+  "viewBox": [0, 0, 34, 14],
+  "offset": [2, 2],
+  "colors": { "light": "#E7E2DA", "dark": "#090A0C" },
+  "glyphs": [
+    { "letter": "p", "x": 0, "path": "M0 2H5L6 3V7L5 8H2V10H0ZM2 4V6H4V4Z" },
+    { "letter": "h", "x": 8, "path": "M0 0H2V2H5L6 3V8H4V4H2V8H0Z" },
+    { "letter": "u", "x": 16, "path": "M0 2H2V6H4V2H6V7L5 8H1L0 7Z" },
+    { "letter": "x", "x": 24, "path": "M0 2H2L3 4L4 2H6L4 5L6 8H4L3 6L2 8H0L2 5Z" }
+  ]
+}

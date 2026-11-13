@@ -11,6 +11,7 @@ import { NavigationDrawer, ReaderTheme, SearchButton, useSlashSearch } from "./R
 import { ReaderNav } from "./ReaderNav";
 import { PageActions } from "./PageActions";
 import { MenuIcon } from "./icons";
+import { Wordmark } from "../Wordmark";
 
 interface Props {
   tree: Root;
@@ -44,8 +45,8 @@ export function Docs(props: Props) {
 
 function Brand() {
   return (
-    <a className="reader-brand" href="/overview">
-      {SITE.name} <span>docs</span>
+    <a className="reader-brand" href="/overview" aria-label="PHUX docs">
+      <Wordmark decorative /> <span>docs</span>
     </a>
   );
 }

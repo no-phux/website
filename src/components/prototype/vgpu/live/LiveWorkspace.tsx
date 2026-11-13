@@ -82,7 +82,7 @@ function Terminal({ glass, retry }: { glass: MutableRefObject<SceneGlass>; retry
   const cell = session.cell;
   return <div className="live-window" data-phase={state.phase} data-busy={busy} onPointerDownCapture={() => { touched.current = true; }} onKeyDownCapture={() => { touched.current = true; }}>
     <header className="live-bar">
-      <p className="live-title"><i aria-hidden="true" /><b>phux</b><span>{state.phase === "live" ? state.backend === "native" ? "Linux shell" : "demo shell" : state.phase === "closed" ? "ended" : "connecting"}</span></p>
+      <p className="live-title"><i aria-hidden="true" /><b><Wordmark /></b><span>{state.phase === "live" ? state.backend === "native" ? "Linux shell" : "demo shell" : state.phase === "closed" ? "ended" : "connecting"}</span></p>
       <nav className="live-tools" aria-label="Panes">
         <span className="live-count" aria-live="polite">{count > 1 ? `${count} panes` : ""}</span>
         <button type="button" title="Split right (Ctrl+A %)" aria-label="Split right" disabled={!ready || count >= MAX_PANES} onClick={act(() => session.split("vertical"))}><Icon><path d="M8 2.75v10.5" /></Icon></button>
@@ -136,3 +136,4 @@ export default function LiveWorkspace({ runtime }: { runtime: RuntimeControl }) 
     <Terminal key={attempt} glass={glass} retry={() => setAttempt(n => n + 1)} />
   </section>;
 }
+import { Wordmark } from "../../../Wordmark";
