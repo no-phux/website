@@ -60,6 +60,12 @@ try {
       return route.fulfill({ json: { ok: true, status: "invited" } });
     });
     await page.goto("https://phux.sh/?hero=light");
+    // The delayed privacy card overlaps Rune at 1440px and can appear between
+    // Playwright's hit test and mouse dispatch. Answer it through the real UI
+    // before interacting with the iframe; never hide it or force a click.
+    await page.getByRole("button", { name: "No thanks", exact: true }).click();
+    assert.ok(await page.locator("#phux-consent").isHidden(), "the privacy choice leaves the workspace controls unobstructed");
+    assert.equal((await context.cookies()).find(cookie => cookie.name === "phux_consent")?.value, "denied", "the real privacy choice is recorded");
     const hero = page.frameLocator("#home-light iframe");
     await hero.locator(".install-hook").waitFor();
     assert.equal(await hero.locator(".install-hook-lede, .install-hook-proof, .live-session-hint").count(), 0, "no marketing prose around the controls");
