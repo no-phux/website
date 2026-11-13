@@ -2,6 +2,7 @@
 import assert from "node:assert/strict";
 import type { Browser } from "playwright-core";
 import { HOME } from "../src/lib/site";
+import { declineAnalytics } from "./home-consent-checks";
 
 export async function verifyStaticHome(browser: Browser, base: string) {
   const stillContext = await browser.newContext({ reducedMotion: "reduce" });
@@ -9,6 +10,7 @@ export async function verifyStaticHome(browser: Browser, base: string) {
   const models: string[] = [];
   stillPage.on("request", request => { if (/\/fox\/.*\.glb/.test(request.url())) models.push(request.url()); });
   await stillPage.goto(`${base}/?hero=classic`);
+  await declineAnalytics(stillPage);
   await stillPage.mouse.move(1200, 100);
   assert.equal(await stillPage.locator("[data-fox]").getAttribute("data-look"), "0 0", "initial reduced motion keeps the fox centered");
   assert.ok(await stillPage.locator(".fox-poster").isVisible(), "reduced motion shows the still mascot");

@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import type { Browser } from "playwright-core";
 import { platformVisitors } from "./home-platform-fixtures";
+import { declineAnalytics } from "./home-consent-checks";
 
 export async function verifyEmailFallback(browser: Browser, base: string) {
   const context = await browser.newContext({ userAgent: platformVisitors.android.userAgent, viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
@@ -9,6 +10,7 @@ export async function verifyEmailFallback(browser: Browser, base: string) {
   await page.route("**/api/beta", route => route.fulfill({ status: 503, json: { ok: false, error: "Please try again" } }));
   try {
     await page.goto(`${base}/more?phone=ios&testflight=unavailable#testflight`);
+    await declineAnalytics(page);
     const root = page.locator("#testflight");
     assert.ok(await root.locator("[data-testflight-link]").isHidden(), "an unavailable public link cannot send visitors into a redirect loop");
     assert.ok(await root.locator("[data-testflight-unavailable]").isVisible());

@@ -5,6 +5,7 @@ import { mkdir } from "node:fs/promises";
 import { resolve } from "node:path";
 import { chromium } from "playwright-core";
 import { verifyStaticHome } from "./home-static-checks";
+import { declineAnalytics } from "./home-consent-checks";
 import { verifyFox } from "./home-fox-checks";
 import { verifyHomeContent } from "./home-content-checks";
 import { verifyDeviceInstalls, verifyLinuxRune, verifyRuneDock } from "./home-platform-checks";
@@ -41,6 +42,7 @@ try {
     });
   });
   await page.goto(`${base}/`);
+  await declineAnalytics(page);
   await verifyHomeContent(page);
   assert.equal(await page.locator("#home-light iframe").count(), 0, "no live app exists before scrolling");
   assert.ok(await page.locator(".client-comparison").isVisible(), "real product screenshots lead the page");
