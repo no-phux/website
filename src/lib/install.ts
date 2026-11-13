@@ -20,7 +20,7 @@ export type InstallTarget = { id: "cli" | "rune" | "mobile"; label: string; comm
 export const installTargets: InstallTarget[] = [
   { id: "cli", label: "CLI", command: cliInstall, note: "macOS and Linux · installs phux and phux-mcp" },
   { id: "rune", label: "Rune", command: runeInstall, note: "Apple-silicon Mac (macOS 14+) · or install from a terminal on macOS or Linux (x86_64 or arm64). Installs the phux CLI too if none is found." },
-  { id: "mobile", label: "Mobile", command: "", note: "No install: open the demo, press Enter, scan the QR, then drive the shell from your phone. Beta: TestFlight on iPhone, Google Play testing on Android." },
+  { id: "mobile", label: "Mobile", command: "", note: "No install: open the demo, press Enter, scan the QR, then drive the shell from your phone. Beta: TestFlight on iPhone." },
 ];
 
 /** The latest Apple-silicon Rune DMG; the site worker resolves it per click (host/download.ts). */

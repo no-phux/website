@@ -120,7 +120,8 @@ try {
   assert.equal(await target("mobile").getAttribute("aria-pressed"), "true", "the clicked target is pressed");
   assert.ok(await request.isVisible(), "Mobile asks for an address instead of printing a command");
   assert.equal(await line.isHidden(), true, "the command line steps aside for the request form");
-  assert.match(await page.locator("#install-note").innerText(), /TestFlight/, "the note describes the mobile target");
+  assert.match(await page.locator("#install-note").innerText(), /TestFlight on iPhone/, "the note describes the mobile target");
+  assert.doesNotMatch(await page.locator("#install-note").innerText(), /Google Play|Play Store|Android/i, "the mobile note does not offer Android testing");
   await target("mobile").focus();
   await page.keyboard.press("ArrowLeft");
   assert.ok(await download.isVisible(), "arrow keys move the target back to Rune");
@@ -153,13 +154,7 @@ try {
   assert.equal(beta.payload?.email, "iphone@example.com", "the hero request posts the address");
   assert.equal(beta.payload?.website, "", "the honeypot stays empty");
   assert.equal(beta.payload?.platform, "ios", "a computer is offered the iPhone beta first");
-  await request.getByRole("button", { name: "Android instead" }).click();
-  assert.equal(await request.locator("input[name=email]").getAttribute("aria-label"), "Email address for the Google Play test", "the switch re-labels the address");
-  await request.locator("input[name=email]").fill("android@example.com");
-  await request.locator("button[type=submit]").click();
-  await page.waitForFunction(() => document.querySelector("#beta-note")?.textContent?.includes("Google Play") ?? false);
-  assert.equal(beta.payload?.platform, "android", "the Android request says so");
-  assert.ok(await request.getByRole("button", { name: "iPhone instead" }).isVisible(), "the switch offers the way back");
+  assert.equal(await request.getByRole("button", { name: "Android instead" }).count(), 0, "the mobile target does not offer Google Play testing");
   for (const width of [320, 390, 768, 1280]) {
     await page.setViewportSize({ width, height: width < 600 ? 740 : 900 });
     await page.locator(".install-options").evaluate((node: HTMLDetailsElement) => { node.open = false; });
@@ -188,6 +183,9 @@ try {
   assert.equal(await page.locator("dialog[open]").count(), 0);
   assert.ok(await page.getByRole("link", { name: "Open demo", exact: true }).evaluate((link) => link === document.activeElement), "closing restores focus");
   await page.goto(`${base}/more`);
+  assert.equal(await page.locator("#testflight > h2").innerText(), "phux on iPhone");
+  assert.equal(await page.locator("#testflight > p").first().innerText(), "Drive the same terminals from your iPhone. In beta on TestFlight.");
+  assert.doesNotMatch(await page.locator("#testflight").innerText(), /Google Play|Play Store|Android/i);
   assert.equal(await page.getByRole("link", { name: /Built for automation/ }).getAttribute("href"), "https://docs.phux.sh/agents");
   assert.ok(await page.locator("#testflight form").isHidden(), "email is optional and does not summon a keyboard");
   await page.locator("#testflight [data-email-invite] > summary").click();

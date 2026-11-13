@@ -42,11 +42,9 @@ export async function verifyDeviceInstalls(browser: Browser, base: string, artif
         await page.locator('[data-install-target="mobile"]').click();
         assert.ok(await page.locator("#beta-form").isHidden(), "optional iOS email entry stays closed");
         await page.locator("[data-email-invite] > summary").click();
-      }
-      await verifyInstallTarget(page, action);
-      if (action.phone) {
         await verifyEmailSubmission(page, device, action.phone, payload);
       }
+      await verifyInstallTarget(page, action);
       await page.getByText("All platforms", { exact: true }).first().waitFor();
     } finally {
       await context.close();
@@ -138,12 +136,6 @@ async function verifyEmailSubmission(page: Page, device: string, phone: Phone, p
   assert.equal(payload.email, `${device}@example.com`);
   assert.ok(await email.evaluate(node => node !== document.activeElement), "success dismisses the email keyboard");
   assert.ok(await page.locator(".closing-command").isHidden());
-  if (phone === "android") {
-    await page.locator("#beta-phone").click();
-    await page.locator(".download-final").focus();
-    await page.locator(".download-final").press("Enter");
-    assert.equal(await form.getAttribute("data-phone"), phone, "closing action retains its advertised phone");
-  }
 }
 
 async function verifyKeyboardViewport(page: Page) {

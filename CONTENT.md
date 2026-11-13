@@ -150,8 +150,8 @@ capture, four exhibits (agents, scripting, machines, Crew), the browser demo,
 and the floating CLI / Desktop install switcher. Desktop is the Phux Rune DMG
 (`/download/rune`, with the curl installer as the alternative). Desktop and
 terminal installs name their actual platform requirements, including the native
-Windows client's WSL 2 coordinator. Phone browsers retain TestFlight/Android
-beta access rather than a Mac download. The release-update signup lives on
+Windows client's WSL 2 coordinator. Phone browsers retain TestFlight only
+rather than a Mac download. The release-update signup lives on
 `/more`.
 
 Each exhibit pairs a statement with a transcript. A transcript is output phux

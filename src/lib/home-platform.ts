@@ -43,14 +43,16 @@ export async function detectLinuxArch(visitor: LinuxVisitor | undefined): Promis
 }
 
 const ios = { href: iosDownload, note: "iOS beta · Join in TestFlight", icon: "→", phone: "ios" } as const;
+const choosePlatform = { label: "Choose your platform", href: docsHref("/installation"), note: "Mac, Linux & Windows · iPhone beta on TestFlight", icon: "↗" } as const;
 export const installActions: Record<InstallPlatform, InstallAction> = {
   iphone: { ...ios, label: "Get for iPhone" },
   ipad: { ...ios, label: "Get for iPad", note: "iPadOS beta · Join in TestFlight" },
-  android: { label: "Get for Android", href: "/more#testflight", note: "Android beta · Google Play access by email", icon: "→", target: "mobile", phone: "android" },
+  // A phone cannot run the desktop installer. Android uses the same chooser as an unknown browser.
+  android: { ...choosePlatform, phone: "android" },
   mac: { label: "Download for Mac", href: runeDownload, note: "Phux Rune · Apple silicon · macOS 14 or later · Apache-2.0 · No account", icon: "↓" },
   linux: { label: "Copy install for Linux", href: "#linux-rune", note: `Phux Rune desktop app · x86_64 or arm64 · ${runeLinuxRequirements} · Installs the CLI too · Apache-2.0`, icon: "⧉", copy: runeInstall },
   windows: { label: "Install for Windows", href: docsHref("/installation"), note: "Native desktop · WSL 2 server required · CLI in WSL 2", icon: "↗" },
-  unknown: { label: "Choose your platform", href: docsHref("/installation"), note: "Mac, Linux & Windows · Mobile beta available", icon: "↗" },
+  unknown: { ...choosePlatform },
 };
 
 /** Shared hero and closing actions; never guess Mac from the viewport width. */
@@ -108,10 +110,6 @@ function openInstall(action: InstallAction) {
   const details = document.querySelector<HTMLDetailsElement>("#install-options")!;
   details.open = true;
   details.querySelector<HTMLButtonElement>(`[data-install-target="${action.target}"]`)!.click();
-  const form = details.querySelector<HTMLFormElement>("#beta-form")!;
-  if (action.phone && form.dataset.phone !== action.phone) {
-    details.querySelector<HTMLButtonElement>("#beta-phone")!.click();
-  }
   if (action.target === "mobile") {
     // Opening access is not consent to summon the keyboard. Let the visitor choose email.
     details.querySelector<HTMLElement>("[data-email-invite] > summary")!.focus({ preventScroll: true });

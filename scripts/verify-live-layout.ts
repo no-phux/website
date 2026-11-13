@@ -107,13 +107,8 @@ try {
       assert.equal(platform, "ios", "a computer is offered the iPhone beta first");
       assert.ok(await input.evaluate(node => Boolean(node.closest(".live-window"))), "email entry is inside the terminal window");
       await verifyWorkspaceLayout(hero, width);
-      await hero.getByRole("button", { name: "Android instead", exact: true }).click();
-      assert.equal(await hero.getByRole("button", { name: "Android", exact: true }).getAttribute("aria-pressed"), "true", "the mobile target follows the chosen phone");
-      await hero.getByRole("textbox", { name: "Email address for the Google Play test" }).fill("android@example.com");
-      await hero.getByRole("button", { name: "Request access", exact: true }).click();
-      await hero.getByRole("status").filter({ hasText: "Google Play" }).waitFor();
-      assert.equal(platform, "android", "the Android request says so");
-      await verifyWorkspaceLayout(hero, width);
+      assert.equal(await hero.getByRole("button", { name: "Android instead", exact: true }).count(), 0, "the live install hook does not offer Google Play testing");
+      assert.doesNotMatch(await hero.locator(".install-hook").innerText(), /Google Play|Play Store|Android/i);
     }
     if (process.env.HERO_LIVE === "1") {
       // A split happens in place: same window, one more pane, no new surface.
