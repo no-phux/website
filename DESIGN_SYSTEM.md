@@ -110,8 +110,8 @@ The primary install action follows the visitor's OS, not viewport width.
 macOS keeps the Mac download; Linux opens the CLI installer; Windows leads to
 installation instructions with the required WSL 2 coordinator noted. Desktop
 0.50.0+ publishes a native Windows client; do not rewrite that as unavailable.
-iPhone/iPad use the existing TestFlight handoff; Android opens its access options
-without forcing the keyboard. Email remains an explicit, viewport-safe alternative.
+iPhone/iPad use the existing TestFlight handoff; Android gets the generic platform chooser.
+Email remains an explicit, viewport-safe alternative.
 The closing action follows the same selection and hides the desktop shell command
 on Windows and on phone browsers.
 Static/no-JavaScript HTML uses a real installation-guide link rather than guessing
