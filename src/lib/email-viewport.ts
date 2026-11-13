@@ -41,14 +41,12 @@ function keyboardHost(): { view: Window; frame: Element | null } {
 }
 
 /** Native choices, not an automatic focus into a field under a moving viewport. */
-export function showMobileChoices(form: HTMLFormElement, phone: "ios" | "android") {
+export function showMobileChoices(form: HTMLFormElement) {
   const root = form.closest<HTMLElement>("[data-mobile-access]");
   if (!root) return;
-  root.querySelectorAll<HTMLElement>("[data-testflight-link]").forEach(link => { link.hidden = phone !== "ios" || root.dataset.testflightUnavailable === "true"; });
-  const email = root.querySelector<HTMLDetailsElement>("[data-email-invite]");
-  if (email) email.open = phone === "android";
-  const summary = email?.querySelector("summary");
-  if (summary) summary.textContent = phone === "ios" ? "Email an invite instead" : "Request Google Play access";
+  root.querySelectorAll<HTMLElement>("[data-testflight-link]").forEach(link => { link.hidden = root.dataset.testflightUnavailable === "true"; });
+  const summary = root.querySelector<HTMLElement>("[data-email-invite] > summary");
+  if (summary) summary.textContent = "Email an invite instead";
   const submit = form.querySelector<HTMLElement>("[data-invite-submit]");
-  if (submit) submit.textContent = phone === "ios" ? "Send invitation" : "Request access";
+  if (submit) submit.textContent = "Send invitation";
 }

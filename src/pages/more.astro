@@ -82,7 +82,7 @@ const FEATURES = [
   <section class="wrap join">
     <div id="testflight" class="mobile-access" data-mobile-access>
       <h2>phux for your phone</h2>
-      <p>Drive the same terminals from your phone. In beta on TestFlight and Google Play.</p>
+      <p>Drive the same terminals from your phone. In beta on TestFlight.</p>
       <p class="access-unavailable" data-testflight-unavailable hidden>TestFlight couldn’t open right now. You can request an email invitation below.</p>
       <MobileAccessForm />
       <p class="join-note" id="beta-note" role="status" aria-live="polite"></p>
@@ -253,7 +253,6 @@ const FEATURES = [
   }
   // Shared with the landing; the inline script above owns the copy/join handlers.
   const parameters = new URLSearchParams(location.search);
-  const phone = parameters.get("phone");
   const access = document.querySelector<HTMLElement>("[data-mobile-access]");
   if (parameters.get("testflight") === "unavailable" && access) {
     access.dataset.testflightUnavailable = "true";
@@ -262,8 +261,6 @@ const FEATURES = [
   wireBetaRequest(
     document.getElementById("beta-form") as HTMLFormElement | null,
     document.getElementById("beta-note"),
-    document.getElementById("beta-phone") as HTMLButtonElement | null,
-    phone === "ios" || phone === "android" ? phone : undefined,
   );
 </script>
 

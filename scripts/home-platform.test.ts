@@ -17,13 +17,17 @@ describe("device-first homepage installs", () => {
       expect(action.href === "/download/rune").toBe(platform === "mac");
     }
   });
-  test("iOS uses a native TestFlight handoff; Android retains its existing access flow", () => {
+  test("iOS uses a native TestFlight handoff; Android uses the same chooser as an unknown browser", () => {
     for (const platform of ["iphone", "ipad"] as const) {
       expect(installActions[platform].target).toBeUndefined();
       expect(installActions[platform].href).toBe("/download/ios");
     }
-    expect(installActions.android.target).toBe("mobile");
-    expect(installActions.android.href).toBe("/more#testflight");
+    expect(installActions.android.target).toBeUndefined();
+    expect(installActions.android.phone).toBe("android");
+    expect(installActions.android.href).toBe(installActions.unknown.href);
+    expect(installActions.android.label).toBe(installActions.unknown.label);
+    expect(installActions.android.note).toBe(installActions.unknown.note);
+    expect(installActions.android.note).not.toMatch(/Android|Google Play|Play Store/i);
     expect(installActions.windows.note).toContain("WSL 2 server required");
     expect(installActions.windows.label).toBe("Install for Windows");
   });
