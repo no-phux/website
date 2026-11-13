@@ -33,14 +33,21 @@ restores the current pin; use `python3 scripts/brand.py sync --archive PATH
 --sha256 SHA256` to install an explicitly checksummed release or rollback.
 
 The shared `src/components/Wordmark.tsx` uses the approved transparent mono SVG
-installed at `public/brand/images/mono-wordmark.svg`. Map the release's canonical
-mono export to that destination in `brand.config.json`, then synchronize the
-checksummed archive; do not copy geometry or private source artwork into the
-site. Until the pinned release includes it, the component preserves the existing
-text wordmark. Its mask inherits the surrounding text color, keeps the SVG's
-intrinsic proportions, and does not change body or code fonts. The home and docs
-social cards use the same pin when available, retaining their separate fox marks.
+installed at `public/brand/images/mono-wordmark.svg`. The canonical source is
+`logos/wordmark-mono.svg`, mapped in `brand.config.json`; synchronize only a
+checksummed approved archive, not private source artwork. Missing artwork fails
+the build rather than substituting typeset text. Its mask inherits surrounding
+ink, keeps the 17:7 SVG proportions and built-in clear space, and respects the
+108px minimum export width. It does not change body or code fonts. The home and
+docs social cards use the same pin, retaining their separate fox marks.
 The documentation SVG and PNG remain separate downloadable assets.
+
+For external embeds (including GitHub README `<picture>` elements), use
+`https://phux.sh/brand/images/wordmark-light.svg?v=1.5.0` on dark backgrounds and
+`https://phux.sh/brand/images/wordmark-dark.svg?v=1.5.0` on light backgrounds.
+Matching `wordmark-light-512.png` and `wordmark-dark-512.png` (also 256/1024)
+are available at the same base path. The mono SVG uses `currentColor`; use its
+CSS mask/inline form, not an external `<img>`, when it must inherit page ink.
 
 After installing a release, retain its approved ZIP, manifest and `SHA256SUMS`
 under `public/brand/releases/VERSION/` and add its checksum to

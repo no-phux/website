@@ -5,8 +5,8 @@ import { monoWordmarkUrl } from "../src/lib/brand";
 import { Wordmark } from "../src/components/Wordmark";
 
 describe("release-aware wordmark", () => {
-  test("does not request artwork missing from the pin", () => {
-    expect(monoWordmarkUrl({ version: "1.4.0", files: {} })).toBeUndefined();
+  test("rejects a pin missing the canonical artwork rather than typesetting a substitute", () => {
+    expect(() => monoWordmarkUrl({ version: "1.4.0", files: {} })).toThrow("canonical mono wordmark");
   });
 
   test("uses only the installed canonical destination and cache-busts releases", () => {
@@ -20,6 +20,7 @@ describe("release-aware wordmark", () => {
     const html = renderToStaticMarkup(createElement(Wordmark));
     expect(html).toContain('role="img"');
     expect(html).toContain('aria-label="PHUX"');
+    expect(html).toContain(`src="${monoWordmarkUrl()}"`);
   });
 
   test("can be decorative inside an explicitly named home link", () => {

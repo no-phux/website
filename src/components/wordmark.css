@@ -13,8 +13,10 @@
 
 .phux-wordmark-art > img {
   display: block;
-  width: auto;
-  height: 1em;
+  /* 30×10 glyph field plus 2-grid clear space; minimum from wordmark.json. */
+  width: max(3.4em, 108px);
+  height: auto;
+  aspect-ratio: 17 / 7;
   max-width: none;
   visibility: hidden;
 }

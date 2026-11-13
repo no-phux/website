@@ -2,7 +2,7 @@ import type { APIRoute } from "astro";
 import sharp from "sharp";
 import { resolve } from "node:path";
 import { HOME } from "../lib/site";
-import { monoWordmarkUrl, MONO_WORDMARK_DESTINATION } from "../lib/brand";
+import { MONO_WORDMARK_DESTINATION } from "../lib/brand";
 
 const xml = (value: string) => value.replace(/[&<>"']/g, char => ({
   "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&apos;",
@@ -22,17 +22,15 @@ export const GET: APIRoute = async () => {
   const [desktopImage, tuiImage, wordmark] = await Promise.all([
     sharp(desktop).resize(552, 352, { fit: "contain", background: "#080d10" }).png().toBuffer(),
     sharp(tui).resize(552, 352, { fit: "contain", background: "#080d10" }).png().toBuffer(),
-    monoWordmarkUrl()
-      ? sharp(resolve(MONO_WORDMARK_DESTINATION)).resize({ width: 166 }).ensureAlpha()
-        .linear([0, 0, 0, 1], [231, 226, 218, 0]).png().toBuffer()
-      : sharp(resolve("public/brand/images/wordmark.svg")).resize({ width: 166 }).png().toBuffer(),
+    sharp(resolve(MONO_WORDMARK_DESTINATION)).resize({ height: 59 }).ensureAlpha()
+      .linear([0, 0, 0, 1], [231, 226, 218, 0]).png().toBuffer(),
   ]);
   const image = await sharp(header).composite([
-    ...(monoWordmarkUrl() ? [{
+    {
       input: await sharp(resolve("public/brand/images/mark.svg")).resize(42, 42).png().toBuffer(),
       left: 36, top: 20,
-    }] : []),
-    { input: wordmark, left: monoWordmarkUrl() ? 90 : 36, top: 20 },
+    },
+    { input: wordmark, left: 82, top: 11 },
     { input: desktopImage, left: 36, top: 170 },
     { input: tuiImage, left: 612, top: 170 },
   ]).png().toBuffer();

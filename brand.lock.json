@@ -15,11 +15,11 @@
     },
     "logos/docs-wordmark.png": {
       "destination": "public/brand/images/wordmark.png",
-      "sha256": "cb98b384bc38c309edcff441d845fd2232bf3d0e9ae66cf528c21808c4f51a18"
+      "sha256": "d690fa9f7eae902ecd561bc02e7f06bb499e8a141cba5c861fc1b35f7d96e833"
     },
     "logos/docs-wordmark.svg": {
       "destination": "public/brand/images/wordmark.svg",
-      "sha256": "6bc7d8192283ea1dfb9dc9ab9da82af5846cfdb18b77770924304311b4694c59"
+      "sha256": "a0d8ffc6944a28a83cbcc09689e513aed84dc29d9a597d73b8c1b0913562ee66"
     },
     "logos/fox-dark.svg": {
       "destination": "public/brand/images/fox-dark.svg",
@@ -45,6 +45,58 @@
       "destination": "public/brand/images/mark.svg",
       "sha256": "e8cfccb8f5cd6c7a105b2e0607dde5b2d9b037b43e50ee3b534bea656497bf65"
     },
+    "logos/wordmark-1024.png": {
+      "destination": "public/brand/images/wordmark-1024.png",
+      "sha256": "f92877dbcc3c6bd353066446aa02d8d0d7e3dd5ebf13be9a2c824430864405fe"
+    },
+    "logos/wordmark-256.png": {
+      "destination": "public/brand/images/wordmark-256.png",
+      "sha256": "aab5c812e7cf68dc32d104fd0bbc044fb69053ab4a58a3209514e541016bdc8c"
+    },
+    "logos/wordmark-512.png": {
+      "destination": "public/brand/images/wordmark-512.png",
+      "sha256": "74b4f0d076dabc7ba7f54301c6254cb1d05a1c9f5649d268e6a76483faf8b8ab"
+    },
+    "logos/wordmark-dark-1024.png": {
+      "destination": "public/brand/images/wordmark-dark-1024.png",
+      "sha256": "05e84f0f4af3321e4673fe19ede1b0d46fd9056ae10007cac0db4ba5517c2f84"
+    },
+    "logos/wordmark-dark-256.png": {
+      "destination": "public/brand/images/wordmark-dark-256.png",
+      "sha256": "5c9dcacc48a76eb1a4c44ba1e3d2f674f9f2121ff3d51e663fc3b99d932aeae7"
+    },
+    "logos/wordmark-dark-512.png": {
+      "destination": "public/brand/images/wordmark-dark-512.png",
+      "sha256": "3a19081bde1d6ef3a8b059eee92b2007bfd3c66b6be436e0aaa5c0e9e1478371"
+    },
+    "logos/wordmark-dark.svg": {
+      "destination": "public/brand/images/wordmark-dark.svg",
+      "sha256": "4a283c7410801826945507e1eb9ae856a66a37212340196b6e43e413d7ddf42f"
+    },
+    "logos/wordmark-light-1024.png": {
+      "destination": "public/brand/images/wordmark-light-1024.png",
+      "sha256": "f92877dbcc3c6bd353066446aa02d8d0d7e3dd5ebf13be9a2c824430864405fe"
+    },
+    "logos/wordmark-light-256.png": {
+      "destination": "public/brand/images/wordmark-light-256.png",
+      "sha256": "aab5c812e7cf68dc32d104fd0bbc044fb69053ab4a58a3209514e541016bdc8c"
+    },
+    "logos/wordmark-light-512.png": {
+      "destination": "public/brand/images/wordmark-light-512.png",
+      "sha256": "74b4f0d076dabc7ba7f54301c6254cb1d05a1c9f5649d268e6a76483faf8b8ab"
+    },
+    "logos/wordmark-light.svg": {
+      "destination": "public/brand/images/wordmark-light.svg",
+      "sha256": "a0d8ffc6944a28a83cbcc09689e513aed84dc29d9a597d73b8c1b0913562ee66"
+    },
+    "logos/wordmark-mono.svg": {
+      "destination": "public/brand/images/mono-wordmark.svg",
+      "sha256": "572e06498f31e3b18acc4ae6a1e09186b0588f114337d7047188106058c2246c"
+    },
+    "tokens/wordmark.json": {
+      "destination": "public/brand/wordmark.json",
+      "sha256": "d75a20583b82fdbd94cfb141424857ed6fb7eb861dd6e4c0883377313928c7d7"
+    },
     "tooling/brand.py": {
       "destination": "scripts/brand.py",
       "sha256": "7c1b9f2253ce695d65748b10ea2b2a0cf9a22c45f0d2d2d45001dc289a603e1d"
@@ -55,8 +107,8 @@
     }
   },
   "schema": 1,
-  "sha256": "8995194fb14065225e886c3db9edba9a520d540002c88fcd05f4adfdfda1f320",
-  "source_revision": "786354266582d7144de749b4b4a19bfc57b96a38",
-  "url": "https://phux.sh/brand/releases/1.4.0/phux-brand.zip",
-  "version": "1.4.0"
+  "sha256": "2e5f120f4d8705663e11ad9a601d1d6adb8a00273ac5092ac74e870b11f847ab",
+  "source_revision": "d3fc8adf97ac57c363d951950eebe2647828d47d",
+  "url": "https://phux.sh/brand/releases/1.5.0/phux-brand.zip",
+  "version": "1.5.0"
 }

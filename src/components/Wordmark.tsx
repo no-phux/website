@@ -7,13 +7,13 @@ export function Wordmark({ decorative = false }: { decorative?: boolean }) {
   const source = monoWordmarkUrl();
   return (
     <span
-      className={`phux-wordmark${source ? " phux-wordmark-art" : ""}`}
+      className="phux-wordmark phux-wordmark-art"
       role={decorative ? undefined : "img"}
       aria-label={decorative ? undefined : "PHUX"}
       aria-hidden={decorative || undefined}
-      style={source ? { "--wordmark-source": `url("${source}")` } as CSSProperties : undefined}
+      style={{ "--wordmark-source": `url("${source}")` } as CSSProperties}
     >
-      {source ? <img src={source} alt="" aria-hidden="true" /> : "phux"}
+      <img src={source} alt="" aria-hidden="true" />
     </span>
   );
 }
