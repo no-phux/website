@@ -40,14 +40,14 @@ describe("compare page extension", () => {
     expect(text).toContain("2026-10-19");
     expect(text).toContain("checked on 2026-10-27");
     expect(text).toContain("## Compared with zellij and WezTerm");
-    expect(text).toContain("## phux and Rex");
+    expect(text).toContain("## Other multiplexers");
     expect(text).toContain("[Rex](https://www.superlogical.com/) is Superlogical's terminal multiplexer.");
-    const rex = text.slice(text.indexOf("## phux and Rex"), text.indexOf("## Where phux isn't the answer"));
-    expect(rex).toBe("## phux and Rex\n\n[Rex](https://www.superlogical.com/) is Superlogical's terminal multiplexer.\n\n");
+    const rex = text.slice(text.indexOf("## Other multiplexers"), text.indexOf("## Where phux isn't the answer"));
+    expect(rex).toBe("## Other multiplexers\n\n[Rex](https://www.superlogical.com/) is Superlogical's terminal multiplexer.\n\n");
     expect(rex).not.toContain("Apache");
     expect(text).not.toContain("If you want an open-source option");
     expect(text).toContain("## Where phux isn't the answer");
-    expect(text.indexOf("## phux and Rex")).toBeLessThan(text.indexOf("\n## Next\n"));
+    expect(text.indexOf("## Other multiplexers")).toBeLessThan(text.indexOf("\n## Next\n"));
     expect(text).not.toContain("Rex, as Superlogical's pages describe it");
     expect(text.indexOf("| zellij | WezTerm | phux |")).toBeGreaterThan(0);
     expect(text).toContain(`https://github.com/no-phux/phux/blob/${revision}/LICENSE`);

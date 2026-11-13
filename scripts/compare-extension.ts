@@ -39,7 +39,7 @@ WezTerm is the better choice for a GUI on Windows 10, FreeBSD, or NetBSD, a Lua 
 
 phux is the choice for a background server you drive with commands and JSON, a recorded agent state, or \`phux host add\` and then a QUIC attach. [Remote machines](./remote.md). The desktop and terminal UI draw with libghostty, the same emulator the server uses. [Clients](./clients.md).
 
-## phux and Rex
+## Other multiplexers
 
 [Rex](https://www.superlogical.com/) is Superlogical's terminal multiplexer.
 
