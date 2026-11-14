@@ -1,10 +1,15 @@
 {
   "schema": 1,
-  "id": "emblem-fox",
-  "name": "Emblem Fox",
+  "id": "embossed-fox",
+  "name": "Embossed Fox",
   "finish": "flat",
   "ink": "text",
   "available": [
+    {
+      "id": "embossed-fox",
+      "name": "Embossed Fox",
+      "finish": "flat"
+    },
     {
       "id": "emblem-fox",
       "name": "Emblem Fox",
