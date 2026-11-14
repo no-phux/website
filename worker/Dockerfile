@@ -80,7 +80,7 @@ RUN apt-get update \
     && apt-get install --yes --no-install-recommends \
       bash=5.2.15-2+b13 \
       build-essential=12.9 \
-      ca-certificates=20250419~deb12u1 \
+      ca-certificates=20250419~deb12u2 \
       coreutils=9.1-1 \
       curl=7.88.1-10+deb12u15 \
       fd-find=8.6.0-3 \
