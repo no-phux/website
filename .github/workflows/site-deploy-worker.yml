@@ -31,6 +31,8 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          # The shared test suite checks source dates against real history.
+          fetch-depth: 0
           persist-credentials: false
 
       - name: Resolve pinned native source
