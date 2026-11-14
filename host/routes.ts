@@ -74,6 +74,8 @@ export const DOCS_PREFIXES = [
   "/protocol-files",
   "/compatibility",
   "/development",
+  "/ci",
+  "/ci-plan",
   "/mutation-testing",
   "/windows-desktop-development",
   "/releasing",

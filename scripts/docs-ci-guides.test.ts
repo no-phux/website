@@ -4,6 +4,7 @@ import { join } from "node:path";
 import { discover } from "./docs-catalog";
 import { writeDocumentation } from "./docs-output";
 import { metadata, revision, siteRevision, source, state, useDocsSyncRoot, versions } from "./docs-sync.harness";
+import { DOCS_HOST, SITE_HOST, isDocsPath, routeRequest } from "../host/routes";
 
 useDocsSyncRoot();
 
@@ -14,6 +15,16 @@ test("publishes CI guides beside development with local links and navigation", a
   const { entries, excluded } = await discover(state.docs);
   const guides = entries.filter(({ group }) => group === "internals").sort((a, b) => a.order - b.order);
   expect(guides.map(({ slug }) => slug)).toEqual(["development", "ci", "ci-plan"]);
+  for (const { slug } of guides) {
+    for (const suffix of ["", ".html", ".md"]) {
+      const path = `/${slug}${suffix}`;
+      expect(isDocsPath(path)).toBe(true);
+      expect(routeRequest(DOCS_HOST, new URL(path, `https://${DOCS_HOST}`))).toEqual({ kind: "asset" });
+      expect(routeRequest(SITE_HOST, new URL(path, `https://${SITE_HOST}`))).toEqual({
+        kind: "redirect", location: `https://${DOCS_HOST}${path}`, status: 301,
+      });
+    }
+  }
   expect(excluded).toEqual([]);
   const out = join(state.root, "out");
   await mkdir(out);
