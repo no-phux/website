@@ -115,6 +115,8 @@ const ORIENTATION: { file: string; slug: string; group: Group; order: number; ti
   { file: "compatibility.md", slug: "compatibility", group: "internals", order: 4 },
   { file: "embedding.md", slug: "embedding", group: "internals", order: 5 },
   { file: "development.md", slug: "development", group: "internals", order: 6 },
+  { file: "ci.md", slug: "ci", group: "internals", order: 6.1 },
+  { file: "ci-plan.md", slug: "ci-plan", group: "internals", order: 6.15 },
   { file: "mutation-testing.md", slug: "mutation-testing", group: "internals", order: 6.25 },
   { file: "windows-desktop-development.md", slug: "windows-desktop-development", group: "internals", order: 6.5 },
   { file: "releasing.md", slug: "releasing", group: "internals", order: 7 },
