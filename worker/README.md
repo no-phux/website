@@ -142,6 +142,14 @@ See [release versioning](https://github.com/no-phux/phux/blob/main/docs/RELEASIN
 for how phux cuts the release this image tracks. Zig/libghostty/Ghostty ARGs
 must stay coherent with that phux revision.
 
+The certificate package is pinned to Bookworm's maintained security revision.
+Verify all package pins with
+`PHUX_CONTAINER_PACKAGE_CHECK=1 bun test worker/src/container-packages.test.ts`.
+This opt-in check uses the Dockerfile's exact amd64 runtime base and package
+setup, displays signed-repository package metadata, and checks the CA store,
+HTTPS verification, and package-manager removal in a disposable container.
+It does not build or qualify the full native image.
+
 ## Deploy
 
 Pushed automatically by `.github/workflows/site-deploy-worker.yml` on relevant
