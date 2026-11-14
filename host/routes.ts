@@ -45,6 +45,7 @@ export const DOCS_PREFIXES = [
   "/approvals",
   "/remote",
   "/ssh",
+  "/forwarding",
   "/native-terminal",
   "/hub-mail",
   "/enterprise",
@@ -56,6 +57,7 @@ export const DOCS_PREFIXES = [
   "/building",
   // Alias of /building. The worker 301s the page; Astro's redirect is the fallback.
   "/build-on",
+  "/build-a-client",
   "/any-program-status",
   "/program-protocol",
   "/program-sequences",
