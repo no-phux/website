@@ -35,6 +35,10 @@
     "1.5.0": {
       "sha256": "2e5f120f4d8705663e11ad9a601d1d6adb8a00273ac5092ac74e870b11f847ab",
       "source_revision": "d3fc8adf97ac57c363d951950eebe2647828d47d"
+    },
+    "1.6.0": {
+      "sha256": "7f2b7cf8d031e3852de4603c625524bb3f875f9569eea81d37f498cd090ba098",
+      "source_revision": "9b3a5b4233f846cbfc9b1942b186ce2273f5e6e4"
     }
   },
   "schema": 1
