@@ -76,9 +76,9 @@ export default Alchemy.Stack(
         { pattern: "phux.sh/auth/*", zoneId: "efe8d7a4ec74ca0561c8915a77714f93" },
       ],
       workersDev: false,
+      // Cost containment: keep the interactive demo, not persisted invocation logs.
       observability: {
-        enabled: true,
-        logs: { enabled: true, invocationLogs: true, persist: true },
+        enabled: false,
       },
       env: {
         // SessionDO: one per live session; runs the phux-edge WASM server
