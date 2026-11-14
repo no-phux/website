@@ -1,4 +1,5 @@
 import { describe, expect, test } from "bun:test";
+import { spawnSync } from "node:child_process";
 import { copyFile, mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -167,7 +168,7 @@ async function runStamp(
         const page = Number(url.searchParams.get("page"));
         requestedPages.push(page);
         await Bun.write(${JSON.stringify(requests)}, JSON.stringify(requestedPages));
-        if (page === ${failedPage ?? 0}) return new Response("unavailable", { status: 503 });
+        if (page === ${failedPage ?? 0}) return new Response("unavailable", { status: 403 });
         if (!pages[page - 1]) throw new Error("unexpected page " + page);
         return Response.json(pages[page - 1]);
       };
@@ -193,6 +194,27 @@ async function runStamp(
     };
   } finally {
     await rm(root, { recursive: true, force: true });
+  }
+}
+
+/** Exercise the real Astro/TypeScript consumer, restoring any warm local stamp. */
+async function checkStamp(raw: string) {
+  const root = join(import.meta.dir, "..");
+  const out = join(root, "src/lib/release.json");
+  const previous = await Bun.file(out).exists() ? await readFile(out, "utf8") : undefined;
+  try {
+    await writeFile(out, raw);
+    const options = {
+      cwd: root,
+      env: { ...process.env, PATH: `${join(root, "node_modules/.bin")}:${process.env.PATH}` },
+      encoding: "utf8" as const,
+    };
+    const sync = spawnSync(process.execPath, ["run", "--bun", "astro", "sync"], options);
+    expect(sync.status, sync.stdout + sync.stderr).toBe(0);
+    return spawnSync(process.execPath, ["run", "scripts/typecheck.ts"], options);
+  } finally {
+    if (previous === undefined) await rm(out, { force: true });
+    else await writeFile(out, previous);
   }
 }
 
@@ -257,7 +279,22 @@ describe("release stamp command", () => {
       rune: { tag: null, url: null, publishedAt: null },
     });
     expect(result.stderr).toContain("badges omitted this build");
-  });
+    expect(result.stderr).toContain("github api 403");
+    const checked = await checkStamp(result.raw);
+    expect(checked.stderr).toBe("");
+    expect(checked.status).toBe(0);
+  }, 30_000);
+
+  test("published metadata still typechecks with the Rune badge", async () => {
+    const result = await runStamp([[
+      { tag_name: "v1.2.3", html_url: "https://github.com/no-phux/phux/releases/tag/v1.2.3" },
+      { tag_name: "rune-v0.1.22", html_url: "https://github.com/no-phux/phux/releases/tag/rune-v0.1.22" },
+    ]]);
+    expect(result.stamp.rune.tag).toBe("rune-v0.1.22");
+    const checked = await checkStamp(result.raw);
+    expect(checked.stderr).toBe("");
+    expect(checked.status).toBe(0);
+  }, 30_000);
 
   test("no core release retains the existing failure policy", async () => {
     const result = await runStamp([[{ tag_name: "desktop-v0.1.0" }]]);
