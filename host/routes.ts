@@ -43,7 +43,6 @@ export const DOCS_PREFIXES = [
   "/agent-skill",
   "/acp",
   "/approvals",
-  "/onepassword",
   "/remote",
   "/ssh",
   "/forwarding",

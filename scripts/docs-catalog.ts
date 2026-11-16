@@ -81,7 +81,6 @@ const ORIENTATION: { file: string; slug: string; group: Group; order: number; ti
   { file: "agent-skill.md", slug: "agent-skill", group: "automate", order: 2.2 },
   { file: "acp.md", slug: "acp", group: "automate", order: 3 },
   { file: "approvals.md", slug: "approvals", group: "automate", order: 2.5 },
-  { file: "onepassword.md", slug: "onepassword", group: "automate", order: 2.6 },
   { file: "remote.md", slug: "remote", group: "connect", order: 0 },
   { file: "ssh.md", slug: "ssh", group: "connect", order: 0.5 },
   { file: "forwarding.md", slug: "forwarding", group: "connect", order: 0.55 },
