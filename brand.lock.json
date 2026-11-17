@@ -93,13 +93,21 @@
       "destination": "public/brand/images/mono-wordmark.svg",
       "sha256": "572e06498f31e3b18acc4ae6a1e09186b0588f114337d7047188106058c2246c"
     },
+    "tokens/css/phux-tokens.css": {
+      "destination": "src/styles/brand-tokens.css",
+      "sha256": "ed2a32faea5811d074b6ae25c054c5e91e0b0891cb043bd6ea7d968964746fbb"
+    },
+    "tokens/vocabulary.json": {
+      "destination": "src/data/vocabulary.json",
+      "sha256": "9834329807ad96296861b02157f414610b4a8cf65c78ae7b39201d114d8b5079"
+    },
     "tokens/wordmark.json": {
       "destination": "public/brand/wordmark.json",
       "sha256": "d75a20583b82fdbd94cfb141424857ed6fb7eb861dd6e4c0883377313928c7d7"
     },
     "tooling/brand.py": {
       "destination": "scripts/brand.py",
-      "sha256": "7c1b9f2253ce695d65748b10ea2b2a0cf9a22c45f0d2d2d45001dc289a603e1d"
+      "sha256": "c8b49c7cfe3c0e1fb7fc57e540b231880984f80844340a8b8af3e4b1e800419b"
     },
     "website/favicon.svg": {
       "destination": "public/favicon.svg",
@@ -107,8 +115,8 @@
     }
   },
   "schema": 1,
-  "sha256": "7f2b7cf8d031e3852de4603c625524bb3f875f9569eea81d37f498cd090ba098",
-  "source_revision": "9b3a5b4233f846cbfc9b1942b186ce2273f5e6e4",
-  "url": "https://phux.sh/brand/releases/1.6.0/phux-brand.zip",
-  "version": "1.6.0"
+  "sha256": "e82668ca59542ba3d4afd0cbcd3a5fa72f4e279a956bd8672339281addef02f9",
+  "source_revision": "2beae1fadad94eab91247b19a775890f1016ce92",
+  "url": "https://phux.sh/brand/releases/1.7.0/phux-brand.zip",
+  "version": "1.7.0"
 }
