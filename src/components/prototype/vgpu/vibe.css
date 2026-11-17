@@ -1,3 +1,4 @@
+/* style-literals: illustration. The vgpu light lab is a concept with its own art direction, pinned dark; it is not product chrome. */
 /* A field and an optical surface. Product state supplies all foreground content. */
 .variant-combo{height:100svh;min-height:620px;background:#050609;overflow:hidden}
 .variant-combo .lab-nav{position:absolute;inset:0 0 auto;height:80px;padding-inline:4.5vw;border:0;z-index:20}

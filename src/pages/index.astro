@@ -102,7 +102,7 @@ const fallback = installActions.unknown;
       <a class="download-final" data-device-install href={fallback.href}><span data-device-label>{fallback.label}</span> <span data-device-icon aria-hidden="true">{fallback.icon}</span></a>
       <a class="closing-platforms" href={docsHref("/installation")}>All platforms ↗</a>
     </div>
-    <img class="closing-fox" src={`/brand/images/mark.svg?v=${brand.version}`} width="340" height="340" alt="" aria-hidden="true" loading="lazy" />
+    <picture class="closing-fox" aria-hidden="true"><source srcset={`/brand/images/mark-dark.svg?v=${brand.version}`} media="(prefers-color-scheme: light)" /><img src={`/brand/images/mark.svg?v=${brand.version}`} width="340" height="340" alt="" loading="lazy" /></picture>
   </section>
 
   <details class="connection-details home" id="connection-details">
@@ -212,14 +212,16 @@ const fallback = installActions.unknown;
   .linux-rune-status:empty { display: none; }
   .install-request { grid-area: 1 / 1; padding-block: 10px; min-width: 0; }
   .install-note { min-height: 3.2em; margin: 10px 0 0; color: var(--phux-text-faint); font-size: var(--phux-type-micro-size); line-height: 1.6; }
-  .copy-status { min-height: var(--phux-space-s5); margin: 3px 0 0; color: var(--phux-text-dim); font-size: var(--phux-type-micro-size); }
+  /* One micro line fits inside the reserved height, so a status never moves the dock. */
+  .copy-status { min-height: var(--phux-space-s5); margin: 3px 0 0; color: var(--phux-text-dim); font-size: var(--phux-type-micro-size); line-height: var(--phux-type-micro-line-height); }
   .release-links { display: flex; flex-wrap: wrap; gap: var(--phux-space-s1) 14px; margin: 10px 0 0; color: var(--phux-text-faint); font-size: var(--phux-type-micro-size); }
   .release-links a { display: inline-flex; align-items: center; min-height: var(--phux-space-s8); }
   .closing { display: flex; align-items: center; justify-content: space-between; gap: var(--phux-space-s10); margin-top: 100px; padding-block: 62px; border-top: var(--phux-space-hairline) solid var(--phux-border-base); border-bottom: var(--phux-space-hairline) solid var(--phux-border-base); }
   .closing h2 { margin: 0; color: var(--phux-text-text); font-size: clamp(var(--phux-type-display-size), 3.6vw, 2.75rem); line-height: 1.1; font-weight: var(--phux-weight-semibold); letter-spacing: -.035em; }
   .closing-command { display: flex; gap: var(--phux-space-s2); align-items: baseline; margin: 18px 0 22px; color: var(--phux-text-text); font-size: var(--phux-type-label-size); line-height: 1.5; }
   .closing-platforms { display: inline-flex; align-items: center; min-height: var(--phux-space-touch-min); margin-inline-start: var(--phux-space-s6); color: var(--phux-text-dim); font-size: var(--phux-type-caption-size); }
-  .closing-fox { flex: none; width: 280px; height: 280px; object-fit: contain; }
+  .closing-fox { flex: none; width: 280px; height: 280px; }
+  .closing-fox img { display: block; width: 100%; height: 100%; object-fit: contain; }
   .connection-details { margin-top: 28px; margin-bottom: var(--phux-space-s12); }
   .connection-details > summary { display: flex; justify-content: space-between; align-items: center; min-height: 52px; color: var(--phux-text-faint); font-size: var(--phux-type-caption-size); list-style: none; cursor: pointer; }
   .connection-details > summary::-webkit-details-marker { display: none; }

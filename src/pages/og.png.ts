@@ -3,6 +3,13 @@ import sharp from "sharp";
 import { resolve } from "node:path";
 import { HOME } from "../lib/site";
 import { MONO_WORDMARK_DESTINATION } from "../lib/brand";
+import { brandRgb, brandToken } from "../lib/brand-tokens";
+
+// The product card is the house look in dark mode.
+const ground = brandToken("houseDark", "--phux-layer-ground");
+const ink = brandToken("houseDark", "--phux-text-text");
+const dim = brandToken("houseDark", "--phux-text-dim");
+const raised = brandToken("houseDark", "--phux-layer-raised");
 
 const xml = (value: string) => value.replace(/[&<>"']/g, char => ({
   "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&apos;",
@@ -11,19 +18,19 @@ const xml = (value: string) => value.replace(/[&<>"']/g, char => ({
 // Keep the share preview on the same real product captures as the homepage.
 export const GET: APIRoute = async () => {
   const header = Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630">
-    <rect width="1200" height="630" fill="#0c0f11"/>
+    <rect width="1200" height="630" fill="${ground}"/>
     <g font-family="Helvetica Neue, Helvetica, Arial, sans-serif">
-      <text x="36" y="126" fill="#e7e2da" font-size="40" font-weight="600" letter-spacing="-1">${xml(HOME.headline)}</text>
-      <text x="36" y="155" fill="#adb8b0" font-size="18">This one gives a phux. Open source, on your machines, no account.</text>
+      <text x="36" y="126" fill="${ink}" font-size="40" font-weight="600" letter-spacing="-1">${xml(HOME.headline)}</text>
+      <text x="36" y="155" fill="${dim}" font-size="18">This one gives a phux. Open source, on your machines, no account.</text>
     </g>
   </svg>`);
   const desktop = resolve("public/product/desktop-workspace.webp");
   const tui = resolve("public/product/tui-workspace.webp");
   const [desktopImage, tuiImage, wordmark] = await Promise.all([
-    sharp(desktop).resize(552, 352, { fit: "contain", background: "#080d10" }).png().toBuffer(),
-    sharp(tui).resize(552, 352, { fit: "contain", background: "#080d10" }).png().toBuffer(),
+    sharp(desktop).resize(552, 352, { fit: "contain", background: raised }).png().toBuffer(),
+    sharp(tui).resize(552, 352, { fit: "contain", background: raised }).png().toBuffer(),
     sharp(resolve(MONO_WORDMARK_DESTINATION)).resize({ height: 59 }).ensureAlpha()
-      .linear([0, 0, 0, 1], [231, 226, 218, 0]).png().toBuffer(),
+      .linear([0, 0, 0, 1], [...brandRgb("houseDark", "--phux-text-text"), 0]).png().toBuffer(),
   ]);
   const image = await sharp(header).composite([
     {

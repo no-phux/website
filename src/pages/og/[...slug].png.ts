@@ -4,8 +4,12 @@ import sharp from "sharp";
 import { resolve } from "node:path";
 import { SITE } from "../../lib/site";
 import { MONO_WORDMARK_DESTINATION } from "../../lib/brand";
+import { brandRgb, brandToken } from "../../lib/brand-tokens";
 
 // Per-page social cards: the reader's paper and ink, the page title and summary.
+const paper = brandToken("readerLight", "--phux-layer-ground");
+const ink = brandToken("readerLight", "--phux-text-text");
+const dim = brandToken("readerLight", "--phux-text-dim");
 export async function getStaticPaths() {
   return (await getCollection("docs")).map((page) => ({
     params: { slug: page.id },
@@ -47,16 +51,16 @@ export const GET: APIRoute = async ({ props }) => {
   const titleY = 250;
   const summaryY = titleY + (title.length - 1) * 78 + 86;
   const wordmark = await sharp(resolve(MONO_WORDMARK_DESTINATION))
-    .resize({ height: 46 }).ensureAlpha().linear([0, 0, 0, 1], [18, 19, 16, 0])
+    .resize({ height: 46 }).ensureAlpha().linear([0, 0, 0, 1], [...brandRgb("readerLight", "--phux-text-text"), 0])
     .png().toBuffer({ resolveWithObject: true });
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
-  <rect width="${W}" height="${H}" fill="#f5f5f3"/>
+  <rect width="${W}" height="${H}" fill="${paper}"/>
 
-  <text x="${PAD + 60 + wordmark.info.width}" y="${PAD + 18}" font-family="${SANS}" font-size="28" fill="#6b6c66" font-weight="400">docs</text>
-  <text x="${PAD}" y="${titleY}" font-family="${SANS}" font-size="68" fill="#121310" font-weight="500" letter-spacing="-1.4">${tspans(title, PAD, 78)}</text>
-  <text x="${PAD}" y="${summaryY}" font-family="${SANS}" font-size="30" fill="#5d5e58">${tspans(summary, PAD, 42)}</text>
-  <path d="M${PAD} ${H - PAD - 34}H${W - PAD}" stroke="#1b1c19" stroke-opacity="0.12" stroke-width="2"/>
-  <text x="${PAD}" y="${H - PAD + 6}" font-family="${MONO}" font-size="24" fill="#6b6c66">${xml(`${SITE.docsDomain}/${page.id}`)}</text>
+  <text x="${PAD + 60 + wordmark.info.width}" y="${PAD + 18}" font-family="${SANS}" font-size="28" fill="${dim}" font-weight="400">docs</text>
+  <text x="${PAD}" y="${titleY}" font-family="${SANS}" font-size="68" fill="${ink}" font-weight="500" letter-spacing="-1.4">${tspans(title, PAD, 78)}</text>
+  <text x="${PAD}" y="${summaryY}" font-family="${SANS}" font-size="30" fill="${dim}">${tspans(summary, PAD, 42)}</text>
+  <path d="M${PAD} ${H - PAD - 34}H${W - PAD}" stroke="${ink}" stroke-opacity="0.12" stroke-width="2"/>
+  <text x="${PAD}" y="${H - PAD + 6}" font-family="${MONO}" font-size="24" fill="${dim}">${xml(`${SITE.docsDomain}/${page.id}`)}</text>
 </svg>`;
   const fox = await sharp(resolve("public/brand/images/mark-dark.svg")).resize(52, 52).png().toBuffer();
   const image = await sharp(Buffer.from(svg)).composite([

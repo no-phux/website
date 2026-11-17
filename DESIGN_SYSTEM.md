@@ -65,7 +65,9 @@ See them rendered as this site renders them at `/_design`.
 
 | Surface | Selector | Mode |
 |---|---|---|
-| Marketing (`BaseLayout`, `/embed`, `/concepts`) | `data-design="terminal"`, `data-theme="dark"` | the house look, dark. Marketing stays dark until every component reads tokens (the ratchet below reaches zero), then follows the system. |
+| Marketing (`BaseLayout`, `/embed`, `/connect`) | `data-design="terminal"`, no `data-theme` | the house look in the system appearance (`prefers-color-scheme`); `theme-color` follows it too |
+| Concepts (`/concepts/vgpu`) | `data-theme="dark"` | the vgpu light lab, an illustration with its own art direction, pinned dark |
+| Fixed-mode specimens (`/brand` surfaces) | `data-theme="dark"` or `"light"` on the element | the brand tokens of that mode, whatever the page's mode |
 | Documentation | `data-design="reader"` with a `.dark`/`.light` class | the reader variant, following the Light/Dark/System selector |
 | Live shell | `.terminal-surface` | glass in the page's mode; program output is not recoloured |
 
@@ -282,11 +284,12 @@ key, and drawer checks.
   `box-shadow` literals, pixel `font-size` and physical inline properties are
   counted per file under `src/`. A file may not rise above
   `scripts/style-literals.baseline.json` and a new file may not add any. Only
-  `brand-tokens.css` and `reader/tokens.css` own literals; motion scenes under
-  `src/components/motion/` may opt out with a `style-literals: illustration`
-  header. Lower a file's count when you touch it; rewrite the baseline only in a
-  cleanup commit (`bun run scripts/check-style-literals.ts --write-baseline`).
-  The target is an empty baseline.
+  `brand-tokens.css` and `reader/tokens.css` own literals. Illustrations under
+  `src/components/motion/`, the vgpu light lab (`src/components/prototype/vgpu/`)
+  and the 3D fox's lighting (`src/components/fox/`) may opt out with a
+  `style-literals: illustration` header; product chrome never does. The baseline
+  is empty: new code reads `var(--phux-*)`, and raster or `<meta>` values read
+  `brandToken()`/`brandRgb()` from `src/lib/brand-tokens.ts`.
 - `scripts/brand-tokens.test.ts` fails when a stylesheet names a token the brand
   does not define, or when a mode the site relies on disappears.
 - `/_design` (noindex, not in the sitemap) renders every role, the status ladder

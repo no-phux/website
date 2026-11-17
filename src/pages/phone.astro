@@ -34,11 +34,11 @@ import { SITE } from "../lib/site";
 <style>
   .phone { width: min(100%, 620px); margin: auto; padding-inline: 16px; box-sizing: border-box; display: grid; gap: 12px; align-content: start; }
   .phone-head { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; margin-top: 18px; }
-  .phone-head h1 { margin: 0; font-size: 22px; font-weight: 650; letter-spacing: -0.03em; }
-  .phone-app { flex: none; display: inline-flex; align-items: center; gap: 5px; min-height: 32px; padding: 0; color: var(--color-signal); font-size: 13px; font-weight: 600; text-decoration: none; }
+  .phone-head h1 { margin: 0; font-size: var(--phux-type-title-size); font-weight: 650; letter-spacing: -0.03em; }
+  .phone-app { flex: none; display: inline-flex; align-items: center; gap: 5px; min-height: 32px; padding: 0; color: var(--color-signal); font-size: var(--phux-type-label-size); font-weight: 600; text-decoration: none; }
   .phone-app:hover { text-decoration: underline; text-underline-offset: 3px; }
-  .phone-app:focus-visible { outline: 2px solid var(--color-signal); outline-offset: 3px; border-radius: 4px; }
-  .phone-lede { margin: 0 0 6px; color: var(--color-muted); font-size: 13px; line-height: 1.6; }
+  .phone-app:focus-visible { outline: 2px solid var(--color-signal); outline-offset: 3px; border-radius: var(--phux-radius-xs); }
+  .phone-lede { margin: 0 0 6px; color: var(--color-muted); font-size: var(--phux-type-label-size); line-height: 1.6; }
   .phone-lede em { color: var(--color-fg); font-style: normal; font-weight: 600; }
   @media (max-width: 420px) {
     .phone-head { align-items: flex-start; flex-direction: column; gap: 6px; }

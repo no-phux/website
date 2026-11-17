@@ -5,14 +5,14 @@ const clients = [
 ];
 ---
 <figure class="client-comparison" data-comparison aria-label="Compare the real phux TUI and Desktop workspace">
-  <div class="comparison-stage" style="--reveal: 50%">
+  <div class="comparison-stage" style="--reveal: 38%">
     {clients.map(client => (
       <a class={`client-layer client-${client.id}`} href={client.src} data-product-image aria-label={`Enlarge ${client.label} screenshot`}>
         <img src={client.src} width="3088" height="1740" alt={client.alt} loading="eager" fetchpriority="high" />
       </a>
     ))}
     <div class="comparison-divider" aria-hidden="true"><span>‹ ›</span></div>
-    <input class="comparison-range" type="range" min="0" max="100" value="50" step="1" aria-label="Reveal desktop client" aria-valuetext="50% desktop client" hidden />
+    <input class="comparison-range" type="range" min="0" max="100" value="38" step="1" aria-label="Reveal desktop client" aria-valuetext="38% desktop client" hidden />
   </div>
   <figcaption>
     <button type="button" data-client-position="0" hidden>TUI</button>
@@ -61,28 +61,28 @@ const clients = [
   dialog.addEventListener("click", event => { if (event.target === dialog) dialog.close(); });
 </script>
 <style>
-  .client-comparison { width: 100%; margin: 0; text-align: left; }
-  .comparison-stage { position: relative; aspect-ratio: 3088 / 1740; overflow: hidden; isolation: isolate; border: 1px solid #c8d0c038; border-radius: 16px; background: #080d10; box-shadow: 0 1px #f4efe616 inset, 0 24px 100px #0005; }
+  .client-comparison { width: 100%; margin: 0; text-align: start; }
+  .comparison-stage { position: relative; aspect-ratio: 3088 / 1740; overflow: hidden; isolation: isolate; border: var(--phux-space-hairline) solid var(--phux-border-base); border-radius: var(--phux-radius-lg); background: var(--phux-layer-raised); box-shadow: var(--phux-elevation-floating); }
   .client-layer { position: absolute; inset: 0; display: block; cursor: zoom-in; }
   .client-layer img { display: block; width: 100%; height: 100%; object-fit: contain; }
   .client-gui { clip-path: inset(0 0 0 calc(100% - var(--reveal))); }
-  .comparison-divider { position: absolute; inset: 0 auto 0 calc(100% - var(--reveal)); width: 1px; background: #e7e2da; z-index: 2; pointer-events: none; }
-  .comparison-divider > span { position: absolute; left: 0; top: 50%; display: grid; place-items: center; transform: translate(-50%, -50%); width: 40px; height: 40px; border: 1px solid #f4efe6aa; border-radius: 50%; background: #e7e2da; box-shadow: 0 3px 24px #0007; color: #171a1e; font: 600 15px var(--font-reading); }
+  .comparison-divider { position: absolute; inset: 0 auto 0 calc(100% - var(--reveal)); width: var(--phux-space-hairline); background: var(--phux-accent-accent); z-index: 2; pointer-events: none; }
+  .comparison-divider > span { position: absolute; inset-inline-start: 0; top: 50%; display: grid; place-items: center; transform: translate(-50%, -50%); width: var(--phux-space-s10); height: var(--phux-space-s10); border: var(--phux-space-hairline) solid var(--phux-accent-hi); border-radius: var(--phux-radius-full); background: var(--phux-accent-accent); box-shadow: var(--phux-elevation-floating); color: var(--phux-accent-on-accent); font: var(--phux-weight-semibold) var(--phux-type-lead-size) var(--font-reading); }
   .comparison-range { appearance: none; -webkit-appearance: none; position: absolute; z-index: 3; inset: calc(50% - 22px) -22px auto; width: calc(100% + 44px); height: 44px; margin: 0; background: transparent; cursor: ew-resize; direction: rtl; touch-action: pan-y; }
   .comparison-range::-webkit-slider-thumb { appearance: none; width: 44px; height: 44px; background: transparent; }
   .comparison-range::-moz-range-thumb { width: 44px; height: 44px; background: transparent; border: 0; }
   .comparison-range:focus-visible { outline: none; }
-  .comparison-stage:has(.comparison-range:focus-visible) .comparison-divider > span { outline: 2px solid #e7e2da; outline-offset: 4px; }
+  .comparison-stage:has(.comparison-range:focus-visible) .comparison-divider > span { outline: var(--phux-focus-ring-width) solid var(--phux-border-focus); outline-offset: var(--phux-focus-ring-offset); }
   figcaption { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-top: 4px; }
-  figcaption button { min-height: 44px; padding: 0 4px; border: 0; background: none; color: #a3afa5; font: 12px var(--font-reading); cursor: pointer; }
-  figcaption button[aria-pressed=true] { color: #ededee; text-decoration: underline; text-underline-offset: 4px; }
-  .comparison-hint { color: #8a978d; font-size: 11px; }
-  .product-image { width: min(1600px, calc(100vw - 32px)); max-width: none; max-height: calc(100dvh - 32px); padding: 44px 12px 12px; border: 1px solid #c2d6e32a; border-radius: 14px; background: #101517; color: #eee; }
-  .product-image::backdrop { background: #000d; }
+  figcaption button { min-height: 44px; padding: 0 4px; border: 0; background: none; color: var(--phux-text-dim); font: var(--phux-type-caption-size) var(--font-reading); cursor: pointer; }
+  figcaption button[aria-pressed=true] { color: var(--phux-text-text); text-decoration: underline; text-underline-offset: 4px; }
+  .comparison-hint { color: var(--phux-text-faint); font-size: var(--phux-type-micro-size); }
+  .product-image { width: min(1600px, calc(100vw - 32px)); max-width: none; max-height: calc(100dvh - 32px); padding: 44px 12px 12px; border: var(--phux-space-hairline) solid var(--phux-border-base); border-radius: var(--phux-radius-lg); background: var(--phux-layer-overlay); color: var(--phux-text-text); box-shadow: var(--phux-elevation-overlay); }
+  .product-image::backdrop { background: var(--phux-layer-scrim); }
   .product-image img { display: block; max-width: 100%; max-height: calc(100dvh - 104px); margin: auto; object-fit: contain; }
-  .product-image button { position: absolute; top: 0; right: 4px; width: 44px; height: 44px; border: 0; background: none; color: inherit; font: 28px var(--font-reading); cursor: pointer; }
+  .product-image button { position: absolute; top: 0; inset-inline-end: var(--phux-space-s1); width: var(--phux-space-touch-min); height: var(--phux-space-touch-min); border: 0; background: none; color: inherit; font: var(--phux-type-display-size) var(--font-reading); cursor: pointer; }
   [hidden] { display: none !important; }
-  @media (max-width: 600px) { .comparison-stage { border-radius: 8px; } }
+  @media (max-width: 600px) { .comparison-stage { border-radius: var(--phux-radius-md); } }
   @media (scripting: none) {
     .comparison-stage { display: grid; grid-template-columns: 1fr 1fr; aspect-ratio: auto; }
     .client-layer { position: static; clip-path: none; }

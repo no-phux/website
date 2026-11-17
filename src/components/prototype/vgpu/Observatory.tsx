@@ -1,3 +1,4 @@
+// style-literals: illustration. The vgpu light lab is a concept with its own art direction, pinned dark; it is not product chrome.
 import { isBrowserConcept } from "./transport";
 import { useState } from "react";
 import { Scene } from "./Scene";

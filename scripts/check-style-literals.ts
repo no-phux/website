@@ -16,9 +16,11 @@ const SCANNED = new Set([".css", ".astro", ".ts", ".tsx"]);
 /** Token-owning files, where literals are the definition. */
 export const OWNER_PATHS = new Set(["src/styles/brand-tokens.css", "src/styles/reader/tokens.css"]);
 
-/** Illustration scenes may keep literals when they carry this header. */
+/** Illustration scenes may keep literals when they carry this header: the motion
+ *  scenes, the vgpu light-lab concept (its own art direction, pinned dark), and the
+ *  3D fox's physical lighting. */
 export const ART_HEADER = "style-literals: illustration";
-const ART_ROOTS = ["src/components/motion/"];
+export const ART_ROOTS = ["src/components/motion/", "src/components/prototype/vgpu/", "src/components/fox/"];
 
 type Rule = { name: string; pattern: RegExp; css?: true };
 

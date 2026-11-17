@@ -55,8 +55,8 @@
   --font-sans: var(--font-reading);
 }
 
-/* Marketing. Pages are dark (BaseLayout sets data-theme="dark") until every
-   component reads tokens; the reader follows the system appearance. */
+/* Marketing. Like the reader, it follows the system appearance through the
+   brand tokens' light and dark blocks. */
 [data-design="terminal"] {
   --color-surface: var(--phux-layer-sidebar);
   --color-surface-raised: var(--phux-layer-raised);

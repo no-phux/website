@@ -5,15 +5,17 @@ import PhuxTerminal from "../components/PhuxTerminal";
 import GitHubBadge from "../components/GitHubBadge.astro";
 import { Wordmark } from "../components/Wordmark";
 import { SITE } from "../lib/site";
+import { brandToken } from "../lib/brand-tokens";
 ---
 
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <meta name="robots" content="noindex" />
-    <meta name="theme-color" content="#0a1016" />
+    <meta name="theme-color" content={brandToken("houseLight", "--phux-layer-ground")} media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content={brandToken("houseDark", "--phux-layer-ground")} media="(prefers-color-scheme: dark)" />
     <title>{SITE.name} — hosted terminal</title>
     <AuthReturn />
     <script is:inline>document.documentElement.dataset.embedded = String(window.self !== window.top);</script>
@@ -43,8 +45,8 @@ import { SITE } from "../lib/site";
 </html>
 
 <style>
-  html, body { min-height: 100%; margin: 0; background: #0a1016; color: #d7e4ec; }
-  body { padding: 0; background: radial-gradient(ellipse at 12% 28%, #69c6db14, transparent 56%), radial-gradient(ellipse at 88% 68%, #a798df18, transparent 55%); }
+  html, body { min-height: 100%; margin: 0; background: var(--phux-layer-ground); color: var(--phux-text-text); }
+  body { padding: 0; }
   main {
     min-height: 100dvh;
     display: grid;
@@ -55,17 +57,17 @@ import { SITE } from "../lib/site";
   }
   h1 { margin: 0; font-size: clamp(25px, 4vw, 34px); font-weight: 500; letter-spacing: -.04em; line-height: 1.2; }
   .embed-frame { width: min(1080px, 100%); min-width: 0; }
-  .embed-nav { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 30px; color: #a9becb; font-size: 12px; }
-  .embed-brand { display: inline-flex; align-items: center; min-height: 44px; color: #e1edf3; font-size: 18px; font-weight: 600; letter-spacing: -.04em; }
-  .embed-brand:hover { color: #fff; }
+  .embed-nav { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 30px; color: var(--phux-text-dim); font-size: var(--phux-type-caption-size); }
+  .embed-brand { display: inline-flex; align-items: center; min-height: 44px; color: var(--phux-text-text); font-size: var(--phux-type-lead-size); font-weight: 600; letter-spacing: -.04em; }
+  .embed-brand:hover { color: var(--phux-accent-accent-text); }
   .embed-intro { margin-bottom: 24px; }
-  .embed-intro > p { margin: 0 0 10px; color: #a1b9c8; font: 10px var(--font-code); text-transform: uppercase; letter-spacing: .1em; }
-  .embed-frame :global(.pterm) { width: 100%; box-shadow: 0 32px 100px #0005, inset 0 1px #e0efff10; }
-  .embed-note { margin: 20px 8px 0; color: #9fb3c2; font-size: 12px; text-align: center; }
-  .embed-note a { color: #c6dce8; text-decoration: underline; }
+  .embed-intro > p { margin: 0 0 10px; color: var(--phux-text-dim); font: var(--phux-type-micro-size) var(--font-code); text-transform: uppercase; letter-spacing: .1em; }
+  .embed-frame :global(.pterm) { width: 100%; box-shadow: var(--phux-elevation-overlay); }
+  .embed-note { margin: 20px 8px 0; color: var(--phux-text-dim); font-size: var(--phux-type-caption-size); text-align: center; }
+  .embed-note a { color: var(--phux-text-text); text-decoration: underline; }
   html[data-embedded="true"] :is(.embed-nav, .embed-intro, .embed-note) { display: none; }
   html[data-embedded="true"] main { padding: 8px; }
-  @media (max-width: 600px) { main { align-items: start; padding-top: 12px; } .embed-nav { margin-bottom: 20px; } .embed-intro { margin-bottom: 18px; } .embed-note { text-align: left; line-height: 1.7; } }
-  noscript p { color: #aaaab1; font-size: 13px; }
+  @media (max-width: 600px) { main { align-items: start; padding-top: 12px; } .embed-nav { margin-bottom: 20px; } .embed-intro { margin-bottom: 18px; } .embed-note { text-align: start; line-height: 1.7; } }
+  noscript p { color: var(--phux-text-dim); font-size: var(--phux-type-label-size); }
   noscript a { text-decoration: underline; }
 </style>

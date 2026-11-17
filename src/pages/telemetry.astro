@@ -83,7 +83,7 @@ const description =
     letter-spacing: -0.02em;
   }
   .lede {
-    color: var(--fg-muted, #565f89);
+    color: var(--phux-text-dim);
     max-width: 62ch;
     margin-bottom: 32px;
   }
@@ -94,18 +94,18 @@ const description =
     margin-bottom: 24px;
   }
   .tile {
-    border: 1px solid var(--line, #232433);
-    border-radius: 10px;
+    border: var(--phux-space-hairline) solid var(--phux-border-base);
+    border-radius: var(--phux-radius-md);
     padding: 16px;
   }
   .tile b {
     display: block;
-    font-size: 28px;
+    font-size: var(--phux-type-display-size);
     font-variant-numeric: tabular-nums;
   }
   .tile span {
-    font-size: 12px;
-    color: var(--fg-muted, #565f89);
+    font-size: var(--phux-type-caption-size);
+    color: var(--phux-text-dim);
     text-transform: uppercase;
     letter-spacing: 0.08em;
   }
@@ -116,27 +116,27 @@ const description =
     margin-bottom: 12px;
   }
   .card {
-    border: 1px solid var(--line, #232433);
-    border-radius: 10px;
+    border: var(--phux-space-hairline) solid var(--phux-border-base);
+    border-radius: var(--phux-radius-md);
     padding: 16px 18px;
     margin-bottom: 12px;
   }
   .card h2 {
-    font-size: 13px;
+    font-size: var(--phux-type-label-size);
     text-transform: uppercase;
     letter-spacing: 0.08em;
-    color: var(--fg-muted, #565f89);
+    color: var(--phux-text-dim);
     margin: 0 0 12px;
   }
   .privacy p {
     margin: 0 0 10px;
-    color: var(--fg-muted, #565f89);
-    font-size: 13px;
+    color: var(--phux-text-dim);
+    font-size: var(--phux-type-label-size);
     max-width: 80ch;
   }
   .privacy strong,
   .privacy a {
-    color: var(--fg, #c0caf5);
+    color: var(--phux-text-text);
   }
   .bars {
     display: flex;
@@ -148,7 +148,7 @@ const description =
     grid-template-columns: 180px 1fr 64px;
     align-items: center;
     gap: 10px;
-    font-size: 13px;
+    font-size: var(--phux-type-label-size);
     font-variant-numeric: tabular-nums;
   }
   .bar-row .k {
@@ -156,24 +156,25 @@ const description =
     text-overflow: ellipsis;
     white-space: nowrap;
     font-family: var(--font-code);
-    font-size: 12px;
+    font-size: var(--phux-type-caption-size);
   }
   .bar-track {
     height: 10px;
-    border-radius: 5px;
-    background: var(--line, #232433);
+    border-radius: var(--phux-radius-xs);
+    background: var(--phux-wash-selected);
     overflow: hidden;
   }
+  /* Chart series use the syntax slots, never a status tone. */
   .bar-fill {
     height: 100%;
-    background: #7aa2f7;
+    background: var(--phux-syntax-4);
   }
   .bar-row.ai .bar-fill {
-    background: #9ece6a;
+    background: var(--phux-syntax-2);
   }
   .bar-row .n {
-    text-align: right;
-    color: var(--fg-muted, #565f89);
+    text-align: end;
+    color: var(--phux-text-dim);
   }
   #spark {
     width: 100%;
@@ -181,32 +182,32 @@ const description =
     display: block;
   }
   #spark .axis {
-    stroke: var(--line, #232433);
+    stroke: var(--phux-border-base);
   }
   #spark .line {
     fill: none;
-    stroke: #7aa2f7;
+    stroke: var(--phux-syntax-4);
     stroke-width: 2;
   }
   #spark .area {
-    fill: #7aa2f7;
+    fill: var(--phux-syntax-4);
     opacity: 0.15;
   }
   .misses {
     margin-top: 12px;
-    font-size: 12px;
-    color: var(--fg-muted, #565f89);
+    font-size: var(--phux-type-caption-size);
+    color: var(--phux-text-dim);
     font-family: var(--font-code);
   }
   .foot-note {
     margin-top: 24px;
-    font-size: 13px;
-    color: var(--fg-muted, #565f89);
+    font-size: var(--phux-type-label-size);
+    color: var(--phux-text-dim);
     max-width: 72ch;
   }
   code {
     font-family: var(--font-code);
-    font-size: 12px;
+    font-size: var(--phux-type-caption-size);
   }
 </style>
 

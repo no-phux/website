@@ -28,7 +28,7 @@ const navigation = minimal ? [
 ---
 
 <!doctype html>
-<html lang="en" data-design={SITE.designMode} data-theme="dark" data-home={minimal || undefined}>
+<html lang="en" data-design={SITE.designMode} data-home={minimal || undefined}>
   <head>
     <Head title={title} description={description} type="website" />
     {minimal && <link rel="preload" href="/fonts/InterVariable.woff2" as="font" type="font/woff2" crossorigin />}
@@ -38,7 +38,7 @@ const navigation = minimal ? [
     <a class="skip" href="#main">Skip to content</a>
     <header class="site-frame">
       <nav class="nav" aria-label="Primary navigation">
-        <a class="brand" href="/" aria-label={SITE.name}>{minimal ? <span class="home-wordmark"><img src={`/brand/images/mark.svg?v=${brand.version}`} width="42" height="42" alt="" /><Wordmark decorative /></span> : <><img class="brand-fox" src={`/favicon.svg?v=${brand.version}`} alt="" width="32" height="32" /><Wordmark decorative /></>}</a>
+        <a class="brand" href="/" aria-label={SITE.name}>{minimal ? <span class="home-wordmark"><picture><source srcset={`/brand/images/mark-dark.svg?v=${brand.version}`} media="(prefers-color-scheme: light)" /><img src={`/brand/images/mark.svg?v=${brand.version}`} width="42" height="42" alt="" /></picture><Wordmark decorative /></span> : <><img class="brand-fox" src={`/favicon.svg?v=${brand.version}`} alt="" width="32" height="32" /><Wordmark decorative /></>}</a>
         <div class="links">
           {
             navigation.map((item) => (
@@ -72,7 +72,7 @@ const navigation = minimal ? [
           <span>Open source · Apache-2.0</span>
           <nav aria-label="More about phux">
             <a href="/demos">Demos</a>
-            <a class="concept-link" href="/concepts/vgpu" title="Explore the phux light lab"><span aria-hidden="true">◌</span> Concepts</a>
+            <a href="/concepts/vgpu" title="Explore the phux light lab">Concepts</a>
             <a href="/more">More</a>
             <a href="/teams">Teams</a>
             <a href="/privacy">Privacy</a>
@@ -90,7 +90,7 @@ const navigation = minimal ? [
         <nav class="foot-col" aria-label="Product">
           <h2>Product</h2>
           <a href="/demos">Demos</a>
-          <a class="concept-link" href="/concepts/vgpu" title="Explore the phux light lab"><span aria-hidden="true">◌</span> Concepts</a>
+          <a href="/concepts/vgpu" title="Explore the phux light lab">Concepts</a>
           <a href={docsHref("/getting-started")}>CLI</a>
           <a href={docsHref("/clients")}>Desktop</a>
           <a href={docsHref("/clients")}>Web</a>
@@ -136,16 +136,13 @@ const navigation = minimal ? [
   :global(html[data-home]) .nav .links { gap: 30px; }
   :global(html[data-home]) .nav .links a { display: inline-flex; align-items: center; justify-content: center; min-width: var(--phux-space-touch-min); min-height: var(--phux-space-touch-min); }
   .home-wordmark { display: inline-flex; align-items: center; gap: var(--phux-space-s2); color: var(--color-fg); font-size: var(--phux-type-display-size); font-weight: var(--phux-weight-semibold); letter-spacing: -.05em; }
-  .home-wordmark > img { display: block; width: 42px; height: 42px; }
+  .home-wordmark picture, .home-wordmark img { display: block; width: 42px; height: 42px; }
   .quiet-foot { display: flex; justify-content: space-between; flex-wrap: wrap; gap: var(--phux-space-s3) var(--phux-space-s6); border-top: var(--phux-space-hairline) solid var(--color-rule); padding-block: var(--phux-space-s5) var(--phux-space-s8); color: var(--color-dim); font-size: var(--phux-type-caption-size); }
   .quiet-foot nav { display: flex; flex-wrap: wrap; gap: var(--phux-space-s5); }
-  .concept-link span { display: inline-block; margin-inline-end: 5px; color: var(--phux-text-faint); transition: transform var(--phux-motion-control-duration) var(--phux-motion-control-easing); }
-  .concept-link:hover span, .concept-link:focus-visible span { transform: rotate(90deg); }
-  @media (prefers-reduced-motion: reduce) { .concept-link span { transition: none; } }
   .quiet-foot a, .quiet-foot .privacy-choices { display: inline-flex; align-items: center; min-height: var(--phux-space-touch-min); }
   @media (max-width: 560px) {
     :global(html[data-home]) .nav { flex-wrap: nowrap; gap: var(--phux-space-s4); }
-    :global(html[data-home]) .nav .links { flex-basis: auto; flex-wrap: nowrap; margin-inline-start: auto; gap: var(--phux-space-s4); }
+    :global(html[data-home]) .nav .links { flex-basis: auto; flex-wrap: nowrap; margin-inline-start: auto; gap: var(--phux-space-s3); }
   }
   /* Keep the full primary navigation readable and reachable on small screens. */
   @media (max-width: 560px) {

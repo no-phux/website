@@ -53,8 +53,12 @@ describe("style literal ratchet", () => {
     write("src/styles/reader/tokens.css", ":root { --y: #000; }");
     write("src/components/motion/Scene.css", `/* ${ART_HEADER} */\n.s { fill: #abc; }`);
     write("src/components/motion/Plain.css", ".s { fill: #abc; }");
+    write("src/components/prototype/vgpu/lab.css", `/* ${ART_HEADER} */\n.l { color: #abc; }`);
+    write("src/components/fox/scene.ts", `// ${ART_HEADER}\nlight("#fff");`);
+    // The header only exempts files under an art root.
+    write("src/components/Card.css", `/* ${ART_HEADER} */\n.c { color: #abc; }`);
     write("src/lib/x.test.ts", 'expect("#fff")');
     write("src/pages/a.astro", "<style>.a { color: #fff; }</style>");
-    expect(scan(root)).toEqual({ "src/components/motion/Plain.css": 1, "src/pages/a.astro": 1 });
+    expect(scan(root)).toEqual({ "src/components/Card.css": 1, "src/components/motion/Plain.css": 1, "src/pages/a.astro": 1 });
   });
 });

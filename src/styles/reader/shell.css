@@ -19,7 +19,19 @@
   overscroll-behavior: contain;
   scrollbar-width: thin;
   scrollbar-color: var(--color-faint) transparent;
-  padding: 3rem 1.25rem 2.5rem 1.75rem;
+  padding-block: 3rem 2.5rem;
+  padding-inline: 1.75rem 1.25rem;
+  /* Links that run under the viewport edge fade out instead of being cut
+     mid-glyph. The fade spans the bottom padding, so at the end of the list it
+     covers only empty space. Mask alpha only: the colour keyword is not paint. */
+  -webkit-mask-image: linear-gradient(to bottom, black calc(100% - 2.5rem), transparent);
+  mask-image: linear-gradient(to bottom, black calc(100% - 2.5rem), transparent);
+}
+@media (forced-colors: active) {
+  .reader-sidebar {
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
 }
 .reader-main {
   min-width: 0;

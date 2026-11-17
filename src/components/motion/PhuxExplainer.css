@@ -12,7 +12,7 @@
 .explainer-kicker {
   color: var(--color-cyan);
   font-family: var(--font-code);
-  font-size: 12px;
+  font-size: var(--phux-type-caption-size);
   margin: 0 0 12px;
 }
 .explainer-heading h2 {
@@ -51,21 +51,21 @@
   align-items: center;
 }
 .scenario-picker button span {
-  font: 11px var(--font-code);
+  font: var(--phux-type-micro-size) var(--font-code);
   color: var(--color-dim);
 }
 .phux-explainer button[aria-pressed="true"] {
   color: var(--color-cyan);
-  background: #131b2a;
+  background: var(--phux-wash-selected);
   box-shadow: inset 0 -2px var(--color-cyan);
 }
 .phux-explainer button:hover {
-  background: #141a28;
+  background: var(--phux-wash-hover);
 }
 .explainer-stage {
   border: 1px solid var(--color-rule);
   border-top: 0;
-  background: #090c13;
+  background: var(--phux-layer-sidebar);
 }
 .stage-toolbar {
   display: flex;
@@ -74,7 +74,7 @@
   gap: 12px;
   padding: 12px 18px;
   border-bottom: 1px solid var(--color-rule);
-  font-size: 13px;
+  font-size: var(--phux-type-label-size);
 }
 .stage-toolbar label {
   display: flex;
@@ -97,8 +97,8 @@
 }
 .signal-legend {
   display: none;
-  fill: #dcf5ff;
-  font: 11px var(--font-code);
+  fill: var(--phux-text-text);
+  font: var(--phux-type-micro-size) var(--font-code);
 }
 .compact .signal-legend {
   display: block;
@@ -107,82 +107,82 @@
   display: none;
 }
 .arrival-ring {
-  stroke: #7dcfff;
+  stroke: var(--phux-status-working);
   stroke-width: 1.5;
   fill: none;
 }
 .packet-trail {
-  stroke: #7dcfff;
+  stroke: var(--phux-status-working);
   stroke-width: 3;
   stroke-linecap: round;
   opacity: 0.6;
 }
 .host-boundary {
-  fill: #0d121c;
-  stroke: #252f47;
+  fill: var(--phux-layer-raised);
+  stroke: var(--phux-border-base);
   stroke-dasharray: 4 5;
 }
 .stage-heading,
 .host-label,
 .stage-footnote {
-  fill: #8992b8;
-  font: 11px var(--font-code);
+  fill: var(--phux-text-dim);
+  font: var(--phux-type-micro-size) var(--font-code);
   letter-spacing: 1px;
 }
 .host-label {
-  font-size: 10px;
+  font-size: var(--phux-type-micro-size);
 }
 .quiet-wires path {
-  stroke: #29324a;
+  stroke: var(--phux-border-base);
   stroke-width: 1.5;
   fill: none;
 }
 .active-wire {
-  stroke: #557d9b;
+  stroke: var(--phux-status-working-edge);
   stroke-width: 2;
   fill: none;
 }
 .stage-node rect {
-  fill: #0d131f;
-  stroke: #39435f;
+  fill: var(--phux-layer-overlay);
+  stroke: var(--phux-border-strong);
   stroke-width: 1.5;
 }
 .stage-node.landed rect {
-  stroke: #7dcfff;
+  stroke: var(--phux-status-working);
 }
 .stage-node.landed .node-port {
-  fill: #9ece6a;
+  fill: var(--phux-status-done);
 }
 .node-name {
-  fill: #c0caf5;
-  font: 17px var(--font-reading);
+  fill: var(--phux-text-text);
+  font: var(--phux-type-lead-size) var(--font-reading);
   font-weight: 500;
 }
 .node-sub {
-  fill: #8992b8;
+  fill: var(--phux-text-dim);
   font: 10px var(--font-code);
 }
 .node-port {
-  fill: #55708a;
+  fill: var(--phux-text-faint);
 }
 .stage-node.detached rect {
   stroke-dasharray: 4 5;
 }
 .stage-node.detached .node-name {
-  fill: #8992b8;
+  fill: var(--phux-text-dim);
 }
 .signal-packet {
-  fill: #dcf5ff;
+  fill: var(--phux-text-text);
 }
 .signal-packet .packet-halo {
-  fill: #7dcfff;
+  fill: var(--phux-status-working);
   opacity: 0.12;
 }
 .signal-packet text {
-  fill: #dcf5ff;
-  font: 11px var(--font-code);
+  fill: var(--phux-text-text);
+  font: var(--phux-type-micro-size) var(--font-code);
   paint-order: stroke;
-  stroke: #090c13;
+  stroke: var(--phux-layer-sidebar);
   stroke-width: 5;
   stroke-linejoin: round;
 }
@@ -207,7 +207,7 @@
   align-items: center;
   gap: 12px;
   flex: 1;
-  font-size: 12px;
+  font-size: var(--phux-type-caption-size);
   color: var(--color-muted);
 }
 .timeline-label input {
@@ -219,7 +219,7 @@
 }
 .step-counter {
   white-space: nowrap;
-  font: 12px var(--font-code);
+  font: var(--phux-type-caption-size) var(--font-code);
   color: var(--color-muted);
 }
 .explainer-story {
@@ -229,7 +229,7 @@
   padding-top: 28px;
 }
 .explainer-story h3 {
-  font-size: 24px;
+  font-size: var(--phux-type-title-size);
   letter-spacing: -0.025em;
   margin: 0 0 8px;
 }
@@ -239,7 +239,7 @@
 }
 .explainer-story a {
   color: var(--color-cyan);
-  font-size: 14px;
+  font-size: var(--phux-type-body-size);
   text-decoration: underline;
 }
 .beat-picker {
@@ -256,14 +256,14 @@
 }
 .beat-copy h4 {
   margin: 0 0 6px;
-  font-size: 17px;
+  font-size: var(--phux-type-lead-size);
 }
 .beat-copy p {
-  font-size: 15px;
+  font-size: var(--phux-type-body-size);
 }
 .motion-note {
   margin: 18px 0 0;
-  font-size: 12px;
+  font-size: var(--phux-type-caption-size);
   color: var(--color-muted);
 }
 .architecture-film {
@@ -280,8 +280,8 @@
 .architecture-film summary span {
   color: var(--color-muted);
   font-weight: 400;
-  font-size: 13px;
-  margin-left: 12px;
+  font-size: var(--phux-type-label-size);
+  margin-inline-start: 12px;
 }
 .architecture-film video {
   display: block;
@@ -291,7 +291,7 @@
 }
 .architecture-film p {
   color: var(--color-muted);
-  font-size: 13px;
+  font-size: var(--phux-type-label-size);
   max-width: 90ch;
 }
 .architecture-film a {
@@ -315,7 +315,7 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
   .scenario-picker button {
-    font-size: 13px;
+    font-size: var(--phux-type-label-size);
   }
   .explainer-story {
     grid-template-columns: 1fr;
@@ -331,7 +331,7 @@
     order: 3;
   }
   .step-counter {
-    margin-left: auto;
+    margin-inline-start: auto;
   }
   .stage-toolbar {
     padding: 12px;

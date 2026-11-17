@@ -1,5 +1,7 @@
 ---
 import VgpuPrototype from "../../components/prototype/vgpu/VgpuPrototype";
+import { brandToken } from "../../lib/brand-tokens";
+// The light lab is a concept with its own art direction and stays dark.
 ---
 <!doctype html>
 <html lang="en" data-theme="dark">
@@ -7,7 +9,7 @@ import VgpuPrototype from "../../components/prototype/vgpu/VgpuPrototype";
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="robots" content="noindex,nofollow" />
-    <meta name="theme-color" content="#09090d" />
+    <meta name="theme-color" content={brandToken("houseDark", "--phux-layer-ground")} />
     <meta name="description" content="Five interactive PHUX concepts. Explore light, work and a common language." />
     <link rel="canonical" href="https://phux.sh/concepts/vgpu" />
     <title>phux / concepts in light</title>

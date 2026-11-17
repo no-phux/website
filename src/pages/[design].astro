@@ -71,7 +71,7 @@ const toggles = [
         const root = document.documentElement;
         const reader = query.get("design") === "reader";
         root.dataset.design = reader ? "reader" : "terminal";
-        let mode = query.get("mode") ?? (reader ? "system" : "dark");
+        let mode = query.get("mode") ?? "system";
         if (query.get("contrast") === "more" && mode === "system") mode = "dark";
         // data-theme only: a .dark/.light class on <html> would also restyle the nested reader samples.
         if (mode === "dark" || mode === "light") root.dataset.theme = mode;
@@ -241,7 +241,7 @@ const toggles = [
   .type span { display: inline-block; min-width: 6em; color: var(--phux-text-faint); font: var(--phux-weight-medium) var(--phux-type-caption-size) var(--phux-font-mono); }
   .type .mono { font-family: var(--phux-font-mono); font-size: var(--phux-type-body-size); }
   .tiles { display: flex; flex-wrap: wrap; gap: var(--phux-space-s5); margin: 0 0 var(--phux-space-s6); padding: var(--phux-space-s5); list-style: none; border-radius: var(--phux-radius-lg); background: var(--phux-layer-sidebar); }
-  .tiles li { display: grid; place-items: center; width: 132px; height: 84px; background: var(--phux-layer-raised); border: var(--phux-space-hairline) solid var(--phux-border-base); border-radius: var(--phux-radius-md); color: var(--phux-text-dim); }
+  .tiles li { display: grid; place-items: center; min-width: 132px; height: 84px; padding-inline: var(--phux-space-s3); box-sizing: border-box; white-space: nowrap; font-size: var(--phux-type-caption-size); background: var(--phux-layer-raised); border: var(--phux-space-hairline) solid var(--phux-border-base); border-radius: var(--phux-radius-md); color: var(--phux-text-dim); }
   .states, .fields { display: flex; flex-wrap: wrap; align-items: center; gap: var(--phux-space-s3); }
   .control { min-height: var(--phux-space-touch-min); padding: 0 var(--phux-space-s4); border: var(--phux-space-hairline) solid var(--phux-border-control); border-radius: var(--phux-radius-sm); background: var(--phux-layer-raised); color: var(--phux-text-text); font: inherit; font-size: var(--phux-type-body-size); cursor: pointer; transition: background-color var(--phux-motion-control-duration) var(--phux-motion-control-easing), transform var(--phux-motion-press-duration) var(--phux-motion-press-easing); }
   .control:hover, .control.is-hover { background-image: linear-gradient(var(--phux-wash-hover), var(--phux-wash-hover)); }
