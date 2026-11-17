@@ -17,6 +17,7 @@ export const SITE_ALIASES = ["phux.computer", "www.phux.computer"] as const;
 export const DOCS_PREFIXES = [
   "/overview",
   "/brand-assets",
+  "/design-language",
   "/docs",
   "/installation",
   "/getting-started",
@@ -43,6 +44,7 @@ export const DOCS_PREFIXES = [
   "/agent-skill",
   "/acp",
   "/approvals",
+  "/onepassword",
   "/remote",
   "/ssh",
   "/forwarding",
