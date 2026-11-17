@@ -951,16 +951,16 @@
       "sha256": "ed2a32faea5811d074b6ae25c054c5e91e0b0891cb043bd6ea7d968964746fbb"
     },
     "tokens/derive-vectors.android.json": {
-      "bytes": 394919,
+      "bytes": 394617,
       "id": "tokens-derive-vectors-android",
       "rights": "PHUX project design tokens; brand usage guidelines apply",
-      "sha256": "9e02f317f4ce4d16e9da11220837d6a0f4fc6b29f06393406b404ecba7503044"
+      "sha256": "6d74b270c2f79677536d2bfc5242f7d4a9a27e560d682539e59f475eeaa98304"
     },
     "tokens/derive-vectors.json": {
-      "bytes": 394919,
+      "bytes": 394617,
       "id": "tokens-derive-vectors",
       "rights": "PHUX project design tokens; brand usage guidelines apply",
-      "sha256": "9e02f317f4ce4d16e9da11220837d6a0f4fc6b29f06393406b404ecba7503044"
+      "sha256": "6d74b270c2f79677536d2bfc5242f7d4a9a27e560d682539e59f475eeaa98304"
     },
     "tokens/emblem-fox.json": {
       "bytes": 2585,
@@ -1072,6 +1072,6 @@
     }
   },
   "schema": 1,
-  "source_revision": "2beae1fadad94eab91247b19a775890f1016ce92",
+  "source_revision": "82d6d4d9c08723530688708421e5c0d9994338c5",
   "version": "1.7.0"
 }
