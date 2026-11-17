@@ -4,6 +4,7 @@
 import { HOME, SITE } from "../lib/site";
 import { softwareApplicationJson } from "../lib/software-application";
 import brand from "../../brand.lock.json";
+import { brandToken } from "../lib/brand-tokens";
 
 interface Props {
   title: string;
@@ -17,6 +18,8 @@ interface Props {
 }
 
 const { title, description, type = "website", origin = SITE.url, image } = Astro.props;
+// Browser chrome matches the page ground: the reader follows the system, marketing is dark.
+const ground = "--phux-layer-ground";
 
 // build.format "file" leaves ".html" on build-time pathnames; the served
 // routes are extensionless (trailingSlash "never"), so canonicals must be too.
@@ -56,10 +59,10 @@ const jsonLd = softwareApplicationJson();
 <meta property="og:image:alt" content={ogAlt} />
 {origin === SITE.docsUrl ? (
   <>
-    <meta name="theme-color" content="#f5f5f3" media="(prefers-color-scheme: light)" />
-    <meta name="theme-color" content="#121311" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content={brandToken("readerLight", ground)} media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content={brandToken("readerDark", ground)} media="(prefers-color-scheme: dark)" />
   </>
-) : <meta name="theme-color" content="#07080b" />}
+) : <meta name="theme-color" content={brandToken("houseDark", ground)} />}
 <link rel="icon" href={`/favicon.svg?v=${brand.version}`} type="image/svg+xml" />
 <link rel="sitemap" href="/sitemap-index.xml" />
 <script is:inline type="application/ld+json" set:html={jsonLd} />

@@ -18,7 +18,7 @@
   padding: 1rem 1rem 1rem 1.25rem;
 }
 [data-design="reader"] .reader-search-head input {
-  font-size: 1.375rem;
+  font-size: var(--phux-type-title-size);
   letter-spacing: -0.015em;
   color: var(--color-fg);
 }
@@ -29,12 +29,12 @@
 [data-design="reader"] .reader-search-head input:focus-visible {
   outline: none;
 }
-/* Match highlights: ink on an accent tint, not a link-coloured underline. */
+/* Match highlights: ink on the brand match role, not a link-coloured underline. */
 [data-design="reader"] .reader-search .text-fd-primary.underline {
   color: var(--color-fg);
   text-decoration: none;
-  background: color-mix(in srgb, var(--color-accent) 18%, transparent);
-  border-radius: 3px;
+  background: var(--phux-match-bg);
+  border-radius: var(--phux-radius-xs);
 }
 [data-design="reader"] .reader-search-close {
   height: auto;
@@ -44,22 +44,22 @@
   background: transparent;
   color: var(--color-subtle);
   font-family: var(--font-code);
-  font-size: 0.75rem;
+  font-size: var(--phux-type-caption-size);
 }
 [data-design="reader"] .reader-search [role="option"],
 [data-design="reader"] .reader-search button[aria-selected] {
   border-radius: var(--radius-lg);
-  font-size: 0.875rem;
+  font-size: var(--phux-type-body-size);
 }
 [data-design="reader"] .reader-search mark {
-  background: color-mix(in srgb, var(--color-accent) 22%, transparent);
+  background: var(--phux-match-bg);
   color: var(--color-fg);
-  border-radius: 3px;
+  border-radius: var(--phux-radius-xs);
 }
 .docs-search-error {
   padding: 1.25rem;
   color: var(--color-fg);
-  font-size: 0.9375rem;
+  font-size: var(--phux-type-lead-size);
 }
 .docs-search-error p {
   margin: 0 0 0.75rem;
@@ -75,7 +75,7 @@
   cursor: pointer;
 }
 .docs-search-error a {
-  margin-left: 1rem;
+  margin-inline-start: 1rem;
   color: var(--color-fg);
   text-decoration: underline;
   text-decoration-color: var(--color-accent);

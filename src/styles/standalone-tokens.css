@@ -1,0 +1,5 @@
+/* The brand tokens for pages that do not load global.css (the vgpu concepts).
+   Importing Tailwind's theme layer makes Tailwind compile this file, which
+   resolves the token file's @theme block; it emits no utilities or reset. */
+@import "tailwindcss/theme.css" layer(theme);
+@import "./brand-tokens.css";

@@ -35,7 +35,7 @@
   align-items: center;
   gap: 0.625rem;
   color: var(--color-fg);
-  font-size: 0.9375rem;
+  font-size: var(--phux-type-lead-size);
   font-weight: 600;
   letter-spacing: -0.01em;
 }
@@ -43,12 +43,12 @@
   content: "";
   width: 1.75rem;
   height: 1.75rem;
-  border-radius: 0.4375rem;
+  border-radius: var(--phux-radius-sm);
   background: url("/favicon.svg") center / cover;
-  box-shadow: 0 0 0 1px var(--color-rule);
+  outline: var(--phux-space-hairline) solid var(--color-rule);
 }
 .reader-brand > span:not(.phux-wordmark) {
-  margin-left: -0.3rem;
+  margin-inline-start: -0.3rem;
   color: var(--color-subtle);
   font-weight: 400;
 }
@@ -68,13 +68,13 @@
   margin-bottom: 1.25rem;
   padding: 0 0.75rem;
   border: 1px solid var(--color-rule);
-  border-radius: 999px;
+  border-radius: var(--phux-radius-full);
   background: transparent;
   color: var(--color-subtle);
   font: inherit;
-  font-size: 0.875rem;
+  font-size: var(--phux-type-body-size);
   cursor: pointer;
-  transition: background-color 0.15s, border-color 0.15s;
+  transition: background-color var(--phux-motion-control-duration) var(--phux-motion-control-easing), border-color var(--phux-motion-control-duration) var(--phux-motion-control-easing);
 }
 .reader-search-button:hover {
   background: var(--color-surface);
@@ -83,13 +83,13 @@
 }
 .reader-search-label {
   flex: 1;
-  text-align: left;
+  text-align: start;
 }
 .reader-search-keys {
   display: inline-flex;
   gap: 1px;
   font-family: var(--font-reading);
-  font-size: 0.75rem;
+  font-size: var(--phux-type-caption-size);
   color: var(--color-subtle);
 }
 
@@ -104,7 +104,7 @@
   background: transparent;
   color: var(--color-subtle);
   cursor: pointer;
-  transition: background-color 0.15s, color 0.15s;
+  transition: background-color var(--phux-motion-control-duration) var(--phux-motion-control-easing), color var(--phux-motion-control-duration) var(--phux-motion-control-easing);
 }
 .reader-icon-button:hover {
   background: var(--color-wash);
@@ -130,7 +130,7 @@
 .reader-nav-label {
   margin: 0 0 0.375rem 0.25rem;
   color: var(--color-subtle);
-  font-size: 0.8125rem;
+  font-size: var(--phux-type-label-size);
   line-height: 1.4;
 }
 .reader-nav-link,
@@ -138,7 +138,7 @@
   display: block;
   padding: 0.25rem 0.25rem;
   color: var(--color-nav);
-  font-size: 0.875rem;
+  font-size: var(--phux-type-body-size);
   line-height: 1.4;
   letter-spacing: -0.005em;
   border-radius: var(--radius-sm);
@@ -154,7 +154,7 @@
   color: var(--color-subtle);
 }
 .reader-nav-folder > ul {
-  margin-left: 0.75rem;
+  margin-inline-start: 0.75rem;
 }
 
 /* The active page's outline: thin branch lines, the section in view inked. */
@@ -163,20 +163,20 @@
 }
 .reader-outline li {
   position: relative;
-  padding-left: 0.875rem;
+  padding-inline-start: 0.875rem;
 }
 .reader-outline li::before,
 .reader-outline li::after {
   content: "";
   position: absolute;
-  left: 0;
+  inset-inline-start: 0;
   border: 0 solid var(--color-faint);
   pointer-events: none;
 }
 .reader-outline li::before {
   top: 0;
   bottom: 0;
-  border-left-width: 1px;
+  border-inline-start-width: 1px;
 }
 .reader-outline li:last-child::before {
   bottom: auto;
@@ -189,7 +189,7 @@
 }
 .reader-outline li[data-depth="3"],
 .reader-outline li[data-depth="4"] {
-  padding-left: 1.625rem;
+  padding-inline-start: 1.625rem;
 }
 .reader-outline li[data-depth="3"]::after,
 .reader-outline li[data-depth="4"]::after {
@@ -199,10 +199,10 @@
   display: block;
   padding: 0.25rem 0.25rem;
   color: var(--color-subtle);
-  font-size: 0.8125rem;
+  font-size: var(--phux-type-label-size);
   line-height: 1.35;
   border-radius: var(--radius-sm);
-  transition: color 0.15s;
+  transition: color var(--phux-motion-control-duration) var(--phux-motion-control-easing);
 }
 .reader-outline-link:hover {
   color: var(--color-fg);
@@ -220,7 +220,7 @@
   gap: 0.5rem;
   margin: 2.5rem 0 0 0.25rem;
   color: var(--color-subtle);
-  font-size: 0.8125rem;
+  font-size: var(--phux-type-label-size);
 }
 .reader-sidebar-foot p {
   display: flex;
@@ -270,7 +270,7 @@
 .reader-header h1 {
   margin: 0;
   color: var(--color-fg);
-  font-size: 1.75rem;
+  font-size: var(--phux-type-display-size);
   font-weight: 500;
   line-height: 1.18;
   letter-spacing: -0.022em;
@@ -285,18 +285,18 @@
   display: flex;
   gap: 0.125rem;
   margin-top: 0.0625rem;
-  margin-right: -0.375rem;
+  margin-inline-end: -0.375rem;
 }
 .reader-actions-status {
   position: absolute;
   top: calc(100% + 0.25rem);
-  right: 0.375rem;
+  inset-inline-end: 0.375rem;
   width: max-content;
   max-width: min(20rem, 70vw);
   color: var(--color-subtle);
-  font-size: 0.8125rem;
+  font-size: var(--phux-type-label-size);
   line-height: 1.4;
-  text-align: right;
+  text-align: end;
 }
 
 /* ── Footer: previous/next, then quiet meta ─────────────────────────────── */
@@ -318,19 +318,19 @@
   min-width: 0;
   padding: 0.25rem 0;
   color: var(--color-fg);
-  font-size: 0.875rem;
+  font-size: var(--phux-type-body-size);
 }
 .reader-pager a span {
   color: var(--color-subtle);
-  font-size: 0.8125rem;
+  font-size: var(--phux-type-label-size);
 }
 .reader-pager a:hover {
-  color: var(--color-accent);
+  color: var(--color-accent-text);
 }
 .reader-pager-next {
   grid-column: 2;
   align-items: flex-end;
-  text-align: right;
+  text-align: end;
 }
 .reader-meta {
   display: flex;
@@ -338,7 +338,7 @@
   gap: 0.25rem 1rem;
   margin: 2.5rem 0 0;
   color: var(--color-subtle);
-  font-size: 0.8125rem;
+  font-size: var(--phux-type-label-size);
 }
 .reader-meta a {
   color: var(--color-subtle);
