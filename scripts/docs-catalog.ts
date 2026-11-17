@@ -124,6 +124,7 @@ const ORIENTATION: { file: string; slug: string; group: Group; order: number; ti
   { file: "releasing.md", slug: "releasing", group: "internals", order: 7 },
   { file: "substrate.md", slug: "substrate", group: "internals", order: 8 },
   { file: "brand-assets.md", slug: "brand-assets", group: "internals", order: 9 },
+  { file: "design-language.md", slug: "design-language", group: "internals", order: 9.5 },
 ];
 
 /** Reading order of the generated reference pages; unlisted ones follow alphabetically. */
