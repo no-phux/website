@@ -1,3 +1,4 @@
+// style-literals: illustration. The vgpu light lab is a concept with its own art direction, pinned dark; it is not product chrome.
 import { useEffect, useRef, useState } from "react";
 import { getGhosttyEngine, ghosttyLicenseUrl, ghosttyNoticeUrl, type GhosttyEngine, type GhosttyGrid, type GhosttyTerminal, type RGB } from "../../../lib/ghostty-vt";
 

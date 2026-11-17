@@ -25,15 +25,15 @@ const history = Object.keys(releases.releases).sort((a, b) =>
       <figure><img src={`/favicon.svg?v=${version}`} alt={`PHUX ${profile.name} website mark`} width="192" height="192" /><figcaption>Website mark</figcaption></figure>
       <figure><img src={`/brand/images/desktop.svg?v=${version}`} alt={`PHUX ${profile.name} desktop icon`} width="192" height="192" /><figcaption>Desktop icon</figcaption></figure>
       <figure><img src={`/brand/images/mobile.png?v=${version}`} alt={`PHUX ${profile.name} mobile icon`} width="192" height="192" /><figcaption>Mobile icon</figcaption></figure>
-      <figure class="wordmark dark-surface"><img src={`/brand/images/wordmark.svg?v=${version}`} alt="PHUX documentation wordmark" width="476" height="196" /><figcaption>Documentation wordmark · <a href={`/brand/images/wordmark.svg?v=${version}`} download>SVG</a> · <a href={`/brand/images/wordmark.png?v=${version}`} download>PNG</a></figcaption></figure>
-      <figure class="mono-preview dark-surface"><Wordmark /><figcaption>On graphite · <a href={`/brand/images/wordmark-light.svg?v=${version}`} download>SVG</a> · <a href={`/brand/images/wordmark-light-512.png?v=${version}`} download>PNG</a></figcaption></figure>
-      <figure class="mono-preview light-surface"><Wordmark /><figcaption>On warm stone · <a href={`/brand/images/wordmark-dark.svg?v=${version}`} download>SVG</a> · <a href={`/brand/images/wordmark-dark-512.png?v=${version}`} download>PNG</a></figcaption></figure>
+      <figure class="wordmark dark-surface" data-theme="dark"><img src={`/brand/images/wordmark.svg?v=${version}`} alt="PHUX documentation wordmark" width="476" height="196" /><figcaption>Documentation wordmark · <a href={`/brand/images/wordmark.svg?v=${version}`} download>SVG</a> · <a href={`/brand/images/wordmark.png?v=${version}`} download>PNG</a></figcaption></figure>
+      <figure class="mono-preview dark-surface" data-theme="dark"><Wordmark /><figcaption>On graphite · <a href={`/brand/images/wordmark-light.svg?v=${version}`} download>SVG</a> · <a href={`/brand/images/wordmark-light-512.png?v=${version}`} download>PNG</a></figcaption></figure>
+      <figure class="mono-preview light-surface" data-theme="light"><Wordmark /><figcaption>On warm stone · <a href={`/brand/images/wordmark-dark.svg?v=${version}`} download>SVG</a> · <a href={`/brand/images/wordmark-dark-512.png?v=${version}`} download>PNG</a></figcaption></figure>
     </section>
 
     <section class="previews" aria-label="Standalone mark variants">
       <figure><img src={`/brand/images/mark.svg?v=${version}`} alt={`PHUX ${profile.name}`} width="192" height="192" /><figcaption>{profile.name}</figcaption></figure>
-      <figure class="dark-surface"><img src={`/brand/images/mark-light.svg?v=${version}`} alt={`Light ${profile.name} mark`} width="192" height="192" /><figcaption>On graphite</figcaption></figure>
-      <figure class="light-surface"><img src={`/brand/images/mark-dark.svg?v=${version}`} alt={`Dark ${profile.name} mark`} width="192" height="192" /><figcaption>On warm stone</figcaption></figure>
+      <figure class="dark-surface" data-theme="dark"><img src={`/brand/images/mark-light.svg?v=${version}`} alt={`Light ${profile.name} mark`} width="192" height="192" /><figcaption>On graphite</figcaption></figure>
+      <figure class="light-surface" data-theme="light"><img src={`/brand/images/mark-dark.svg?v=${version}`} alt={`Dark ${profile.name} mark`} width="192" height="192" /><figcaption>On warm stone</figcaption></figure>
     </section>
 
     <section aria-labelledby="download-title">
@@ -65,26 +65,24 @@ const history = Object.keys(releases.releases).sort((a, b) =>
 <style>
   .brand-kit { max-width: 900px; padding-block: 5rem; }
   header { margin-bottom: 3rem; }
-  .eyebrow { color: var(--muted, #a4aab5); }
+  .eyebrow { color: var(--phux-text-dim); }
   h1 { font-size: clamp(2.5rem, 7vw, 5rem); line-height: 1.1; }
   h2 { font-size: 1.35rem; font-weight: 600; margin-bottom: .75rem; }
-  .download { display: inline-block; margin-block: 1rem; padding: .8rem 1.15rem; border-radius: .5rem; background: #8fdfc0; color: #090a0c; font-weight: 600; }
-  .download:hover { background: #b4ecd7; }
-  .download:focus-visible { outline: 3px solid currentColor; outline-offset: 4px; }
+  .download { display: inline-block; margin-block: 1rem; padding: .8rem 1.15rem; border-radius: var(--phux-radius-sm); background: var(--phux-accent-accent); color: var(--phux-accent-on-accent); font-weight: var(--phux-weight-semibold); }
+  .download:hover { background: var(--phux-accent-hi); color: var(--phux-accent-on-accent); }
+  .download:focus-visible { outline: var(--phux-focus-ring-width) solid var(--phux-border-focus); outline-offset: var(--phux-focus-ring-offset); }
   .intro { max-width: 40rem; font-size: 1.2rem; }
   section { margin-block: 3rem; }
   .previews { display: flex; flex-wrap: wrap; gap: 2rem; }
   figure { margin: 0; }
-  img { max-width: 100%; height: auto; border-radius: 1rem; }
-  .dark-surface { background: #171a1e; border-radius: 1rem; }
+  img { max-width: 100%; height: auto; border-radius: var(--phux-radius-lg); }
+  /* Fixed-mode specimens: data-theme pins each surface's tokens to graphite or stone. */
+  .dark-surface, .light-surface { background: var(--phux-layer-ground); color: var(--phux-text-text); border-radius: var(--phux-radius-lg); }
   .wordmark { padding: 1rem; }
-  .dark-surface figcaption { color: #e7e2da; }
-  .light-surface { background: #e7e2da; color: #171a1e; border-radius: 1rem; }
-  .light-surface figcaption { color: #171a1e; }
+  .dark-surface figcaption, .light-surface figcaption { color: var(--phux-text-text); }
   .mono-preview { padding: 1.25rem; }
   .mono-preview :global(.phux-wordmark) { font-size: clamp(24px, 6vw, 48px); }
-  .mono-preview.dark-surface { color: #e7e2da; }
-  figcaption { margin-top: .75rem; color: var(--muted, #a4aab5); }
+  figcaption { margin-top: .75rem; color: var(--phux-text-dim); }
   .checksum { display: block; overflow-wrap: anywhere; }
   details { margin-top: 1.5rem; }
   summary { cursor: pointer; }

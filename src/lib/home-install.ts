@@ -21,11 +21,11 @@ export function wireInstallTargets(copyButton: HTMLButtonElement | null) {
     tabs.style.setProperty("--pill-x", `${box.left - frame.left}px`);
     tabs.style.setProperty("--pill-width", `${box.width}px`);
   };
-  const settle = (element: HTMLElement, distance: number, duration: number) => {
+  const settle = (element: HTMLElement, distance: number, spring: Spring) => {
     if (still.matches) return;
     element.animate(
       [{ opacity: 0, transform: `translateY(${distance}px)` }, { opacity: 1, transform: "none" }],
-      { duration, easing: "cubic-bezier(.22,.61,.36,1)" },
+      brandMotion(spring),
     );
   };
   const swap = (target: HTMLButtonElement) => {
@@ -45,8 +45,8 @@ export function wireInstallTargets(copyButton: HTMLButtonElement | null) {
     download.hidden = !desktop;
     placePill(target);
     const preview = installPreview(mobile, desktop, request, download, code);
-    settle(preview.element, preview.distance, preview.duration);
-    settle(note, 4, 340);
+    settle(preview.element, preview.distance, preview.spring);
+    settle(note, 4, "pop");
   };
   targets.forEach((target, index) => {
     target.addEventListener("pointerenter", () => swap(target));
@@ -84,8 +84,22 @@ function arrowStep(key: string): number {
   return 0;
 }
 
+type Spring = "pop" | "settle";
+
+/** A brand spring as Web Animations timing, read from the synced tokens so the
+ *  linear() curve (or its cubic-bezier fallback) and settle time stay in one place. */
+function brandMotion(spring: Spring): KeyframeAnimationOptions {
+  const style = getComputedStyle(document.documentElement);
+  const duration = style.getPropertyValue(`--phux-motion-${spring}-duration`).trim();
+  const seconds = Number.parseFloat(duration);
+  return {
+    duration: Number.isFinite(seconds) ? seconds * (duration.endsWith("ms") ? 1 : 1000) : 0,
+    easing: style.getPropertyValue(`--phux-motion-${spring}-easing`).trim() || "linear",
+  };
+}
+
 function installPreview(mobile: boolean, desktop: boolean, request: HTMLElement, download: HTMLElement, code: HTMLElement) {
-  if (mobile) return { element: request, distance: 4, duration: 340 };
-  if (desktop) return { element: download, distance: 6, duration: 420 };
-  return { element: code, distance: 6, duration: 420 };
+  if (mobile) return { element: request, distance: 4, spring: "pop" as const };
+  if (desktop) return { element: download, distance: 6, spring: "settle" as const };
+  return { element: code, distance: 6, spring: "settle" as const };
 }

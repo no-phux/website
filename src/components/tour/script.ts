@@ -1,14 +1,16 @@
 // The landing tour is a scripted illustration, not a live session. Every
 // chapter is a list of timed steps applied on top of the previous chapter's
 // final state, so the story stays continuous and each frame is a pure
-// function of (chapter, time).
+// function of (chapter, time). Pane states are the brand status ladder's keys
+// and every status word comes from the synced vocabulary.
+import { statusWord } from "../../lib/vocabulary";
 
 export type NodeId = "server" | "terminal" | "desktop" | "phone" | "devbox";
 export type ClientId = "terminal" | "desktop" | "phone";
 export type PaneId = "shell" | "build" | "claude" | "train";
-export type Status = "idle" | "working" | "blocked" | "done";
+export type Status = "needs_you" | "failed" | "done" | "working" | "idle";
 export type View = "off" | "attached" | "detached";
-export type Tone = "cmd" | "dim" | "ok" | "ask" | "agent";
+export type Tone = "cmd" | "dim" | "ok" | "fail" | "ask" | "agent";
 export type Line = { text: string; tone?: Tone; typing?: boolean };
 export type Pane = { lines: Line[]; status: Status };
 export type Signal = { from: NodeId; to: NodeId; label: string; progress: number };
@@ -129,13 +131,20 @@ export const CHAPTERS: readonly Chapter[] = [
       { at: 1.08, status: "working", pane: "build" },
       { at: 1.10, line: "running 128 tests", pane: "build", tone: "dim" },
       { at: 1.12, signal: "output", from: "server", to: VIEWS },
-      { at: 1.48, line: "test result: ok. 128 passed", pane: "build", tone: "ok" },
-      { at: 1.48, status: "done", pane: "build" },
-      { at: 1.90, line: "Tests pass. Apply 0042 to staging? (y/n)", pane: "claude", tone: "ask" },
-      { at: 1.90, status: "blocked", pane: "claude" },
-      { at: 1.90, log: "@7 blocked · needs input" },
-      { at: 1.92, signal: "needs you", from: "server", to: VIEWS },
-      { at: 2.12, notice: "claude needs you · api/@7" },
+      { at: 1.40, line: "test result: FAILED. 127 passed; 1 failed", pane: "build", tone: "fail" },
+      { at: 1.40, status: "failed", pane: "build" },
+      { at: 1.40, log: `@3 ${statusWord("failed")} · 1 test` },
+      { at: 1.42, signal: "output", from: "server", to: VIEWS },
+      { at: 1.60, line: "Fixing the race in 0042_users setup", pane: "claude", tone: "dim" },
+      { at: 1.80, type: "cargo test", pane: "build", agent: true, prompt: "api > " },
+      { at: 1.96, status: "working", pane: "build" },
+      { at: 2.28, line: "test result: ok. 128 passed", pane: "build", tone: "ok" },
+      { at: 2.28, status: "done", pane: "build" },
+      { at: 2.60, line: "Tests pass. Apply 0042 to staging? (y/n)", pane: "claude", tone: "ask" },
+      { at: 2.60, status: "needs_you", pane: "claude" },
+      { at: 2.60, log: `@7 ${statusWord("needs_you")}` },
+      { at: 2.62, signal: statusWord("needs_you"), from: "server", to: VIEWS },
+      { at: 2.82, notice: `claude ${statusWord("needs_you")} · api/@7` },
     ],
   },
   {

@@ -1,0 +1,267 @@
+---
+// /_design: the website's specimen of the phux-brand tokens (noindex). Astro skips
+// files whose names start with "_", so this route emits that one path. Every value
+// on the page is read from src/styles/brand-tokens.css; nothing here restates one.
+// Query toggles: ?mode=dark|light|system, ?design=reader, ?contrast=more,
+// ?forced=active (a preview of the token map), ?dir=rtl. DESIGN_SYSTEM.md has the list.
+import BaseLayout from "../layouts/BaseLayout.astro";
+import brand from "../../brand.lock.json";
+import { tokenRules } from "../lib/brand-tokens";
+import { previewDeclarations, tokenNames } from "../lib/token-css";
+import { countLabel, statusWord } from "../lib/vocabulary";
+
+export function getStaticPaths() {
+  return [{ params: { design: "_design" } }];
+}
+
+const names = tokenNames(tokenRules);
+const companion = /-(wash|edge|glow)$/;
+const colourGroups = ["layer", "text", "border", "wash", "accent", "status", "match", "diff", "selection"].map((group) => ({
+  group,
+  tokens: names.filter((name) => name.startsWith(`--phux-${group}-`) && !companion.test(name)),
+}));
+const syntax = names.filter((name) => /^--phux-syntax-\d+$/.test(name));
+const roles = ["micro", "caption", "label", "body", "lead", "title", "display"];
+const radii = names.filter((name) => name.startsWith("--phux-radius-"));
+const tiers = ["flat", "raised", "floating", "overlay"];
+const springs = names.filter((name) => /^--phux-motion-[a-z]+-duration$/.test(name));
+
+type Mark = "needs-you" | "failed" | "done" | "working" | "ring" | "unknown" | "ended" | "bell";
+// The status ladder (brand phux.tokens.json `status`): tone colour, word and mark, always together.
+const ladder: { label: string; word: string; tone: string; mark: Mark; bold: boolean }[] = [
+  { label: "needs you", word: statusWord("needs_you"), tone: "--phux-status-needs-you", mark: "needs-you", bold: true },
+  { label: "failed", word: statusWord("failed"), tone: "--phux-status-failed", mark: "failed", bold: true },
+  { label: "lost", word: statusWord("lost"), tone: "--phux-status-failed", mark: "failed", bold: true },
+  { label: "done, unseen", word: statusWord("done"), tone: "--phux-status-done", mark: "done", bold: true },
+  { label: "working", word: statusWord("working"), tone: "--phux-status-working", mark: "working", bold: false },
+  { label: "done, seen", word: statusWord("done"), tone: "--phux-status-idle", mark: "ring", bold: false },
+  { label: "idle", word: statusWord("idle"), tone: "--phux-status-idle", mark: "ring", bold: false },
+  { label: "unknown", word: "claude", tone: "--phux-status-unknown", mark: "unknown", bold: false },
+  { label: "ended", word: statusWord("ended"), tone: "--phux-text-faint", mark: "ended", bold: false },
+  { label: "bell", word: statusWord("bell"), tone: "--phux-status-bell", mark: "bell", bold: false },
+];
+const counts = [0, 1, 2].map((n) => [countLabel("count.needs_you", n), countLabel("count.failed", n), countLabel("count.done", n)].join(" · "));
+
+const previewCss = [
+  `html[data-preview-contrast][data-theme="dark"]:not([data-design="reader"]) { ${previewDeclarations(tokenRules, "contrastDark")} }`,
+  `html[data-preview-contrast][data-theme="light"]:not([data-design="reader"]) { ${previewDeclarations(tokenRules, "contrastLight")} }`,
+  `html[data-preview-forced] { ${previewDeclarations(tokenRules, "forced")} }`,
+].join("\n");
+
+const toggles = [
+  { label: "Dark", query: "?mode=dark" },
+  { label: "Light", query: "?mode=light" },
+  { label: "System", query: "?mode=system" },
+  { label: "Reader", query: "?design=reader" },
+  { label: "Reader dark", query: "?design=reader&mode=dark" },
+  { label: "Increased contrast", query: "?contrast=more" },
+  { label: "Increased contrast, light", query: "?contrast=more&mode=light" },
+  { label: "Forced colours", query: "?forced=active" },
+  { label: "RTL", query: "?dir=rtl" },
+];
+---
+
+<BaseLayout title={`Design tokens · ${brand.version}`} description="The phux brand tokens as the website renders them.">
+  <Fragment slot="head">
+    <meta name="robots" content="noindex,nofollow" />
+    <script is:inline>
+      // Applied before first paint so the specimen never flashes the wrong mode.
+      (() => {
+        const query = new URLSearchParams(location.search);
+        const root = document.documentElement;
+        const reader = query.get("design") === "reader";
+        root.dataset.design = reader ? "reader" : "terminal";
+        let mode = query.get("mode") ?? "system";
+        if (query.get("contrast") === "more" && mode === "system") mode = "dark";
+        // data-theme only: a .dark/.light class on <html> would also restyle the nested reader samples.
+        if (mode === "dark" || mode === "light") root.dataset.theme = mode;
+        else delete root.dataset.theme;
+        if (query.get("contrast") === "more") root.dataset.previewContrast = "";
+        if (query.get("forced") === "active") root.dataset.previewForced = "";
+        if (query.get("dir") === "rtl") root.dir = "rtl";
+      })();
+    </script>
+    <style is:inline set:html={previewCss}></style>
+  </Fragment>
+
+  <div class="specimen">
+    <header class="intro">
+      <p class="eyebrow">phux-brand {brand.version} · generated tokens</p>
+      <h1>Design tokens</h1>
+      <p class="lede">Every colour, size, radius, shadow and spring on phux.sh comes from <code>src/styles/brand-tokens.css</code>,
+        synced from phux-brand. This page renders them as the
+        site does. The real accessibility modes follow the browser; the toggles preview the same token map.</p>
+      <nav class="toggles" aria-label="Preview modes">
+        {toggles.map(({ label, query }) => <a href={query} data-toggle={query}>{label}</a>)}
+      </nav>
+    </header>
+
+    <section aria-labelledby="colour">
+      <h2 id="colour">Colour roles</h2>
+      {colourGroups.map(({ group, tokens }) => (
+        <div class="group">
+          <h3>{group}</h3>
+          <ul class="swatches">
+            {tokens.map((name) => (
+              <li>
+                <span class="chip" style={`--swatch: var(${name})`}></span>
+                <code>{name.replace("--phux-", "")}</code>
+                <span class="value" data-token-value={name}></span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))}
+      <div class="group">
+        <h3>syntax</h3>
+        <pre class="code-sample"><code>{syntax.map((name, slot) => <span style={`color: var(${name})`}>{`${slot} ▇ `}</span>)}</code></pre>
+      </div>
+    </section>
+
+    <section aria-labelledby="status">
+      <h2 id="status">Status: colour, word and mark</h2>
+      <ul class="ladder">
+        {ladder.map(({ label, word, tone, mark, bold }) => (
+          <li style={`--tone: var(${tone})`} data-bold={bold ? "" : undefined}>
+            <svg class="mark" viewBox="0 0 16 16" aria-hidden="true">
+              {mark === "needs-you" && <circle cx="8" cy="8" r="4.5" fill="currentColor" />}
+              {mark === "failed" && <path d="M4.5 4.5l7 7M11.5 4.5l-7 7" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />}
+              {mark === "done" && <path d="M8 2.75 13.25 8 8 13.25 2.75 8Z" fill="currentColor" />}
+              {mark === "working" && <><circle cx="8" cy="8" r="4.5" fill="none" stroke="currentColor" stroke-width="1.4" /><path d="M8 3.5a4.5 4.5 0 0 0 0 9Z" fill="currentColor" /></>}
+              {mark === "ring" && <circle cx="8" cy="8" r="4.5" fill="none" stroke="currentColor" stroke-width="1.4" />}
+              {mark === "unknown" && <circle cx="8" cy="8" r="4.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-dasharray="1.4 2.1" />}
+              {mark === "ended" && <path d="M4.5 8h7" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" />}
+              {mark === "bell" && <path d="M5 11.5V7.5a3 3 0 0 1 6 0v4l1 1H4ZM7 14h2" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" />}
+            </svg>
+            <span class="word">{word}</span>
+            <span class="label">{label}</span>
+          </li>
+        ))}
+      </ul>
+      <ul class="counts">{counts.map((line) => <li>{line}</li>)}</ul>
+    </section>
+
+    <section aria-labelledby="type">
+      <h2 id="type">Type roles</h2>
+      <ul class="type">
+        {roles.map((role) => (
+          <li style={`font: var(--phux-type-${role}-weight) var(--phux-type-${role}-size) / var(--phux-type-${role}-line-height) var(--phux-type-${role}-family); letter-spacing: var(--phux-type-${role}-tracking); font-feature-settings: var(--phux-type-${role}-features)`}>
+            <span>{role}</span> The agent on api is waiting on you
+          </li>
+        ))}
+        <li class="mono">Paper Mono · phux attach -t api:2 · 120×36</li>
+      </ul>
+    </section>
+
+    <section aria-labelledby="shape">
+      <h2 id="shape">Radius and elevation</h2>
+      <ul class="tiles">
+        {radii.map((name) => <li style={`border-radius: var(${name})`}><code>{name.replace("--phux-", "")}</code></li>)}
+      </ul>
+      <ul class="tiles">
+        {tiers.map((tier) => <li style={`box-shadow: var(--phux-elevation-${tier})`}><code>elevation-{tier}</code></li>)}
+      </ul>
+    </section>
+
+    <section aria-labelledby="states">
+      <h2 id="states">States and materials</h2>
+      <div class="states">
+        <button type="button" class="control">Rest</button>
+        <button type="button" class="control is-hover">Hover</button>
+        <button type="button" class="control is-press">Press</button>
+        <button type="button" class="control is-focus">Focus</button>
+        <button type="button" class="control" disabled>Disabled</button>
+        <button type="button" class="control danger">End session</button>
+        <button type="button" class="metal">Download for Mac</button>
+      </div>
+      <div class="fields">
+        <label>Host <input type="text" value="studio" /></label>
+        <label>Port <input type="text" value="9x" aria-invalid="true" aria-describedby="port-error" /></label>
+        <p id="port-error" class="error">A port is a number from 1 to 65535.</p>
+      </div>
+      <div class="glass-stage">
+        <div class="glass">Glass: floating tint over the page, opaque under reduce transparency.</div>
+      </div>
+      <ul class="springs">
+        {springs.map((name) => <li><code>{name.replace("--phux-motion-", "").replace("-duration", "")}</code> <span class="value" data-token-value={name}></span></li>)}
+      </ul>
+    </section>
+
+    <section aria-labelledby="reader">
+      <h2 id="reader">The reader variant</h2>
+      <p class="note">The docs reader is <code>[data-design="reader"]</code>: paper, ink and one warm accent, with a 15/1.6 lead. Radius, space, motion and status are shared.</p>
+      <div class="readers">
+        {["light", "dark"].map((mode) => (
+          <article data-design="reader" data-theme={mode} class="reader-sample">
+            <h3>Detach and return</h3>
+            <p>A background server owns the terminal. <a href="#reader">Detach</a> leaves it running; <code>phux</code> brings you back to the same shell.</p>
+            <pre><code><span style="color: var(--phux-syntax-4)">phux</span> new <span style="color: var(--phux-syntax-3)">-s</span> <span style="color: var(--phux-syntax-2)">"agent"</span> <span style="color: var(--phux-syntax-8)"># a session for the agent</span></code></pre>
+          </article>
+        ))}
+      </div>
+    </section>
+  </div>
+</BaseLayout>
+
+<script>
+  // Show each token's resolved value where it is drawn, and mark the active toggle.
+  for (const node of document.querySelectorAll<HTMLElement>("[data-token-value]")) {
+    node.textContent = getComputedStyle(node).getPropertyValue(node.dataset.tokenValue ?? "").trim();
+  }
+  for (const link of document.querySelectorAll<HTMLAnchorElement>("[data-toggle]")) {
+    if (link.dataset.toggle === location.search) link.setAttribute("aria-current", "page");
+  }
+</script>
+
+<style>
+  .specimen { width: min(100%, 1080px); margin-inline: auto; padding: var(--phux-space-s10) var(--phux-space-page-margin) var(--phux-space-s16); box-sizing: border-box; color: var(--phux-text-text); }
+  .eyebrow { margin: 0; color: var(--phux-text-faint); font-size: var(--phux-type-caption-size); letter-spacing: var(--phux-type-caption-tracking); }
+  h1 { margin: var(--phux-space-s2) 0; font-size: var(--phux-type-display-size); line-height: var(--phux-type-display-line-height); font-weight: var(--phux-type-display-weight); letter-spacing: var(--phux-type-display-tracking); }
+  h2 { margin: var(--phux-space-s12) 0 var(--phux-space-s4); font-size: var(--phux-type-title-size); line-height: var(--phux-type-title-line-height); font-weight: var(--phux-type-title-weight); }
+  h3 { margin: var(--phux-space-s5) 0 var(--phux-space-s2); color: var(--phux-text-dim); font-size: var(--phux-type-caption-size); font-weight: var(--phux-weight-medium); letter-spacing: 0.06em; text-transform: uppercase; }
+  .lede, .note { max-width: 68ch; color: var(--phux-text-dim); font-size: var(--phux-type-body-size); line-height: var(--phux-type-body-line-height); }
+  code { font-family: var(--phux-font-mono); font-size: var(--phux-type-label-size); }
+  .toggles { display: flex; flex-wrap: wrap; gap: var(--phux-space-s2); margin-top: var(--phux-space-s5); }
+  .toggles a { display: inline-flex; align-items: center; min-height: var(--phux-space-pointer-min); padding: var(--phux-space-s1) var(--phux-space-s3); border: var(--phux-space-hairline) solid var(--phux-border-control); border-radius: var(--phux-radius-sm); color: var(--phux-text-text); font-size: var(--phux-type-label-size); }
+  .toggles a:hover { background: var(--phux-wash-hover); }
+  .toggles a[aria-current="page"] { background: var(--phux-wash-selected); border-color: var(--phux-border-strong); }
+  .swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: var(--phux-space-s2); margin: 0; padding: 0; list-style: none; }
+  .swatches li { display: grid; grid-template-columns: var(--phux-space-s8) 1fr; grid-template-rows: auto auto; column-gap: var(--phux-space-s3); align-items: center; padding: var(--phux-space-s2); border-radius: var(--phux-radius-md); background: var(--phux-layer-raised); box-shadow: var(--phux-elevation-raised); }
+  .chip { grid-row: span 2; width: var(--phux-space-s8); height: var(--phux-space-s8); border-radius: var(--phux-radius-sm); background: var(--swatch); outline: var(--phux-space-hairline) solid var(--phux-border-base); outline-offset: -1px; }
+  .value { color: var(--phux-text-faint); font-family: var(--phux-font-mono); font-size: var(--phux-type-micro-size); overflow-wrap: anywhere; }
+  .code-sample, .reader-sample pre { margin: 0; padding: var(--phux-space-s3) var(--phux-space-s4); border: var(--phux-space-hairline) solid var(--phux-border-base); border-radius: var(--phux-radius-md); background: var(--phux-layer-raised); font-family: var(--phux-font-mono); font-size: var(--phux-type-label-size); white-space: pre-wrap; }
+  .ladder { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: var(--phux-space-s2); margin: 0; padding: 0; list-style: none; }
+  .ladder li { display: flex; align-items: center; gap: var(--phux-space-icon-gap); min-height: var(--phux-space-row-h); padding-inline: var(--phux-space-row-inset-x); border-radius: var(--phux-radius-sm); background: var(--phux-layer-raised); }
+  .mark { flex: none; width: var(--phux-icon-md); height: var(--phux-icon-md); color: var(--tone); }
+  .word { color: var(--tone); font-size: var(--phux-type-caption-size); font-weight: var(--phux-weight-regular); }
+  .ladder li[data-bold] .word { font-weight: var(--phux-weight-semibold); }
+  .label { margin-inline-start: auto; color: var(--phux-text-faint); font-size: var(--phux-type-micro-size); }
+  .counts { margin: var(--phux-space-s3) 0 0; padding: 0; list-style: none; color: var(--phux-text-dim); font-size: var(--phux-type-caption-size); font-variant-numeric: tabular-nums; }
+  .type { display: grid; gap: var(--phux-space-s3); margin: 0; padding: 0; list-style: none; }
+  .type span { display: inline-block; min-width: 6em; color: var(--phux-text-faint); font: var(--phux-weight-medium) var(--phux-type-caption-size) var(--phux-font-mono); }
+  .type .mono { font-family: var(--phux-font-mono); font-size: var(--phux-type-body-size); }
+  .tiles { display: flex; flex-wrap: wrap; gap: var(--phux-space-s5); margin: 0 0 var(--phux-space-s6); padding: var(--phux-space-s5); list-style: none; border-radius: var(--phux-radius-lg); background: var(--phux-layer-sidebar); }
+  .tiles li { display: grid; place-items: center; min-width: 132px; height: 84px; padding-inline: var(--phux-space-s3); box-sizing: border-box; white-space: nowrap; font-size: var(--phux-type-caption-size); background: var(--phux-layer-raised); border: var(--phux-space-hairline) solid var(--phux-border-base); border-radius: var(--phux-radius-md); color: var(--phux-text-dim); }
+  .states, .fields { display: flex; flex-wrap: wrap; align-items: center; gap: var(--phux-space-s3); }
+  .control { min-height: var(--phux-space-touch-min); padding: 0 var(--phux-space-s4); border: var(--phux-space-hairline) solid var(--phux-border-control); border-radius: var(--phux-radius-sm); background: var(--phux-layer-raised); color: var(--phux-text-text); font: inherit; font-size: var(--phux-type-body-size); cursor: pointer; transition: background-color var(--phux-motion-control-duration) var(--phux-motion-control-easing), transform var(--phux-motion-press-duration) var(--phux-motion-press-easing); }
+  .control:hover, .control.is-hover { background-image: linear-gradient(var(--phux-wash-hover), var(--phux-wash-hover)); }
+  .control:active, .control.is-press { background-image: linear-gradient(var(--phux-wash-press), var(--phux-wash-press)); transform: scale(0.98); }
+  .control.is-focus { outline: var(--phux-focus-ring-width) solid var(--phux-border-focus); outline-offset: var(--phux-focus-ring-offset); }
+  .control:disabled { border-color: var(--phux-border-muted); background: var(--phux-layer-raised); color: var(--phux-text-faint); cursor: default; transform: none; }
+  .control.danger { color: var(--phux-status-failed); }
+  .metal { min-height: var(--phux-space-touch-min); padding: 0 var(--phux-space-s5); border: var(--phux-space-hairline) solid var(--phux-border-strong); border-radius: var(--phux-radius-sm); background: var(--phux-metal); color: var(--phux-accent-on-accent); font: inherit; font-size: var(--phux-type-body-size); font-weight: var(--phux-weight-semibold); box-shadow: var(--phux-elevation-raised); cursor: pointer; }
+  .fields { margin-top: var(--phux-space-s5); }
+  .fields label { display: grid; gap: var(--phux-space-s1); color: var(--phux-text-dim); font-size: var(--phux-type-caption-size); }
+  .fields input { min-height: var(--phux-space-touch-min); padding: 0 var(--phux-space-s3); border: var(--phux-space-hairline) solid var(--phux-border-control); border-radius: var(--phux-radius-sm); background: var(--phux-layer-raised); color: var(--phux-text-text); font: inherit; font-size: var(--phux-type-body-size); }
+  .fields input[aria-invalid="true"] { border-color: var(--phux-status-failed); }
+  .error { flex-basis: 100%; margin: 0; color: var(--phux-status-failed); font-size: var(--phux-type-caption-size); }
+  .glass-stage { margin-top: var(--phux-space-s6); padding: var(--phux-space-s10); border-radius: var(--phux-radius-lg); background: repeating-linear-gradient(135deg, var(--phux-text-text) 0 12px, var(--phux-layer-ground) 12px 24px); }
+  .glass { max-width: 420px; padding: var(--phux-space-card-inset) var(--phux-space-s4); border: var(--phux-space-hairline) solid var(--phux-border-base); border-radius: var(--phux-radius-md); background: var(--phux-glass-tint); color: var(--phux-text-text); font-size: var(--phux-type-body-size); box-shadow: var(--phux-elevation-floating); -webkit-backdrop-filter: blur(var(--phux-glass-blur-floating)) saturate(160%); backdrop-filter: blur(var(--phux-glass-blur-floating)) saturate(160%); }
+  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) { .glass { background: var(--phux-glass-fallback); } }
+  .springs { display: flex; flex-wrap: wrap; gap: var(--phux-space-s2) var(--phux-space-s5); margin: var(--phux-space-s6) 0 0; padding: 0; list-style: none; color: var(--phux-text-dim); }
+  .readers { display: grid; grid-template-columns: 1fr 1fr; gap: var(--phux-space-s4); }
+  .reader-sample { padding: var(--phux-space-s6); border: var(--phux-space-hairline) solid var(--phux-border-base); border-radius: var(--phux-radius-lg); background: var(--phux-layer-ground); color: var(--phux-text-text); font-size: var(--phux-type-lead-size); line-height: var(--phux-type-lead-line-height); }
+  .reader-sample h3 { margin-top: 0; color: var(--phux-text-text); font-size: var(--phux-type-title-size); letter-spacing: normal; text-transform: none; }
+  .reader-sample a { color: var(--phux-accent-accent-text); text-decoration: underline; }
+  @media (max-width: 720px) { .readers { grid-template-columns: 1fr; } }
+</style>

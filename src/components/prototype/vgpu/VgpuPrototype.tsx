@@ -10,6 +10,8 @@ import Observatory from "./Observatory";
 import SuperDemo from "./SuperDemo";
 import { LiveStatus } from "./Pipes";
 import { useRuntime, type RuntimeControl } from "./runtime";
+// Shared surfaces (live shell, TestFlight link) read the brand tokens.
+import "../../../styles/standalone-tokens.css";
 import "./prototype.css";
 
 type Variant="all"|"persistence"|"instrument"|"machine"|"observatory"|"combo";

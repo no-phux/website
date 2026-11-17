@@ -1,3 +1,4 @@
+// style-literals: illustration. The vgpu light lab is a concept with its own art direction, pinned dark; it is not product chrome.
 import type { MutableRefObject } from "react";
 import { createMotion, type Motion, type Pointer, type SceneSettings } from "./scene-motion";
 

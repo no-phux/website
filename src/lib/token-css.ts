@@ -1,0 +1,116 @@
+// Reads the generated brand stylesheet (src/styles/brand-tokens.css) as data, for
+// places CSS cannot reach: <meta name="theme-color"> and the /_design specimen.
+// The file is phux-brand output, so the parser only handles its flat shape:
+// rules of custom properties, optionally inside @media/@supports blocks.
+
+export type TokenRule = {
+  /** Enclosing at-rule preludes, outermost first (for example `@media (prefers-color-scheme: light)`). */
+  at: string[];
+  selector: string;
+  props: Record<string, string>;
+};
+
+/** Every rule that declares custom properties, in source order. */
+export function parseTokenCss(source: string): TokenRule[] {
+  const text = source.replace(/\/\*[\s\S]*?\*\//g, "");
+  const rules: TokenRule[] = [];
+  const stack: string[] = [];
+  let buffer = "";
+  let current: TokenRule | undefined;
+  for (const char of text) {
+    if (char === "{") {
+      const prelude = buffer.trim();
+      buffer = "";
+      if (prelude.startsWith("@")) {
+        stack.push(prelude);
+      } else {
+        current = { at: [...stack], selector: prelude, props: {} };
+        rules.push(current);
+        stack.push(prelude);
+      }
+    } else if (char === ";" || char === "}") {
+      if (current) declare(current, buffer);
+      buffer = "";
+      if (char === "}") {
+        const closed = stack.pop();
+        if (closed !== undefined && !closed.startsWith("@")) current = undefined;
+      }
+    } else {
+      buffer += char;
+    }
+  }
+  return rules;
+}
+
+function declare(rule: TokenRule, declaration: string): void {
+  const colon = declaration.indexOf(":");
+  if (colon < 0) return;
+  const name = declaration.slice(0, colon).trim();
+  if (name.startsWith("--")) rule.props[name] = declaration.slice(colon + 1).trim();
+}
+
+/** The merged custom properties of every rule with exactly this selector and at-rule chain. */
+export function tokensFor(rules: TokenRule[], selector: string, at: readonly string[] = []): Record<string, string> {
+  const out: Record<string, string> = {};
+  for (const rule of rules) {
+    if (rule.selector === selector && rule.at.join("\n") === at.join("\n")) Object.assign(out, rule.props);
+  }
+  return out;
+}
+
+/** Every custom property name the file defines, in first-seen order. */
+export function tokenNames(rules: TokenRule[]): string[] {
+  const names = new Set<string>();
+  for (const rule of rules) for (const name of Object.keys(rule.props)) names.add(name);
+  return [...names];
+}
+
+/** Selectors and at-rules phux-brand emits for the modes the site uses. */
+export const MODE = {
+  houseDark: { selector: ":root", at: [] as string[] },
+  houseLight: {
+    selector: ':root:not([data-theme="dark"]):not(.dark)',
+    at: ["@media (prefers-color-scheme: light)"],
+  },
+  readerDark: {
+    selector: '[data-design="reader"][data-theme="dark"], [data-design="reader"].dark, .dark [data-design="reader"]',
+    at: [] as string[],
+  },
+  readerLight: {
+    selector: '[data-design="reader"][data-theme="light"], [data-design="reader"].light, .light [data-design="reader"]',
+    at: [] as string[],
+  },
+} as const;
+
+export type Mode = keyof typeof MODE;
+
+/** The accessibility blocks, which the /_design page can preview without the media query. */
+export const PREVIEW = {
+  contrastDark: {
+    selector: '[data-theme="dark"]:not([data-design="reader"]), .dark:not([data-design="reader"])',
+    at: ["@media (prefers-contrast: more)"],
+  },
+  contrastLight: {
+    selector: '[data-theme="light"]:not([data-design="reader"]), .light:not([data-design="reader"])',
+    at: ["@media (prefers-contrast: more)"],
+  },
+  forced: {
+    selector: ":is(:root, [data-theme], .dark, .light, [data-design]):not(#phux-forced-colors)",
+    at: ["@media (forced-colors: active)"],
+  },
+} as const;
+
+/** One preview block's declarations, as CSS text for another selector. */
+export function previewDeclarations(rules: TokenRule[], block: keyof typeof PREVIEW): string {
+  const { selector, at } = PREVIEW[block];
+  return Object.entries(tokensFor(rules, selector, at))
+    .map(([name, value]) => `${name}: ${value};`)
+    .join(" ");
+}
+
+/** The resolved custom properties for one mode: the root, then the reader base, then the mode block. */
+export function modeTokens(rules: TokenRule[], mode: Mode): Record<string, string> {
+  const { selector, at } = MODE[mode];
+  const reader = mode.startsWith("reader") ? tokensFor(rules, '[data-design="reader"]') : {};
+  return { ...tokensFor(rules, ":root"), ...reader, ...tokensFor(rules, selector, at) };
+}

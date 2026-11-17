@@ -1,41 +1,44 @@
 /* ── Documentation reader ───────────────────────────────────────────────────
-   A calm single reading column: quiet paper, one ink, one warm accent. Every
-   rule is scoped to html[data-design="reader"], so the landing and the live
-   terminal keep their own palettes. Tokens also reach portalled search UI.
+   The reader is the documented variant [data-design="reader"] of the brand
+   tokens: paper and ink with one warm accent, verified by phux-brand
+   (variants.reader). Its colours and the 15/1.6 lead come from
+   src/styles/brand-tokens.css; radius, space, motion and status are shared.
+   This file only names them for the reader stylesheets and maps Fumadocs'
+   --color-fd-* onto them. The .dark/.light class on <html> picks the mode.
    Specs: DESIGN_SYSTEM.md, "Documentation reader".
    ────────────────────────────────────────────────────────────────────────── */
 
 html[data-design="reader"] {
-  color-scheme: light;
-  --font-reading: -apple-system, BlinkMacSystemFont, "Inter", "Helvetica Neue", "Segoe UI", sans-serif;
-  --font-code: ui-monospace, "SFMono-Regular", "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  --font-reading: var(--phux-font-ui);
+  --font-code: var(--phux-font-mono);
   --font-sans: var(--font-reading);
   --font-mono: var(--font-code);
 
-  --color-bg: #f5f5f3; /* paper */
-  --color-fg: #121310; /* ink */
-  --color-nav: #2c2d29; /* sidebar links */
-  --color-muted: #44453f; /* secondary text */
+  --color-bg: var(--phux-layer-ground); /* paper */
+  --color-fg: var(--phux-text-text); /* ink */
+  --color-nav: var(--phux-text-dim); /* sidebar links */
+  --color-muted: var(--phux-text-dim); /* secondary text */
   --color-dim: var(--color-muted);
-  --color-subtle: #575852; /* labels, meta */
-  --color-faint: #c9c9c5; /* outline branches */
-  --color-rule: rgb(27 28 25 / 12%);
-  --color-rule-faint: rgb(27 28 25 / 7%);
-  --color-wash: rgb(27 28 25 / 5%);
-  --color-bg-soft: #ebebe8;
-  --color-surface: #ffffff; /* code, tables, dialogs */
-  --color-surface-raised: #ecece9;
-  --color-accent: #7d5f38;
-  --color-accent-soft: #d8c8b0;
+  --color-subtle: var(--phux-text-faint); /* labels, meta */
+  --color-faint: var(--phux-border-strong); /* outline branches */
+  --color-rule: var(--phux-border-base);
+  --color-rule-faint: var(--phux-border-muted);
+  --color-wash: var(--phux-wash-hover);
+  --color-bg-soft: var(--phux-layer-sidebar);
+  --color-surface: var(--phux-layer-raised); /* code, tables, dialogs */
+  --color-surface-raised: var(--phux-layer-overlay);
+  --color-accent: var(--phux-accent-accent);
+  --color-accent-text: var(--phux-accent-accent-text);
+  --color-accent-soft: var(--phux-selection-bg);
   --color-cyan: var(--color-accent);
-  --shadow-surface: 0 1px 2px rgb(27 28 25 / 4%);
-  --shadow-dialog: 0 24px 64px -16px rgb(27 28 25 / 28%), 0 0 0 1px rgb(27 28 25 / 6%);
+  --shadow-surface: var(--phux-elevation-raised);
+  --shadow-dialog: var(--phux-elevation-overlay);
 
-  --radius-sm: 4px;
-  --radius-md: 6px;
-  --radius-lg: 10px;
-  --radius-xl: 12px;
-  --radius-2xl: 16px;
+  --radius-sm: var(--phux-radius-xs);
+  --radius-md: var(--phux-radius-sm);
+  --radius-lg: var(--phux-radius-md);
+  --radius-xl: var(--phux-radius-lg);
+  --radius-2xl: var(--phux-radius-xl);
   --reading-width: 38rem;
   --sidebar-width: 16.5rem;
 
@@ -48,53 +51,34 @@ html[data-design="reader"] {
   --color-fd-card: var(--color-surface);
   --color-fd-card-foreground: var(--color-fg);
   --color-fd-border: var(--color-rule);
-  --color-fd-input: var(--color-rule);
+  --color-fd-input: var(--phux-border-control);
   --color-fd-primary: var(--color-accent);
-  --color-fd-primary-foreground: var(--color-bg);
+  --color-fd-primary-foreground: var(--phux-accent-on-accent);
   --color-fd-accent: var(--color-wash);
   --color-fd-accent-foreground: var(--color-fg);
   --color-fd-secondary: var(--color-bg-soft);
   --color-fd-secondary-foreground: var(--color-fg);
-  --color-fd-ring: var(--color-accent);
-  --color-fd-overlay: rgb(27 28 25 / 22%);
-}
-html[data-design="reader"].dark {
-  color-scheme: dark;
-  --color-bg: #121311;
-  --color-fg: #ebebe7;
-  --color-nav: #cfd0ca;
-  --color-muted: #b0b1aa;
-  --color-subtle: #92938c;
-  --color-faint: #3b3c38;
-  --color-rule: rgb(235 235 231 / 13%);
-  --color-rule-faint: rgb(235 235 231 / 7%);
-  --color-wash: rgb(235 235 231 / 7%);
-  --color-bg-soft: #1f201e;
-  --color-surface: #1a1b19;
-  --color-surface-raised: #232421;
-  --color-accent: #d2b98f;
-  --color-accent-soft: #5c5040;
-  --shadow-surface: none;
-  --shadow-dialog: 0 24px 64px -16px rgb(0 0 0 / 70%), 0 0 0 1px rgb(235 235 231 / 10%);
-  --color-fd-overlay: rgb(0 0 0 / 50%);
+  --color-fd-ring: var(--phux-border-focus);
+  --color-fd-overlay: var(--phux-layer-scrim);
 }
 
 html[data-design="reader"] body {
   background: var(--color-bg);
   color: var(--color-fg);
   font-family: var(--font-reading);
-  font-size: 15px;
-  line-height: 1.6;
+  font-feature-settings: var(--phux-font-ui-features);
+  font-size: var(--phux-type-lead-size);
+  line-height: var(--phux-type-lead-line-height);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
 [data-design="reader"] ::selection {
-  background: color-mix(in srgb, var(--color-accent) 28%, transparent);
-  color: inherit;
+  background: var(--phux-selection-bg);
+  color: var(--phux-selection-fg);
 }
 [data-design="reader"] :focus-visible {
-  outline: 2px solid var(--color-accent);
-  outline-offset: 2px;
+  outline: var(--phux-focus-ring-width) solid var(--phux-border-focus);
+  outline-offset: var(--phux-focus-ring-offset);
   border-radius: var(--radius-sm);
 }
 [data-design="reader"] .skip {
@@ -105,6 +89,8 @@ html[data-design="reader"] body {
   border-color: var(--color-rule);
 }
 
+/* brand-tokens.css shortens every spring under reduce motion; the reader also
+   drops scroll smoothing and any remaining decorative animation. */
 @media (prefers-reduced-motion: reduce) {
   [data-design="reader"] *,
   [data-design="reader"] *::before,

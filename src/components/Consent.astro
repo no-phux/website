@@ -53,43 +53,41 @@
   .consent-card {
     position: fixed;
     z-index: 1000;
-    left: 16px;
-    bottom: 16px;
+    inset-inline-start: var(--phux-space-s4);
+    bottom: var(--phux-space-s4);
     width: min(360px, calc(100vw - 32px));
     padding: 16px 16px 14px;
-    border: 1px solid #c8d0c024;
-    border-radius: 12px;
-    background: #121518f2;
-    color: #e7e2da;
-    box-shadow: 0 18px 48px -16px #000c;
-    font: 14px/1.5 -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", sans-serif;
-    backdrop-filter: blur(12px);
-    animation: consent-in 260ms ease-out both;
+    border: var(--phux-space-hairline) solid var(--phux-border-base);
+    border-radius: var(--phux-radius-lg);
+    background: var(--phux-glass-tint);
+    color: var(--phux-text-text);
+    box-shadow: var(--phux-elevation-floating);
+    font: var(--phux-type-body-size)/1.5 var(--phux-font-ui);
+    backdrop-filter: blur(var(--phux-glass-blur-floating));
+    animation: consent-in var(--phux-motion-drawer-duration) var(--phux-motion-drawer-easing) both;
   }
   .consent-card[hidden] { display: none; }
   .consent-title { margin: 0 0 4px; font-weight: 600; letter-spacing: -.01em; }
-  .consent-copy { margin: 0; color: #adb8b0; font-size: 13px; }
+  .consent-copy { margin: 0; color: var(--phux-text-dim); font-size: var(--phux-type-label-size); }
   .consent-copy a { color: inherit; text-decoration: underline; text-underline-offset: 3px; }
   .consent-actions { display: flex; gap: 8px; margin-top: 12px; }
   .consent-actions button {
     flex: 1;
     min-height: 40px;
-    border: 1px solid #c8d0c033;
-    border-radius: 8px;
+    border: var(--phux-space-hairline) solid var(--phux-border-control);
+    border-radius: var(--phux-radius-sm);
     background: transparent;
     color: inherit;
     font-family: inherit;
-    font-size: 13px;
-    font-weight: 500;
+    font-size: var(--phux-type-label-size);
+    font-weight: var(--phux-weight-medium);
     cursor: pointer;
   }
-  .consent-actions button[data-consent="grant"] { background: #e7e2da; border-color: #e7e2da; color: #0c0f11; }
-  .consent-actions button:hover { border-color: #c8d0c066; }
-  .consent-actions button:focus-visible, .consent-copy a:focus-visible { outline: 2px solid #7aa2f7; outline-offset: 2px; }
-  html.light .consent-card { background: #fffffff2; color: #18181b; border-color: #18181b1f; box-shadow: 0 18px 48px -20px #18181b4d; }
-  html.light .consent-copy { color: #52525b; }
-  html.light .consent-actions button { border-color: #18181b26; }
-  html.light .consent-actions button[data-consent="grant"] { background: #18181b; border-color: #18181b; color: #fff; }
+  .consent-actions button[data-consent="grant"] { background: var(--phux-accent-accent); border-color: var(--phux-accent-accent); color: var(--phux-accent-on-accent); }
+  .consent-actions button:hover { background: var(--phux-wash-hover); }
+  .consent-actions button[data-consent="grant"]:hover { background: var(--phux-accent-hi); border-color: var(--phux-accent-hi); }
+  .consent-actions button:focus-visible, .consent-copy a:focus-visible { outline: var(--phux-focus-ring-width) solid var(--phux-border-focus); outline-offset: var(--phux-focus-ring-offset); }
+  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) { .consent-card { background: var(--phux-glass-fallback); } }
   .privacy-choices { padding: 0; border: 0; background: none; font: inherit; cursor: pointer; }
   footer .privacy-choices { color: inherit; }
   .privacy-choices:hover { text-decoration: underline; text-underline-offset: 3px; }
