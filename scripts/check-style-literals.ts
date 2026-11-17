@@ -22,14 +22,15 @@ const ART_ROOTS = ["src/components/motion/"];
 
 type Rule = { name: string; pattern: RegExp; css?: true };
 
-/** Physical inline properties only make sense in stylesheets and Astro styles. */
+/** Physical inline properties only make sense in stylesheets and Astro styles. Custom
+ *  properties (a third party's `--padding-left`) are names, not properties. */
 export const RULES: Rule[] = [
   { name: "hex colour", pattern: /(?<![&\w])#[0-9a-fA-F]{3,8}\b/g },
   { name: "pixel radius", pattern: /border-radius:\s*[0-9]+px/g },
   { name: "cubic-bezier", pattern: /cubic-bezier\(/g },
   { name: "box-shadow literal", pattern: /box-shadow:\s*[0-9]/g },
   { name: "pixel font size", pattern: /font-size:\s*[0-9.]+px/g },
-  { name: "physical inline property", pattern: /\b(?:padding|margin|border)-(?:left|right)\b/g, css: true },
+  { name: "physical inline property", pattern: /(?<![-\w])(?:padding|margin|border)-(?:left|right)\b/g, css: true },
   { name: "physical inline offset", pattern: /(?<![-\w])(?:left|right)\s*:(?!:)/g, css: true },
 ];
 

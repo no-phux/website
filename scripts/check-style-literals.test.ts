@@ -23,6 +23,7 @@ describe("style literal ratchet", () => {
       ".c { padding-inline-start: var(--phux-space-s2); inset-inline-end: 0; text-align: left; }",
       ".d { font-size: var(--phux-type-body-size); box-shadow: var(--phux-elevation-raised); }",
       ".e:focus-visible { outline: 2px solid var(--phux-border-focus); }",
+      ".f { --padding-left: 0px; }",
     ].join("\n");
     expect(countLiterals("src/x.css", css)).toBe(0);
   });
