@@ -11,6 +11,7 @@ import {
   type Status,
   type View,
 } from "./script";
+import { statusWord } from "../../lib/vocabulary";
 import "./Tour.css";
 
 type Point = readonly [number, number];
@@ -72,12 +73,20 @@ const TRANSPORT: Record<EdgeId, string> = {
   devbox: "QUIC",
 };
 
-const BADGE: Record<Status, { glyph: string; label: string }> = {
-  blocked: { glyph: "●", label: "needs input" },
-  done: { glyph: "◆", label: "done" },
-  working: { glyph: "◐", label: "working" },
-  idle: { glyph: "○", label: "idle" },
+// Status marks are vector shapes on the 16 grid, the same geometry as phux-web's
+// badges (Paper Mono has no ✕, ◆ or ◐). Shape carries the state; colour repeats it.
+const STROKE = { fill: "none", stroke: "currentColor", strokeWidth: 1.4, strokeLinecap: "round" } as const;
+const MARK: Record<Status, ReactNode> = {
+  needs_you: <circle cx="8" cy="8" r="4.5" fill="currentColor" />,
+  failed: <path d="M4.75 4.75l6.5 6.5M11.25 4.75l-6.5 6.5" {...STROKE} />,
+  done: <path d="M8 2.75L13.25 8 8 13.25 2.75 8z" fill="currentColor" />,
+  working: <><circle cx="8" cy="8" r="4.3" {...STROKE} /><path d="M8 3.7a4.3 4.3 0 0 0 0 8.6z" fill="currentColor" /></>,
+  idle: <circle cx="8" cy="8" r="4.3" {...STROKE} />,
 };
+
+function capitalized(word: string): string {
+  return word.charAt(0).toUpperCase() + word.slice(1);
+}
 
 function cubic([p0, c1, c2, p3]: Curve, t: number): Point {
   const u = 1 - t;
@@ -138,7 +147,11 @@ function Edges({ layout, frame, className, signals = false }: {
 }
 
 function Badge({ status }: { status: Status }) {
-  return <span className={`tour-badge is-${status}`} title={BADGE[status].label}>{BADGE[status].glyph}</span>;
+  return (
+    <span className={`tour-badge is-${status}`} title={statusWord(status)}>
+      <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false">{MARK[status]}</svg>
+    </span>
+  );
 }
 
 function Lines({ pane, prompt = false }: { pane: Pane; prompt?: boolean }) {
@@ -246,7 +259,7 @@ function Desktop({ frame }: { frame: Frame }) {
           </div>
         ))}
       </div>
-      {frame.notice && view === "attached" && <div className="tour-toast"><Badge status="blocked" /> {frame.notice}</div>}
+      {frame.notice && view === "attached" && <div className="tour-toast"><Badge status="needs_you" /> {frame.notice}</div>}
       {view !== "attached" && (
         <div className="tour-veil">
           {view === "off" ? "Opening Phux.app…" : <>Window closed<small>the terminals keep running</small></>}
@@ -270,7 +283,7 @@ function Phone({ frame }: { frame: Frame }) {
               <span>api</span>
               <span>{id === "build" ? "@3" : "@7"} {id} <Badge status={pane.status} /></span>
             </div>
-            {pane.status === "blocked" && <div className="tour-phone-alert">Needs you</div>}
+            {pane.status === "needs_you" && <div className="tour-phone-alert">{capitalized(statusWord("needs_you"))}</div>}
             <div className="tour-body"><Lines pane={pane} /></div>
             <div className="tour-phone-keys">
               {["esc", "tab", "ctrl", "y", "n"].map((key) => (
