@@ -112,7 +112,7 @@ const PLANS = [
   }
   .status {
     font-family: var(--font-code);
-    font-size: 13px;
+    font-size: var(--phux-type-label-size);
     color: var(--color-muted);
     margin: 0 0 12px;
   }
@@ -139,7 +139,7 @@ const PLANS = [
     border-bottom: 0;
   }
   h2 {
-    font-size: 20px;
+    font-size: var(--phux-type-title-size);
     letter-spacing: -0.01em;
     margin: 0 0 12px;
   }
@@ -148,14 +148,14 @@ const PLANS = [
     margin: 0 0 12px;
   }
   ul {
-    padding-left: 1.25em;
+    padding-inline-start: 1.25em;
   }
   li + li {
     margin-top: 6px;
   }
   .summary {
     border: 1px solid var(--color-rule);
-    border-left: 3px solid var(--color-accent);
+    border-inline-start: 3px solid var(--color-accent);
     background: var(--color-surface);
     padding: 20px;
     margin-block: 24px;
@@ -169,7 +169,7 @@ const PLANS = [
   table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 15px;
+    font-size: var(--phux-type-body-size);
   }
   th,
   td {
@@ -179,7 +179,7 @@ const PLANS = [
     border-bottom: 1px solid var(--color-rule);
   }
   thead th {
-    font-size: 12px;
+    font-size: var(--phux-type-caption-size);
     letter-spacing: 0.06em;
     text-transform: uppercase;
     color: var(--color-dim);
@@ -189,7 +189,7 @@ const PLANS = [
   }
   td:nth-child(2) {
     font-family: var(--font-code);
-    font-size: 13px;
+    font-size: var(--phux-type-label-size);
   }
   section a:not(.cta) {
     color: var(--color-accent);

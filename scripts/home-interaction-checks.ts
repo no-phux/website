@@ -11,7 +11,8 @@ export async function verifyClientComparison(page: Page, artifacts: string) {
   const slider = page.getByRole("slider", { name: "Reveal desktop client" });
   await slider.focus();
   await slider.press("ArrowLeft");
-  assert.equal(await slider.inputValue(), "51", "the native slider supports keyboard adjustment");
+  // The default reveal sits on the captures' shared pane gutter, so neither shows a cut pane.
+  assert.equal(await slider.inputValue(), "39", "the native slider supports keyboard adjustment");
   assert.equal(await page.locator(".comparison-divider > span").evaluate(node => getComputedStyle(node).outlineWidth), "2px", "keyboard focus is visible on the drag handle");
   await slider.press("Home");
   assert.equal(await slider.inputValue(), "0", "Home reveals the terminal client");

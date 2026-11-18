@@ -102,7 +102,7 @@ const fallback = installActions.unknown;
       <a class="download-final" data-device-install href={fallback.href}><span data-device-label>{fallback.label}</span> <span data-device-icon aria-hidden="true">{fallback.icon}</span></a>
       <a class="closing-platforms" href={docsHref("/installation")}>All platforms ↗</a>
     </div>
-    <img class="closing-fox" src={`/brand/images/mark.svg?v=${brand.version}`} width="340" height="340" alt="" aria-hidden="true" loading="lazy" />
+    <picture class="closing-fox" aria-hidden="true"><source srcset={`/brand/images/mark-dark.svg?v=${brand.version}`} media="(prefers-color-scheme: light)" /><img src={`/brand/images/mark.svg?v=${brand.version}`} width="340" height="340" alt="" loading="lazy" /></picture>
   </section>
 
   <details class="connection-details home" id="connection-details">
@@ -162,93 +162,101 @@ const fallback = installActions.unknown;
 </script>
 
 <style>
-  .home { width: min(100%, 1240px); margin-inline: auto; padding-inline: 40px; box-sizing: border-box; }
+  /* Every value comes from the brand tokens (src/styles/brand-tokens.css). The
+     hero download is the one metal control in view; the closing one is flat. */
+  .home { width: min(100%, 1240px); margin-inline: auto; padding-inline: var(--phux-space-s10); box-sizing: border-box; }
   .hero { padding-top: 28px; }
-  .hero-intro { display: grid; grid-template-columns: 1.05fr 1fr; align-items: center; gap: 12px; margin-bottom: 32px; }
+  .hero-intro { display: grid; grid-template-columns: 1.05fr 1fr; align-items: center; gap: var(--phux-space-s3); margin-bottom: var(--phux-space-s8); }
   .hero-copy { position: relative; z-index: 1; padding-block: 22px; }
-  .hero-art { margin: -24px -38px -20px -36px; pointer-events: none; overflow: clip; }
-  h1 { margin: 0 0 22px; max-width: 17ch; color: #f0ece4; font-size: clamp(40px, 4.5vw, 60px); line-height: 1.04; font-weight: 600; letter-spacing: -.04em; text-wrap: balance; }
-  .hero-description { margin: 0 0 26px; max-width: 44ch; color: #aeb7b0; font-size: clamp(16px, 1.4vw, 18px); line-height: 1.55; }
-  .download-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 12px 20px; }
-  .download-primary, .download-final { display: inline-flex; align-items: center; justify-content: center; gap: 28px; min-height: 56px; padding: 0 24px; border: 1px solid #efeadf; border-radius: 8px; background: #e7e2da; color: #171a1e; font-size: 14px; font-weight: 650; line-height: 1.2; box-shadow: 0 1px #fff8 inset, 0 5px 20px #0003; transition: background 160ms, transform 160ms, box-shadow 160ms; }
-  .download-primary:hover, .download-final:hover { background: #fffaf2; color: #171a1e; transform: translateY(-1px); box-shadow: 0 1px #fff inset, 0 7px 28px #0005; }
-  [data-device-icon] { font-size: 20px; font-weight: 400; }
-  .try-link { display: inline-flex; align-items: center; gap: 12px; min-height: 44px; color: #adb5b0; font-size: 13px; }
-  .try-link:hover { color: #f0ebe3; }
-  .closing-command code { color: #dce4dc; font-size: 14px; overflow-wrap: anywhere; }
-  .download-note { margin: 12px 0 0; color: #8d9692; font-size: 11px; letter-spacing: .01em; }
-  .install-options { margin-top: 8px; }
-  .install-options > summary { width: fit-content; min-height: 44px; display: flex; align-items: center; gap: 10px; color: #aab2ad; font-size: 12px; cursor: pointer; list-style: none; }
-  .install-options > summary::after { content: "+"; color: #838d87; }
+  .hero-art { margin-block: -24px -20px; margin-inline: -36px -38px; pointer-events: none; overflow: clip; }
+  h1 { margin: 0 0 22px; max-width: 17ch; color: var(--phux-text-text); font-size: clamp(var(--phux-type-display-size), 4.5vw, 3rem); line-height: 1.08; font-weight: var(--phux-weight-semibold); letter-spacing: -.04em; text-wrap: balance; }
+  .hero-description { margin: 0 0 26px; max-width: 44ch; color: var(--phux-text-dim); font-size: clamp(var(--phux-type-lead-size), 1.4vw, 1.125rem); line-height: 1.55; }
+  .download-actions { display: flex; align-items: center; flex-wrap: wrap; gap: var(--phux-space-s3) var(--phux-space-s5); }
+  .download-primary, .download-final { display: inline-flex; align-items: center; justify-content: center; gap: 28px; min-height: 56px; padding: 0 var(--phux-space-s6); border: var(--phux-space-hairline) solid var(--phux-border-strong); border-radius: var(--phux-radius-sm); background: var(--phux-accent-accent); color: var(--phux-accent-on-accent); font-size: var(--phux-type-body-size); font-weight: var(--phux-weight-semibold); line-height: 1.2; box-shadow: var(--phux-elevation-raised); transition: background-color var(--phux-motion-control-duration) var(--phux-motion-control-easing), box-shadow var(--phux-motion-control-duration) var(--phux-motion-control-easing), transform var(--phux-motion-press-duration) var(--phux-motion-press-easing); }
+  .download-primary { background: var(--phux-metal); }
+  .download-primary:hover, .download-final:hover { background: var(--phux-accent-hi); color: var(--phux-accent-on-accent); transform: translateY(-1px); box-shadow: var(--phux-elevation-floating); }
+  .download-primary:active, .download-final:active { transform: scale(0.98); box-shadow: var(--phux-elevation-raised); }
+  [data-device-icon] { font-size: var(--phux-type-title-size); font-weight: var(--phux-weight-regular); }
+  .try-link { display: inline-flex; align-items: center; gap: var(--phux-space-s3); min-height: var(--phux-space-touch-min); color: var(--phux-text-dim); font-size: var(--phux-type-label-size); }
+  .try-link:hover { color: var(--phux-text-text); }
+  .closing-command code { color: var(--phux-text-text); font-size: var(--phux-type-body-size); overflow-wrap: anywhere; }
+  .download-note { margin: var(--phux-space-s3) 0 0; color: var(--phux-text-faint); font-size: var(--phux-type-micro-size); letter-spacing: .01em; }
+  .install-options { margin-top: var(--phux-space-s2); }
+  .install-options > summary { width: fit-content; min-height: var(--phux-space-touch-min); display: flex; align-items: center; gap: 10px; color: var(--phux-text-dim); font-size: var(--phux-type-caption-size); cursor: pointer; list-style: none; }
+  .install-options > summary::after { content: "+"; color: var(--phux-text-faint); }
   .install-options[open] > summary::after { content: "−"; }
   .install-options > summary::-webkit-details-marker { display: none; }
-  .install { position: relative; width: 100%; box-sizing: border-box; padding: 14px 18px 0; border: 1px solid #c8cfc322; border-radius: 10px; background: #171a1eb3; }
+  .install { position: relative; width: 100%; box-sizing: border-box; padding: 14px 18px 0; border: var(--phux-space-hairline) solid var(--phux-border-base); border-radius: var(--phux-radius-md); background: var(--phux-layer-sidebar); }
   .install-tabs { position: relative; display: flex; gap: 6px; }
-  .install-tabs::before { content: ""; position: absolute; bottom: -5px; left: 0; width: var(--pill-width, 0); height: 1px; background: #d9e0d7; opacity: .65; transform: translateX(var(--pill-x, 0)); transition: transform 300ms ease; }
-  .install-tabs button { position: relative; min-width: 64px; min-height: 44px; padding: 0 8px; border: 0; background: none; color: #8c9891; font: inherit; font-size: 12px; cursor: pointer; }
-  .install-tabs button[aria-pressed=true], .install-tabs button:hover { color: #efeae1; }
-  .install-rule { display: block; height: 1px; margin-top: 14px; background: #c8cfc31c; }
+  .install-tabs::before { content: ""; position: absolute; bottom: -5px; inset-inline-start: 0; width: var(--pill-width, 0); height: var(--phux-space-hairline); background: var(--phux-text-dim); transform: translateX(var(--pill-x, 0)); transition: transform var(--phux-motion-select-duration) var(--phux-motion-select-easing); }
+  .install-tabs button { position: relative; min-width: 64px; min-height: var(--phux-space-touch-min); padding: 0 var(--phux-space-s2); border: 0; background: none; color: var(--phux-text-faint); font: inherit; font-size: var(--phux-type-caption-size); cursor: pointer; transition: color var(--phux-motion-control-duration) var(--phux-motion-control-easing); }
+  .install-tabs button[aria-pressed=true], .install-tabs button:hover { color: var(--phux-text-text); }
+  .install-rule { display: block; height: var(--phux-space-hairline); margin-top: 14px; background: var(--phux-border-muted); }
   .install-stage { display: grid; align-items: center; min-height: 112px; }
   .install-line { grid-area: 1 / 1; display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 10px; padding-top: 10px; }
-  .install-command { display: flex; gap: 8px; align-items: start; min-width: 0; }
-  .install-prompt { color: #a9d2b5; font: 12px var(--font-code); }
-  #install-command { min-width: 0; color: #dce4dc; font-size: 11px; line-height: 1.7; white-space: normal; overflow-wrap: anywhere; }
-  .install-copy { min-height: 44px; border: 0; padding: 0; color: #aab4ad; background: none; font: 11px var(--font-reading); cursor: pointer; }
-  .install-download { display: flex; flex-wrap: wrap; gap: 4px 16px; }
-  .install-download a, .linux-rune-archives a { color: #e7e2da; font-size: 12px; text-decoration: underline; text-underline-offset: 4px; }
-  .linux-rune { max-width: 560px; margin-top: 14px; padding: 12px 16px; border: 1px solid #c8cfc322; border-radius: 10px; background: #171a1eb3; }
-  .linux-rune-title { margin: 0; color: #dce4dc; font-size: 12px; font-weight: 650; }
+  .install-command { display: flex; gap: var(--phux-space-s2); align-items: start; min-width: 0; }
+  .install-prompt { color: var(--phux-text-faint); font-family: var(--font-code); font-size: var(--phux-type-caption-size); }
+  #install-command { min-width: 0; color: var(--phux-text-text); font-size: var(--phux-type-micro-size); line-height: 1.7; white-space: normal; overflow-wrap: anywhere; }
+  .install-copy { min-height: var(--phux-space-touch-min); border: 0; padding: 0; color: var(--phux-text-dim); background: none; font-family: var(--font-reading); font-size: var(--phux-type-micro-size); cursor: pointer; }
+  .install-download { display: flex; flex-wrap: wrap; gap: var(--phux-space-s1) var(--phux-space-s4); }
+  .install-download a, .linux-rune-archives a { color: var(--phux-text-text); font-size: var(--phux-type-caption-size); text-decoration: underline; text-underline-offset: 4px; }
+  .linux-rune { max-width: 560px; margin-top: 14px; padding: var(--phux-space-s3) var(--phux-space-s4); border: var(--phux-space-hairline) solid var(--phux-border-base); border-radius: var(--phux-radius-md); background: var(--phux-layer-sidebar); }
+  .linux-rune-title { margin: 0; color: var(--phux-text-text); font-size: var(--phux-type-caption-size); font-weight: var(--phux-weight-semibold); }
   .linux-rune-line { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 10px; }
-  .linux-rune code { min-width: 0; color: #dce4dc; font-size: 12px; line-height: 1.7; overflow-wrap: anywhere; }
-  .linux-rune-copy { min-height: 44px; border: 0; padding: 0; color: #aab4ad; background: none; font: 11px var(--font-reading); cursor: pointer; }
-  .linux-rune-copy:hover { color: #efeae1; }
-  .linux-rune-archives { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 16px; margin: 0; color: #8d9692; font-size: 11px; }
-  .linux-rune-archives a { display: inline-flex; align-items: center; min-height: 32px; }
-  .linux-rune-status { min-height: 0; margin: 4px 0 0; color: #c3d6c6; font-size: 11px; }
+  .linux-rune code { min-width: 0; color: var(--phux-text-text); font-size: var(--phux-type-caption-size); line-height: 1.7; overflow-wrap: anywhere; }
+  .linux-rune-copy { min-height: var(--phux-space-touch-min); border: 0; padding: 0; color: var(--phux-text-dim); background: none; font-family: var(--font-reading); font-size: var(--phux-type-micro-size); cursor: pointer; }
+  .linux-rune-copy:hover { color: var(--phux-text-text); }
+  .linux-rune-archives { display: flex; flex-wrap: wrap; align-items: center; gap: var(--phux-space-s1) var(--phux-space-s4); margin: 0; color: var(--phux-text-faint); font-size: var(--phux-type-micro-size); }
+  .linux-rune-archives a { display: inline-flex; align-items: center; min-height: var(--phux-space-s8); }
+  .linux-rune-status { min-height: 0; margin: var(--phux-space-s1) 0 0; color: var(--phux-text-dim); font-size: var(--phux-type-micro-size); }
   .linux-rune-status:empty { display: none; }
   .install-request { grid-area: 1 / 1; padding-block: 10px; min-width: 0; }
-  .install-note { min-height: 3.2em; margin: 10px 0 0; color: #919e95; font-size: 11px; line-height: 1.6; }
-  .copy-status { min-height: 20px; margin: 3px 0 0; color: #c3d6c6; font-size: 11px; }
-  .release-links { display: flex; flex-wrap: wrap; gap: 4px 14px; margin: 10px 0 0; color: #8f9c92; font-size: 10px; }
-  .release-links a { display: inline-flex; align-items: center; min-height: 32px; }
-  .closing { display: flex; align-items: center; justify-content: space-between; gap: 40px; margin-top: 100px; padding-block: 62px; border-top: 1px solid #c8d0c025; border-bottom: 1px solid #c8d0c025; }
-  .closing h2 { margin: 0; color: #f0ece4; font-size: clamp(30px, 3.6vw, 46px); line-height: 1.1; font-weight: 600; letter-spacing: -.035em; }
-  .closing-command { display: flex; gap: 8px; align-items: baseline; margin: 18px 0 22px; color: #dce4dc; font-size: 13px; line-height: 1.5; }
-  .closing-platforms { display: inline-flex; align-items: center; min-height: 44px; margin-left: 24px; color: #a8b8ad; font-size: 12px; }
-  .closing-fox { flex: none; width: 280px; height: 280px; object-fit: contain; }
-  .connection-details { margin-top: 28px; margin-bottom: 48px; }
-  .connection-details > summary { display: flex; justify-content: space-between; align-items: center; min-height: 52px; color: #8f9e94; font-size: 12px; list-style: none; cursor: pointer; }
+  .install-note { min-height: 3.2em; margin: 10px 0 0; color: var(--phux-text-faint); font-size: var(--phux-type-micro-size); line-height: 1.6; }
+  /* One micro line fits inside the reserved height, so a status never moves the dock. */
+  .copy-status { min-height: var(--phux-space-s5); margin: 3px 0 0; color: var(--phux-text-dim); font-size: var(--phux-type-micro-size); line-height: var(--phux-type-micro-line-height); }
+  .release-links { display: flex; flex-wrap: wrap; gap: var(--phux-space-s1) 14px; margin: 10px 0 0; color: var(--phux-text-faint); font-size: var(--phux-type-micro-size); }
+  .release-links a { display: inline-flex; align-items: center; min-height: var(--phux-space-s8); }
+  .closing { display: flex; align-items: center; justify-content: space-between; gap: var(--phux-space-s10); margin-top: 100px; padding-block: 62px; border-top: var(--phux-space-hairline) solid var(--phux-border-base); border-bottom: var(--phux-space-hairline) solid var(--phux-border-base); }
+  .closing h2 { margin: 0; color: var(--phux-text-text); font-size: clamp(var(--phux-type-display-size), 3.6vw, 2.75rem); line-height: 1.1; font-weight: var(--phux-weight-semibold); letter-spacing: -.035em; }
+  .closing-command { display: flex; gap: var(--phux-space-s2); align-items: baseline; margin: 18px 0 22px; color: var(--phux-text-text); font-size: var(--phux-type-label-size); line-height: 1.5; }
+  .closing-platforms { display: inline-flex; align-items: center; min-height: var(--phux-space-touch-min); margin-inline-start: var(--phux-space-s6); color: var(--phux-text-dim); font-size: var(--phux-type-caption-size); }
+  .closing-fox { flex: none; width: 280px; height: 280px; }
+  .closing-fox img { display: block; width: 100%; height: 100%; object-fit: contain; }
+  .connection-details { margin-top: 28px; margin-bottom: var(--phux-space-s12); }
+  .connection-details > summary { display: flex; justify-content: space-between; align-items: center; min-height: 52px; color: var(--phux-text-faint); font-size: var(--phux-type-caption-size); list-style: none; cursor: pointer; }
   .connection-details > summary::-webkit-details-marker { display: none; }
-  .connection-details > summary > span { font-size: 20px; }
+  .connection-details > summary > span { font-size: var(--phux-type-title-size); transition: transform var(--phux-motion-control-duration) var(--phux-motion-control-easing); }
   .connection-details[open] > summary > span { transform: rotate(45deg); }
-  .terminal { margin-top: 16px; }
+  .terminal { margin-top: var(--phux-space-s4); }
   [hidden] { display: none !important; }
-  a:focus-visible, button:focus-visible, summary:focus-visible, input:focus-visible { outline: 2px solid #c1dbc8; outline-offset: 4px; }
   @media (max-width: 900px) {
     .home { padding-inline: 28px; }
     .hero-intro { gap: 0; grid-template-columns: 1.1fr 1fr; }
     .hero-art { margin-inline: -36px -20px; }
-    h1 { font-size: clamp(36px, 4.8vw, 48px); }
+    h1 { font-size: clamp(var(--phux-type-display-size), 4.8vw, 3rem); }
     .closing-fox { width: 220px; height: 220px; }
   }
   @media (max-width: 650px) {
-    .home { padding-inline: 20px; }
+    .home { padding-inline: var(--phux-space-s5); }
     .hero { padding-top: 18px; }
-    .hero-intro { grid-template-columns: 1fr; gap: 0; margin-bottom: 24px; }
-    .hero-copy { padding-block: 12px 0; }
+    .hero-intro { grid-template-columns: 1fr; gap: 0; margin-bottom: var(--phux-space-s6); }
+    .hero-copy { padding-block: var(--phux-space-s3) 0; }
     .hero-art { width: min(100%, 340px); margin: -28px auto -24px; }
-    h1 { max-width: none; margin-bottom: 12px; font-size: clamp(27px, 8.4vw, 42px); }
-    .hero-description { margin-bottom: 16px; font-size: clamp(15px, 4.2vw, 16px); line-height: 1.5; }
-    .download-actions { gap: 12px; }
-    .download-primary { min-height: 52px; gap: 16px; padding-inline: 16px; }
+    h1 { max-width: none; margin-bottom: var(--phux-space-s3); font-size: clamp(var(--phux-type-display-size), 8.4vw, 2.625rem); }
+    .hero-description { margin-bottom: var(--phux-space-s4); font-size: var(--phux-type-lead-size); line-height: 1.5; }
+    .download-actions { gap: var(--phux-space-s3); }
+    .download-primary { min-height: 52px; gap: var(--phux-space-s4); padding-inline: var(--phux-space-s4); }
     .download-note { margin-top: 10px; }
-    .closing { position: relative; margin-top: 64px; padding-block: 40px; overflow: hidden; }
-    .closing h2 { font-size: 34px; }
+    .closing { position: relative; margin-top: var(--phux-space-s16); padding-block: var(--phux-space-s10); overflow: hidden; }
+    .closing h2 { font-size: clamp(var(--phux-type-display-size), 8vw, 2.125rem); }
     .closing-fox { display: none; }
     .closing-platforms { margin: 10px 0 0; display: flex; width: fit-content; }
     .connection-details { margin-top: 18px; }
     .install-stage { min-height: 112px; }
   }
-  @media (prefers-reduced-motion: reduce) { .download-primary, .download-final, .install-tabs::before { transition: none; } }
+  @media (prefers-reduced-motion: reduce) {
+    .download-primary, .download-final, .install-tabs::before { transition: none; }
+    .download-primary:hover, .download-final:hover { transform: none; }
+  }
   @media (scripting: none) { .install-head, .install-copy { display: none; } .install-line { grid-template-columns: 1fr; } }
 </style>

@@ -8,13 +8,13 @@ const { quiet = false } = Astro.props;
   <span>GitHub</span><span class="badge-source" aria-hidden="true">Source ↗</span>
 </a>
 <style>
-  .github-badge { display: inline-flex; align-items: center; gap: 8px; min-height: 36px; padding: 0 11px; border: 1px solid #ffffff24; border-radius: 9px; color: #e3e9ed; font: 500 12px/1 var(--font-reading); white-space: nowrap; transition: border-color 160ms, background 160ms; }
-  .github-badge:hover { border-color: #c1dce865; background: #c1dce80a; color: #fff; }
-  .github-badge:focus-visible { outline: 2px solid #c1dce8; outline-offset: 3px; }
-  .badge-source { border-left: 1px solid #ffffff24; padding-left: 8px; color: #9caeb9; font-size: 11px; }
-  .github-badge.is-quiet { min-height: 44px; padding: 0; border: 0; color: #a3aea6; background: none; font-size: 13px; }
+  .github-badge { display: inline-flex; align-items: center; gap: var(--phux-space-s2); min-height: 36px; padding: 0 11px; border: var(--phux-space-hairline) solid var(--phux-border-base); border-radius: var(--phux-radius-md); color: var(--phux-text-text); font: var(--phux-weight-medium) var(--phux-type-caption-size)/1 var(--font-reading); white-space: nowrap; transition: border-color var(--phux-motion-control-duration) var(--phux-motion-control-easing), background var(--phux-motion-control-duration) var(--phux-motion-control-easing); }
+  .github-badge:hover { border-color: var(--phux-border-strong); background: var(--phux-wash-hover); color: var(--phux-text-text); }
+  .github-badge:focus-visible { outline: var(--phux-focus-ring-width) solid var(--phux-border-focus); outline-offset: var(--phux-focus-ring-offset); }
+  .badge-source { border-inline-start: var(--phux-space-hairline) solid var(--phux-border-base); padding-inline-start: var(--phux-space-s2); color: var(--phux-text-dim); font-size: var(--phux-type-micro-size); }
+  .github-badge.is-quiet { min-height: 44px; padding: 0; border: 0; color: var(--phux-text-dim); background: none; font-size: var(--phux-type-label-size); }
   .github-badge.is-quiet .badge-source { display: none; }
-  .github-badge.is-quiet:hover { color: #e7e2da; }
+  .github-badge.is-quiet:hover { color: var(--phux-text-text); }
   @media (max-width: 600px) { .github-badge { min-height: 44px; padding-inline: 9px; } .badge-source { display: none; } }
   @media (prefers-reduced-motion: reduce) { .github-badge { transition: none; } }
 </style>

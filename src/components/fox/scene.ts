@@ -1,3 +1,4 @@
+// style-literals: illustration. Physical light colours for the 3D fox render, not UI colour.
 /**
  * The hero fox in 3D: our sculpted metal mascot, lifted to 3D with TRELLIS.2
  * (MIT) and bound to the Khronos glTF sample Fox skeleton (rig and animation

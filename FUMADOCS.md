@@ -86,7 +86,7 @@ static, no server endpoint, no adapter.
 
 Fumadocs UI is themed via its `--fd-*` CSS variables, mapped from the reader
 tokens in `src/styles/reader/tokens.css` (paper, ink, one warm accent; Light, Dark and
-System). See DESIGN_SYSTEM.md for the token table.
+System), which are the brand reader variant. See DESIGN_SYSTEM.md for the mapping.
 
 ### 5a. Reader chrome (2026-10-21)
 

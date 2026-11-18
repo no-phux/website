@@ -19,6 +19,7 @@ import { publishLlmsTxt } from "./scripts/publish-llms.ts";
 import { splitDocsSitemap } from "./scripts/split-sitemaps.ts";
 import { pageLastmods } from "./scripts/sitemap-lastmod.ts";
 import { wgslVitePlugin } from "@vgpu/wgsl/loader-vite";
+import { phuxSyntaxTheme } from "./src/lib/syntax-theme.ts";
 
 const siteRoot = fileURLToPath(new URL(".", import.meta.url));
 const lastmods = pageLastmods(siteRoot);
@@ -32,7 +33,8 @@ const compare = existsSync(fileURLToPath(new URL("./src/content/docs/_synced/com
   : null;
 
 const remarkPlugins = [remarkHeading, remarkCodeTab, remarkNpm];
-const rehypePlugins = [rehypeCode];
+// Code colours are the brand syntax roles in both modes (src/lib/syntax-theme.ts).
+const rehypePlugins = [[rehypeCode, { themes: { light: phuxSyntaxTheme, dark: phuxSyntaxTheme } }]];
 
 // Tables keep their semantics, while the wrapper provides keyboard scrolling
 // and an announced region on narrow screens.
@@ -93,8 +95,9 @@ export default defineConfig({
     react(),
     mdx({ extendMarkdownConfig: true, syntaxHighlight: false }),
     sitemap({
-      // Markdown twins are alternates of the HTML routes. Do not list them.
-      filter: (page) => !new URL(page).pathname.endsWith(".md") && !isEmbedPath(new URL(page).pathname) && !isVgpuConceptPath(new URL(page).pathname) && !isConnectPath(new URL(page).pathname),
+      // Markdown twins are alternates of the HTML routes, and /_design is a noindex
+      // token specimen. Do not list them.
+      filter: (page) => !new URL(page).pathname.endsWith(".md") && new URL(page).pathname !== "/_design" && !isEmbedPath(new URL(page).pathname) && !isVgpuConceptPath(new URL(page).pathname) && !isConnectPath(new URL(page).pathname),
       serialize(item) {
         const url = new URL(item.url);
         const docs = isDocsPath(url.pathname);

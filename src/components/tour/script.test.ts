@@ -2,6 +2,7 @@ import { describe, expect, test } from "bun:test";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import Tour from "./Tour";
+import vocabulary from "../../data/vocabulary.json";
 import { CHAPTERS, QUICK_RATE, SIGNAL_SECONDS, advanceTour, frameAt, type Playback } from "./script";
 
 describe("landing tour", () => {
@@ -60,6 +61,22 @@ describe("landing tour", () => {
         }
       }
     }
+  });
+
+  test("pane states are the brand ladder, and the story reaches failed and needs you", () => {
+    const seen = new Set<string>();
+    for (let chapter = 0; chapter < CHAPTERS.length; chapter++) {
+      for (let time = 0; time <= CHAPTERS[chapter]!.seconds; time += 0.05) {
+        for (const pane of Object.values(frameAt(chapter, time).panes)) seen.add(pane.status);
+      }
+    }
+    for (const status of seen) expect(Object.keys(vocabulary.words)).toContain(status);
+    expect(seen).toContain("failed");
+    expect(seen).toContain("needs_you");
+    const html = renderToStaticMarkup(createElement(Tour));
+    expect(html).not.toMatch(/[●◆◐○✕]/);
+    expect(html).toContain('title="done"');
+    expect(html).toContain('viewBox="0 0 16 16"');
   });
 
   test("static artwork offers a real link without misrepresenting background hosts as live", () => {

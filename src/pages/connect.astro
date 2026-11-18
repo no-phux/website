@@ -17,6 +17,9 @@
 // query and fragment from the address bar as soon as it has read them. The
 // script itself sends nothing anywhere: the handoff to the app is local.
 import { SITE } from "../lib/site";
+import { brandToken } from "../lib/brand-tokens";
+// The brand tokens only: no reset, no utilities, no script.
+import "../styles/standalone-tokens.css";
 ---
 
 <!doctype html>
@@ -27,7 +30,8 @@ import { SITE } from "../lib/site";
     <!-- The link carries a credential: keep it out of indexes and headers. -->
     <meta name="robots" content="noindex,nofollow" />
     <meta name="referrer" content="no-referrer" />
-    <meta name="theme-color" content="#08080b" />
+    <meta name="theme-color" content={brandToken("houseLight", "--phux-layer-ground")} media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content={brandToken("houseDark", "--phux-layer-ground")} media="(prefers-color-scheme: dark)" />
     <title>Pair with {SITE.name}</title>
   </head>
   <body>
@@ -200,12 +204,11 @@ import { SITE } from "../lib/site";
 
     <style>
       :root {
-        color-scheme: dark;
-        --bg: #08080b;
-        --fg: #e8e8ee;
-        --muted: #9a9aa8;
-        --line: #232330;
-        --accent: #7cf1b0;
+        --bg: var(--phux-layer-ground);
+        --fg: var(--phux-text-text);
+        --muted: var(--phux-text-dim);
+        --line: var(--phux-border-base);
+        --accent: var(--phux-accent-accent);
       }
       html,
       body {
@@ -213,10 +216,7 @@ import { SITE } from "../lib/site";
         background: var(--bg);
         color: var(--fg);
         font:
-          16px/1.6 ui-sans-serif,
-          system-ui,
-          -apple-system,
-          sans-serif;
+          var(--phux-type-lead-size)/1.6 var(--phux-font-ui);
       }
       main {
         max-width: 34rem;
@@ -252,7 +252,7 @@ import { SITE } from "../lib/site";
         overflow-wrap: anywhere;
       }
       .mono {
-        font: 13px/1.5 var(--font-code);
+        font: var(--phux-type-label-size)/1.5 var(--phux-font-mono);
       }
       .button {
         width: 100%;
@@ -262,11 +262,11 @@ import { SITE } from "../lib/site";
         display: block;
         text-align: center;
         background: var(--accent);
-        color: #06120c;
-        font-weight: 600;
+        color: var(--phux-accent-on-accent);
+        font-weight: var(--phux-weight-semibold);
         text-decoration: none;
         padding: 0.85rem 1rem;
-        border-radius: 0.6rem;
+        border-radius: var(--phux-radius-md);
       }
       .hint {
         color: var(--muted);
@@ -279,8 +279,8 @@ import { SITE } from "../lib/site";
         margin: 0.5rem 0 1rem;
         padding: 0.75rem;
         border: 1px solid var(--line);
-        border-radius: 0.5rem;
-        background: var(--bg);
+        border-radius: var(--phux-radius-sm);
+        background: var(--phux-control-field);
         color: var(--fg);
         font: inherit;
       }
@@ -288,14 +288,14 @@ import { SITE } from "../lib/site";
         margin-bottom: 2rem;
       }
       pre {
-        background: #101018;
+        background: var(--phux-layer-raised);
         border: 1px solid var(--line);
-        border-radius: 0.5rem;
+        border-radius: var(--phux-radius-sm);
         padding: 0.8rem 1rem;
         overflow-x: auto;
       }
       code {
-        font-family: var(--font-code);
+        font-family: var(--phux-font-mono);
       }
     </style>
   </body>

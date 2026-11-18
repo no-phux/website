@@ -81,6 +81,7 @@ const ORIENTATION: { file: string; slug: string; group: Group; order: number; ti
   { file: "agent-skill.md", slug: "agent-skill", group: "automate", order: 2.2 },
   { file: "acp.md", slug: "acp", group: "automate", order: 3 },
   { file: "approvals.md", slug: "approvals", group: "automate", order: 2.5 },
+  { file: "onepassword.md", slug: "onepassword", group: "automate", order: 2.6 },
   { file: "remote.md", slug: "remote", group: "connect", order: 0 },
   { file: "ssh.md", slug: "ssh", group: "connect", order: 0.5 },
   { file: "forwarding.md", slug: "forwarding", group: "connect", order: 0.55 },
@@ -124,6 +125,7 @@ const ORIENTATION: { file: string; slug: string; group: Group; order: number; ti
   { file: "releasing.md", slug: "releasing", group: "internals", order: 7 },
   { file: "substrate.md", slug: "substrate", group: "internals", order: 8 },
   { file: "brand-assets.md", slug: "brand-assets", group: "internals", order: 9 },
+  { file: "design-language.md", slug: "design-language", group: "internals", order: 9.5 },
 ];
 
 /** Reading order of the generated reference pages; unlisted ones follow alphabetically. */
