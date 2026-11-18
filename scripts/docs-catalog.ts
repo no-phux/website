@@ -104,7 +104,7 @@ const ORIENTATION: { file: string; slug: string; group: Group; order: number; ti
     group: "build",
     order: -1,
     title: "Build on phux: JSON CLI, MCP, wire protocol, OSC 7501 and plugins",
-    description: "Entry points for a program that drives a phux server or reports status into a pane: JSON CLI, MCP, the wire protocol, OSC 7501, and plugins.",
+    description: "There is no published SDK or client library yet. A program builds on the JSON CLI, MCP, the wire protocol, unpublished Rust client crates, OSC 7501, or plugins.",
   },
   { file: "build-a-client.md", slug: "build-a-client", group: "build", order: -0.75 },
   { file: "any-program-status.md", slug: "any-program-status", group: "build", order: -0.5, title: "Any program can report status" },

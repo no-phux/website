@@ -138,13 +138,16 @@ describe("documentation discovery interface", () => {
     await source("any-program-status.md", "# Any program can report status\n\nA program reports with OSC 7501.\n");
     for (const file of ["program-protocol.md", "scripting.md", "agents.md", "protocol.md"]) await source(file);
     const { entries } = await discover(state.docs);
+    const buildingDescription = "There is no published SDK or client library yet. A program builds on the JSON CLI, MCP, the wire protocol, unpublished Rust client crates, OSC 7501, or plugins.";
+    expect(buildingDescription.length).toBeLessThanOrEqual(160);
+    expect(buildingDescription.endsWith("...")).toBe(false);
     expect(entries.find(({ slug }) => slug === "building")).toMatchObject({
       repoPath: "docs/building.md",
       slug: "building",
       group: "build",
       order: -1,
       title: "Build on phux: JSON CLI, MCP, wire protocol, OSC 7501 and plugins",
-      description: "Entry points for a program that drives a phux server or reports status into a pane: JSON CLI, MCP, the wire protocol, OSC 7501, and plugins.",
+      description: buildingDescription,
     });
     expect(entries.find(({ slug }) => slug === "any-program-status")).toMatchObject({
       repoPath: "docs/any-program-status.md",
@@ -166,9 +169,9 @@ describe("documentation discovery interface", () => {
     expect(pages.indexOf("protocol")).toBeGreaterThan(pages.indexOf("building"));
     const guide = await readFile(join(out, "building.md"), "utf8");
     expect(guide).toContain('title: "Build on phux: JSON CLI, MCP, wire protocol, OSC 7501 and plugins"');
-    expect(guide).toContain('description: "Entry points for a program that drives a phux server or reports status into a pane: JSON CLI, MCP, the wire protocol, OSC 7501, and plugins."');
+    expect(guide).toContain(`description: "${buildingDescription}"`);
     expect(guide).toContain('summary: "Programs that drive a phux server start here."');
-    expect(guide).not.toMatch(/SDK|multi-client|hooks edge/i);
+    expect(guide.replace(/no published SDK or client library/gi, "")).not.toMatch(/SDK|multi-client|hooks edge/i);
     expect(guide).toContain('sourcePath: "docs/building.md"');
     const status = await readFile(join(out, "any-program-status.md"), "utf8");
     expect(status).toContain('title: "Any program can report status"');
