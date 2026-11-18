@@ -75,20 +75,47 @@ async function liveSessions(): Promise<number> {
   return Number(value.live ?? -1);
 }
 
-async function waitFor(predicate: () => boolean, what: string): Promise<void> {
+/** Views that have attached; a wait fails as soon as one of them closes. */
+const attached: View[] = [];
+
+function closeState(view: View): string {
+  const closed = view.closed();
+  return closed ? `${closed.code}:${JSON.stringify(closed.reason)}` : "open";
+}
+
+async function waitFor(
+  predicate: () => boolean,
+  what: string,
+  detail?: () => string,
+): Promise<void> {
+  const suffix = () => (detail ? ` (${detail()})` : "");
   const deadline = Date.now() + timeoutMs;
   while (Date.now() < deadline) {
     if (predicate()) return;
+    // A view that closed after attaching can never deliver what is awaited;
+    // say so now rather than as a timeout.
+    for (const view of attached) {
+      const closed = view.closed();
+      if (closed)
+        fail(
+          `the ${view.label} view closed code=${closed.code} reason=${JSON.stringify(closed.reason)} while waiting for ${what}${suffix()}`,
+        );
+    }
     await new Promise((resolve) => setTimeout(resolve, 100));
   }
-  fail(`timed out waiting for ${what}`);
+  fail(`timed out waiting for ${what}${suffix()}`);
 }
 
 interface View {
+  label: string;
   socket: WebSocket;
   envelope: SessionInfo;
   terminalId: Uint8Array;
   output: () => string;
+  /** Terminal payload bytes this view has received. */
+  bytes: () => number;
+  /** The close this view saw, if its socket has closed. */
+  closed: () => { code: number; reason: string } | undefined;
   /** Count of frames of one type this view has received. */
   seen: (type: number) => number;
   close: () => void;
@@ -108,6 +135,8 @@ function open(label: string, attach: string, attachId: number): Promise<View> {
   socket.binaryType = "arraybuffer";
 
   let text = "";
+  let received = 0;
+  let closed: { code: number; reason: string } | undefined;
   let envelope: SessionInfo | undefined;
   let terminalId: Uint8Array | undefined;
   let helloOk = false;
@@ -130,14 +159,19 @@ function open(label: string, attach: string, attachId: number): Promise<View> {
     const settle = () => {
       if (!envelope || !terminalId || addressed < 2) return;
       clearTimeout(timeout);
-      resolve({
+      const view: View = {
+        label,
         socket,
         envelope,
         terminalId,
         output: () => text,
+        bytes: () => received,
+        closed: () => closed,
         seen: (type: number) => counts.get(type) ?? 0,
         close: () => socket.close(1000, "smoke complete"),
-      });
+      };
+      attached.push(view);
+      resolve(view);
     };
     socket.addEventListener("message", (event) => {
       if (!envelope) {
@@ -182,6 +216,7 @@ function open(label: string, attach: string, attachId: number): Promise<View> {
       const payload = parseTerminalPayload(frame);
       if (payload) {
         terminalId ??= payload.terminalId;
+        received += payload.bytes.length;
         text += new TextDecoder().decode(payload.bytes);
       }
       settle();
@@ -189,9 +224,12 @@ function open(label: string, attach: string, attachId: number): Promise<View> {
     socket.addEventListener("error", () =>
       reject(new Error(`${label} failed to connect`)),
     );
-    socket.addEventListener("close", (event) =>
-      reject(new Error(`${label} closed before rendering code=${event.code}`)),
-    );
+    socket.addEventListener("close", (event) => {
+      // After the view resolved, this reject is a no-op: `closed` is what lets
+      // a later wait notice the close instead of timing out on it.
+      closed = { code: event.code, reason: event.reason };
+      reject(new Error(`${label} closed before rendering code=${event.code}`));
+    });
   });
 }
 
@@ -257,9 +295,14 @@ for (const frame of inputTextFrames(phone.terminalId, command)) {
     ) as ArrayBuffer,
   );
 }
-await waitFor(() => desktop.output().includes(marker), "the phone's input on the desktop view");
-await waitFor(() => phone.output().includes(marker), "the phone's own echo");
+const views = () =>
+  `desktop_bytes=${desktop.bytes()} desktop_close=${closeState(desktop)} ` +
+  `phone_bytes=${phone.bytes()} phone_echo=${phone.output().includes(marker)} ` +
+  `phone_close=${closeState(phone)}`;
+await waitFor(() => desktop.output().includes(marker), "the phone's input on the desktop view", views);
+await waitFor(() => phone.output().includes(marker), "the phone's own echo", views);
 console.log("pair_smoke verified=true shared_shell=true");
+console.log(`pair_smoke ${views()}`);
 
 const claimed = await pairStatus(code);
 if (!claimed.ok) fail(`pairing status returned ${claimed.status}`);
