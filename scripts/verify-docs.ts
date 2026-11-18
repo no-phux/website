@@ -10,6 +10,7 @@ import { htmlToMarkdown } from "../host/markdown";
 import { AGENT_START, OVERVIEW } from "../src/lib/site";
 import { SITE_PAGE_CATALOG } from "./site-pages";
 import { asset, root, sitemapFiles, verifyCrawlMetadata, verifyDiscovery } from "./verify-docs-published";
+import { verifyReaderHydration } from "./verify-docs-hydration";
 
 const useWebKit = process.argv.includes("--webkit");
 const artifacts = resolve(import.meta.dir, "../.docs-check", useWebKit ? "webkit" : "chrome");
@@ -83,6 +84,8 @@ async function verifyReaderShell(page: Page, base: string) {
   assert.deepEqual(firstGroup.slice(0, 2), ["/overview", "/installation"], "the overview leads Get started, then install");
   assert.equal(firstGroup.at(-1), "/docs", "the all-docs map closes Get started");
   assert.ok(await sidebar.getByRole("list", { name: "On this page" }).locator("a").count() > 2, "active page shows its outline");
+  // SSR content is visible before React's passive effect attaches the shortcut.
+  await page.locator('.reader[data-search-ready="true"]').waitFor();
   await page.keyboard.press("/");
   await page.getByRole("dialog").locator("input").waitFor();
   await page.keyboard.press("Escape");
@@ -259,6 +262,7 @@ try {
   await page.getByRole("button", { name: "Copy page as Markdown" }).click();
   await page.locator("[data-page-actions] [role=status]").filter({ hasText: "View the Markdown" }).waitFor();
   assert.ok(await page.getByRole("button", { name: "Copy page as Markdown" }).isEnabled(), "failure allows retry");
+  await verifyReaderHydration(page, base, root);
   await verifyReaderShell(page, base);
   assert.deepEqual(errors, [], "no browser exceptions");
   await context.close();
