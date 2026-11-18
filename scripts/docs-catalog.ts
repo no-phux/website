@@ -307,12 +307,13 @@ function uniqueEntries(entries: Entry[]): Entry[] {
 }
 
 /*
- * no-phux/phux CI also imports discover(). A ci.yml job sparse-checks out this
- * file and runs it against phux's docs/ on PRs touching docs/*.md. Its export
- * name, signature, import graph, and failure behavior (throwing or exiting
- * non-zero on an uncatalogued page) are a cross-repo contract: keep it
- * importable standalone and keep it failing loudly. A new phux docs page needs
- * its ORIENTATION entry added here first.
+ * no-phux/phux CI also imports discover(). Its ci.yml job sparse-checks out
+ * this file when flat docs/*.md pages are added, renamed or deleted. The
+ * caller compares base/head misses: new uncatalogued pages fail the gate;
+ * pre-existing misses are reported separately. The export name, signature,
+ * import graph and thrown uncatalogued-page error are a cross-repo contract.
+ * Keep this module importable standalone and discover() failing loudly. A new
+ * public flat phux docs page needs its ORIENTATION entry added here first.
  */
 /** Discover public pages, retaining explicit routes/order and exclusion diagnostics. */
 export async function discover(docsDir: string): Promise<{ entries: Entry[]; excluded: string[] }> {
