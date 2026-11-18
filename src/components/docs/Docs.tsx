@@ -70,14 +70,14 @@ function ReaderShell({
 }: Props) {
   const [drawer, setDrawer] = useState(false);
   const closeDrawer = useCallback(() => setDrawer(false), []);
-  useSlashSearch();
+  const searchReady = useSlashSearch();
   const isOverview = pathname.replace(/\/$/, "") === "/overview";
   const isProtocol = pathname === "/protocol" || pathname.startsWith("/protocol/");
   const lead = summary || description;
 
   return (
     <AnchorProvider toc={toc} single>
-      <div className="reader">
+      <div className="reader" data-search-ready={searchReady}>
         <header className="reader-bar">
           <button type="button" className="reader-icon-button" aria-label="Open navigation" aria-haspopup="dialog" aria-expanded={drawer} onClick={() => setDrawer(true)}>
             <MenuIcon />
