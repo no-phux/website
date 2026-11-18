@@ -1,4 +1,4 @@
-import { useEffect, useRef, useSyncExternalStore, type ReactNode } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { useSearchContext } from "fumadocs-ui/contexts/search";
 import { useTheme } from "fumadocs-ui/provider/base";
 import { CloseIcon, SearchIcon } from "./icons";
@@ -53,6 +53,7 @@ function isTyping(target: EventTarget | null) {
 /** `/` opens search too, unless the reader is typing somewhere. ⌘K/Ctrl-K is the provider's. */
 export function useSlashSearch() {
   const { setOpenSearch } = useSearchContext();
+  const [ready, setReady] = useState(false);
   useEffect(() => {
     function onKey(event: KeyboardEvent) {
       if (event.key !== "/" || event.metaKey || event.ctrlKey || event.altKey || isTyping(event.target)) return;
@@ -60,8 +61,10 @@ export function useSlashSearch() {
       setOpenSearch(true);
     }
     window.addEventListener("keydown", onKey);
+    setReady(true);
     return () => window.removeEventListener("keydown", onKey);
   }, [setOpenSearch]);
+  return ready;
 }
 
 /**
