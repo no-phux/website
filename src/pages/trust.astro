@@ -9,7 +9,7 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 import { SITE, docsHref } from "../lib/site";
 import "../styles/privacy.css";
 
-const LAST_UPDATED = "2026-11-14";
+const LAST_UPDATED = "2026-11-18";
 const CONTACT = "privacy@phall.io";
 const SECURITY = `${SITE.github}/security/policy`;
 const title = `${SITE.name} — Trust`;
@@ -52,22 +52,30 @@ const SUBPROCESSORS = [
       <h2 id="short">in short</h2>
       <ul>
         <li>
-          phux never receives terminal content. Output, keystrokes, pastes,
-          clipboard text and file contents stay on your machines.
+          The organization control plane does not receive terminal streams,
+          keystrokes, pasted text, clipboard text or file contents. Your hosts
+          and clients handle that data.
         </li>
         <li>
           The control plane holds identity, policy and audit metadata: who
           ran which command, on which host, and what was decided.
         </li>
         <li>
-          If the control plane goes down, your machines keep working on cached
-          policy and certificates.
+          Local sessions can continue if the control plane is unavailable.
+          Managed access uses cached policy and certificates only while those
+          credentials remain valid; synchronization and enrollment need the
+          control plane.
         </li>
         <li>
           phux for teams is in early access. SOC 2 and a third-party
           penetration test are planned, not done.
         </li>
       </ul>
+      <p>
+        The hosted demo processes terminal content and has separate coverage
+        in the <a href="/privacy">privacy policy</a>. Recordings and storage you
+        configure are under your control, not the organization control plane's.
+      </p>
     </section>
 
     <section aria-labelledby="data">
@@ -82,8 +90,11 @@ const SUBPROCESSORS = [
         target (such as <code>terminal:3</code> or a file path), the outcome
         and the time. The{" "}
         <a href={docsHref("/audit")}>audit log</a>{" "}lists what is never
-        recorded. Audit records are kept for the period your license sets,
-        then deleted, and can be streamed to your SIEM as they arrive.
+        recorded. When a license sets a retention period, the control plane
+        periodically prunes expired records; deletion is not immediate.
+        SIEM delivery is being qualified. Do not rely on immediate or lossless
+        delivery: host uploads, collector availability and retention affect
+        what can arrive.
       </p>
     </section>
 
@@ -91,14 +102,18 @@ const SUBPROCESSORS = [
       <h2 id="controls">security controls</h2>
       <ul>
         <li>
-          <strong>Encryption in transit.</strong> Every host and device
-          connection uses mutual TLS. The relay forwards encrypted streams it
-          cannot read.
+          <strong>Encryption in transit.</strong> Managed device-to-host
+          connections use mutual TLS. Control-plane enrollment and reporting
+          APIs authenticate with tokens or signed requests; the self-hosted
+          service needs HTTPS termination for production use. The relay
+          forwards encrypted streams it cannot read.
         </li>
         <li>
           <strong>Short-lived access.</strong> After company sign-in, a device
           gets a certificate valid for 12 hours, scoped by your group policy.
-          Revoking it reaches every host at once.
+          Revocation takes effect when each host successfully synchronizes.
+          Hosts poll every 15 seconds by default and can retain cached state
+          during synchronization failures. Certificate expiry still applies.
         </li>
         <li>
           <strong>Tamper-evident audit.</strong> Each host signs its records
@@ -141,8 +156,11 @@ const SUBPROCESSORS = [
       <h2 id="subprocessors">subprocessors</h2>
       <p>
         These providers will process organization data once the hosted control
-        plane launches. None of them receives terminal content. We will update
-        this list 30 days before adding a provider.
+        plane launches. The planned control-plane services process organization
+        metadata. Relay hosting carries end-to-end encrypted terminal streams,
+        not their plaintext contents. Hosted-demo processing is covered
+        separately above. We will update this list 30 days before adding a
+        provider.
       </p>
       <div class="table-region" role="region" tabindex="0" aria-label="Subprocessors">
         <table>
