@@ -69,6 +69,7 @@ export const DOCS_PREFIXES = [
   "/troubleshooting",
   "/reference",
   "/architecture",
+  "/architecture-target",
   "/resource-kinds",
   "/mirrors",
   "/authority",
