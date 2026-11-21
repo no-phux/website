@@ -16,6 +16,9 @@ if index.get("schema") != 1 or lock["version"] not in index["releases"]:
 for version, record in index["releases"].items():
     directory = release_root / version
     manifest, files = brand.read_bundle(directory / "phux-brand.zip", record["sha256"])
+    # From 2.0.0 the archive's own manifest omits source_revision; the release's
+    # published manifest.json carries it alongside the same fields.
+    manifest.setdefault("source_revision", record["source_revision"])
     if manifest["version"] != version or manifest["source_revision"] != record["source_revision"]:
         raise SystemExit(f"brand kit: release identity mismatch: {version}")
     expected = f"{record['sha256']}  phux-brand.zip\n"

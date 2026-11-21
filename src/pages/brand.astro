@@ -8,6 +8,9 @@ import { monoWordmarkUrl } from "../lib/brand";
 
 const version = lock.version;
 const base = `/brand/releases/${version}`;
+// 2.0.0 locks no longer record the source revision; the public index does.
+const sourceRevision = (releases.releases as Record<string, { source_revision: string }>)[version]?.source_revision;
+if (!sourceRevision) throw new Error(`public/brand/index.json has no release ${version}`);
 const history = Object.keys(releases.releases).sort((a, b) =>
   b.localeCompare(a, undefined, { numeric: true }),
 );
@@ -45,7 +48,7 @@ const history = Object.keys(releases.releases).sort((a, b) =>
       <details>
         <summary>Verify this download</summary>
         <p>SHA-256</p><code class="checksum">{lock.sha256}</code>
-        <p>Source revision <code>{lock.source_revision}</code></p>
+        <p>Source revision <code>{sourceRevision}</code></p>
       </details>
     </section>
 
