@@ -82,6 +82,7 @@ const ORIENTATION: { file: string; slug: string; group: Group; order: number; ti
   { file: "agent-shims.md", slug: "agent-shims", group: "automate", order: 2.1 },
   { file: "agent-skill.md", slug: "agent-skill", group: "automate", order: 2.2 },
   { file: "acp.md", slug: "acp", group: "automate", order: 3 },
+  { file: "chief-of-staff.md", slug: "chief-of-staff", group: "automate", order: 3.1 },
   { file: "approvals.md", slug: "approvals", group: "automate", order: 2.5 },
   {
     file: "onepassword.md",
