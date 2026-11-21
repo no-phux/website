@@ -93,14 +93,6 @@
       "destination": "public/brand/images/mono-wordmark.svg",
       "sha256": "572e06498f31e3b18acc4ae6a1e09186b0588f114337d7047188106058c2246c"
     },
-    "tokens/css/phux-tokens.css": {
-      "destination": "src/styles/brand-tokens.css",
-      "sha256": "ed2a32faea5811d074b6ae25c054c5e91e0b0891cb043bd6ea7d968964746fbb"
-    },
-    "tokens/vocabulary.json": {
-      "destination": "src/data/vocabulary.json",
-      "sha256": "9834329807ad96296861b02157f414610b4a8cf65c78ae7b39201d114d8b5079"
-    },
     "tokens/wordmark.json": {
       "destination": "public/brand/wordmark.json",
       "sha256": "d75a20583b82fdbd94cfb141424857ed6fb7eb861dd6e4c0883377313928c7d7"

@@ -27,8 +27,6 @@
     "identity/profile.json": "public/brand/profile.json",
     "logos/mark.svg": "public/brand/images/mark.svg",
     "logos/mark-light.svg": "public/brand/images/mark-light.svg",
-    "logos/mark-dark.svg": "public/brand/images/mark-dark.svg",
-    "tokens/css/phux-tokens.css": "src/styles/brand-tokens.css",
-    "tokens/vocabulary.json": "src/data/vocabulary.json"
+    "logos/mark-dark.svg": "public/brand/images/mark-dark.svg"
   }
 }

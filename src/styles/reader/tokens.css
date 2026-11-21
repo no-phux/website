@@ -1,6 +1,6 @@
 /* ── Documentation reader ───────────────────────────────────────────────────
    The reader is the documented variant [data-design="reader"] of the brand
-   tokens: paper and ink with one warm accent, verified by phux-brand
+   tokens: paper and ink with one warm accent, verified by phux
    (variants.reader). Its colours and the 15/1.6 lead come from
    src/styles/brand-tokens.css; radius, space, motion and status are shared.
    This file only names them for the reader stylesheets and maps Fumadocs'
