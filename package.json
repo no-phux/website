@@ -32,7 +32,7 @@
     "worker:smoke-fallback": "bun run scripts/smoke-native.ts --exercise-fallback",
     "worker:smoke-pair": "bun run scripts/smoke-pair.ts",
     "hooks:install": "git config core.hooksPath .beads/hooks",
-    "brand:check": "python3 -B scripts/brand.py check && python3 -B scripts/check-brand-kit.py",
+    "brand:check": "python3 -B scripts/phux-design.py check && python3 -B scripts/brand.py check && python3 -B scripts/check-brand-kit.py",
     "style:check": "bun run scripts/check-style-literals.ts",
     "brand:restore": "python3 -B scripts/brand.py restore",
     "verify:brand": "bun run scripts/verify-brand.ts"

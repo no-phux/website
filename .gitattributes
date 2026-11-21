@@ -9,6 +9,6 @@ public/demos/**/*.cast linguist-generated=true
 # Immutable producer-generated release manifests; preserve signed hashes.
 public/brand/releases/**/manifest.json linguist-generated=true
 
-# phux-brand design tokens, written by scripts/brand.py sync.
+# phux design tokens, written by scripts/phux-design.py pin.
 src/styles/brand-tokens.css linguist-generated=true
 src/data/vocabulary.json linguist-generated=true

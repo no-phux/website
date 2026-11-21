@@ -1,8 +1,15 @@
-// The synced brand tokens as build-time data (see token-css.ts).
+// The pinned phux design tokens as build-time data (see token-css.ts).
 import source from "../styles/brand-tokens.css?raw";
+import lock from "../../phux-design.lock.json";
 import { modeTokens, parseTokenCss, type Mode } from "./token-css";
 
 export const tokenRules = parseTokenCss(source);
+
+/** The design-token version phux stamps in the stylesheet header, for example "2.0.0". */
+export const designVersion = /phux design tokens (\S+)/.exec(source)?.[1] ?? "unknown";
+
+/** The phux commit the tokens are pinned to (phux-design.lock.json), shortened. */
+export const designRev = lock.rev.slice(0, 12);
 
 /** One token's value in a mode, for HTML attributes such as theme-color. */
 export function brandToken(mode: Mode, name: string): string {
