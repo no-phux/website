@@ -45,6 +45,7 @@ export const DOCS_PREFIXES = [
   "/agent-shims",
   "/agent-skill",
   "/acp",
+  "/chief-of-staff",
   "/approvals",
   "/onepassword",
   "/remote",
