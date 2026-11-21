@@ -1,12 +1,11 @@
 ---
-// /_design: the website's specimen of the phux-brand tokens (noindex). Astro skips
+// /_design: the website's specimen of the phux design tokens (noindex). Astro skips
 // files whose names start with "_", so this route emits that one path. Every value
 // on the page is read from src/styles/brand-tokens.css; nothing here restates one.
 // Query toggles: ?mode=dark|light|system, ?design=reader, ?contrast=more,
 // ?forced=active (a preview of the token map), ?dir=rtl. DESIGN_SYSTEM.md has the list.
 import BaseLayout from "../layouts/BaseLayout.astro";
-import brand from "../../brand.lock.json";
-import { tokenRules } from "../lib/brand-tokens";
+import { designRev, designVersion, tokenRules } from "../lib/brand-tokens";
 import { previewDeclarations, tokenNames } from "../lib/token-css";
 import { countLabel, statusWord } from "../lib/vocabulary";
 
@@ -61,7 +60,7 @@ const toggles = [
 ];
 ---
 
-<BaseLayout title={`Design tokens · ${brand.version}`} description="The phux brand tokens as the website renders them.">
+<BaseLayout title={`Design tokens · ${designVersion}`} description="The phux design tokens as the website renders them.">
   <Fragment slot="head">
     <meta name="robots" content="noindex,nofollow" />
     <script is:inline>
@@ -86,10 +85,10 @@ const toggles = [
 
   <div class="specimen">
     <header class="intro">
-      <p class="eyebrow">phux-brand {brand.version} · generated tokens</p>
+      <p class="eyebrow">phux design {designVersion} · generated tokens · phux <code>{designRev}</code></p>
       <h1>Design tokens</h1>
       <p class="lede">Every colour, size, radius, shadow and spring on phux.sh comes from <code>src/styles/brand-tokens.css</code>,
-        synced from phux-brand. This page renders them as the
+        pinned from phux. This page renders them as the
         site does. The real accessibility modes follow the browser; the toggles preview the same token map.</p>
       <nav class="toggles" aria-label="Preview modes">
         {toggles.map(({ label, query }) => <a href={query} data-toggle={query}>{label}</a>)}

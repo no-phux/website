@@ -1,0 +1,13 @@
+{
+  "rev": "fdc14dca21041cb379f13d71c9cecb2ffc38044f",
+  "files": {
+    "clients/phux-web/assets/phux-tokens.css": {
+      "dest": "src/styles/brand-tokens.css",
+      "sha256": "0b41a2e620c5cedeb4fc914892818e98db8756cb57331c2f9acc187d54a9b4ff"
+    },
+    "crates/phux-design/tokens/src/vocabulary.json": {
+      "dest": "src/data/vocabulary.json",
+      "sha256": "9834329807ad96296861b02157f414610b4a8cf65c78ae7b39201d114d8b5079"
+    }
+  }
+}

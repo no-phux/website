@@ -1,4 +1,4 @@
-// Status words and count plurals from phux-brand (src/data/vocabulary.json, synced).
+// Status words and count plurals from phux (src/data/vocabulary.json, pinned in phux-design.lock.json).
 // Never write a status word as an English literal; read it here.
 import vocabulary from "../data/vocabulary.json";
 
