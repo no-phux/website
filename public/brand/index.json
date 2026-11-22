@@ -47,6 +47,10 @@
     "2.0.0": {
       "sha256": "63f3c6c2779cbd79908b0e5f5719b2f0e98e6033ae6c4eae19818b798f77a098",
       "source_revision": "dc3dd8af9463f0748f14d01e77236fcceafc71d1"
+    },
+    "2.1.0": {
+      "sha256": "580974f8fcb12ad3e69b7371b18579ef8511716abc721d2e6575b4afac328960",
+      "source_revision": "cd9d8a81e9458047f9359f87e9f4a23b22808ad3"
     }
   },
   "schema": 1
