@@ -124,6 +124,7 @@ const ORIENTATION: { file: string; slug: string; group: Group; order: number; ti
   { file: "libghostty.md", slug: "libghostty", group: "internals", order: 0.5, title: "A terminal multiplexer built on libghostty — phux" },
   { file: "decisions.md", slug: "decisions", group: "internals", order: 1 },
   { file: "organization.md", slug: "organization", group: "internals", order: 2 },
+  { file: "organization-store.md", slug: "organization-store", group: "internals", order: 2.5 },
   { file: "protocol.md", slug: "protocol", group: "internals", order: 3 },
   { file: "protocol-changes.md", slug: "protocol-changes", group: "internals", order: 3.25 },
   { file: "protocol-files.md", slug: "protocol-files", group: "internals", order: 3.5 },
