@@ -54,7 +54,7 @@ export async function verifyDiscovery() {
   for (const line of [
     "- [OSC 7501: report status from any program](https://docs.phux.sh/program-protocol): the Program Status Protocol sequence a program writes to report its status; phux records it and shows it per pane.",
     "- [Program sequences and agent reports](https://docs.phux.sh/program-sequences): titles, `phux-ask` questions, OSC 133, OSC 52, and the other sequences phux reads, plus the agent record.",
-    "- [Plugin API](https://docs.phux.sh/plugins): a directory with a `phux-plugin.toml` manifest that adds actions, panes, sidebar sections, status-bar widgets, themes, hooks, and agent declarations.",
+    "- [Plugin API: build extensions for the phux terminal multiplexer](https://docs.phux.sh/plugins): a directory with a `phux-plugin.toml` manifest that adds actions, panes, sidebar sections, status-bar widgets, themes, hooks, and agent declarations.",
     "- [Embed phux](https://docs.phux.sh/embedding): put a phux terminal in your own app with `phux-gpui`, `phux-client-runtime`, or `phux-client-ffi`. None is on crates.io yet.",
     "- [Server protocol](https://docs.phux.sh/protocol): how a client talks to a phux server in length-prefixed frames, with the handshake, capabilities, and the 1.x compatibility rule.",
     "- [Know when Claude Code or Codex is waiting for you](https://docs.phux.sh/agent-waiting): `phux agent list` prints each pane's agent state; `blocked` means Claude Code, Codex, or another recognized agent is waiting on you.",
