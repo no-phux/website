@@ -12,7 +12,11 @@ tmux wait-for cmd-done
 tmux capture-pane -p -t %0
 ```
 
-`send-keys` types the quoted text and then the Enter key. The pane's shell runs that line. Single quotes leave `$?` for that shell, which expands it after `printf`. `wait-for cmd-done` returns when the pane runs `wait-for -S cmd-done`. A signal that arrives first is kept, so the wait still returns. `wait-for` exits 0, including when the marker is `EXIT:1`. `capture-pane -p` prints the visible pane. For this command that pane contains `EXIT:0`. The same marker after `false` is `EXIT:1`. Lines that have scrolled off are not in that print. `capture-pane -p -S -` starts at the beginning of the history.
+`send-keys` types the quoted text and then Enter, and the pane's shell runs that line. Single quotes leave `$?` for that shell, which expands it after `printf`.
+
+`wait-for cmd-done` returns when the pane runs `wait-for -S cmd-done`. If the pane signals first, that signal is kept, so the wait still returns. `wait-for` itself exits 0, even when the marker is `EXIT:1`.
+
+`capture-pane -p` prints the visible pane. For this command that pane contains `EXIT:0`; after `false` the marker is `EXIT:1`. Lines that have scrolled off are not in that print. `capture-pane -p -S -` starts at the beginning of the history.
 
 `phux run` prints the output and exits with the command's status.
 
@@ -34,7 +38,7 @@ phux snapshot --json @7
 
 `phux send-keys` is tmux-shaped: flags go before the target, and everything after the target is a key. [Getting started](/getting-started#coming-from-tmux) has more tmux pairings. The other flags are in the [command reference](/reference/cli).
 
-`run` drives sh, bash, zsh, and fish. It refuses with exit 2 when a shell is not what is reading the pane. In `vim` or `less` those bytes would be keystrokes. `--force` skips that check. Do not use `run` to type into a coding agent that is already in the foreground.
+`run` drives sh, bash, zsh, and fish. It refuses with exit 2 when the program reading the pane is not a shell. In `vim` or `less` those bytes would be keystrokes. `--force` skips that check. Do not use `run` to type into a coding agent that is already in the foreground.
 
 `phux snapshot` prints the screen. It does not attach, resize, or change the pane. `--json` includes the lines, cursor, size, and title.
 
