@@ -30,6 +30,24 @@ describe("documentation discovery interface", () => {
     expect(state.warning).toHaveBeenCalledWith("  skip (missing): docs/clients.md");
   });
 
+  test("publishes organization store after organization with local recovery links", async () => {
+    await source("organization.md", "# Organization\n\nSee [store and recovery](./organization-store.md).\n");
+    await source("organization-store.md", "# Organization store and recovery\n\nSee [organization](./organization.md).\n");
+    await source("protocol.md");
+    const { entries } = await discover(state.docs);
+    expect(entries.find(({ slug }) => slug === "organization-store")).toMatchObject({
+      repoPath: "docs/organization-store.md", group: "internals", order: 2.5,
+    });
+    const out = join(state.root, "out");
+    await mkdir(out);
+    await writeDocumentation(out, entries, revision, versions, siteRevision);
+    const pages = (await metadata(out)).pages as string[];
+    expect(pages.indexOf("organization-store")).toBe(pages.indexOf("organization") + 1);
+    expect(pages.indexOf("protocol")).toBe(pages.indexOf("organization-store") + 1);
+    expect(await readFile(join(out, "organization.md"), "utf8")).toContain("[store and recovery](/organization-store)");
+    expect(await readFile(join(out, "organization-store.md"), "utf8")).toContain("[organization](/organization)");
+  });
+
   test("publishes host services in Build for phux with local documentation links", async () => {
     for (const file of ["program-protocol.md", "program-sequences.md", "protocol.md"]) await source(file);
     await source("host-services.md", "# Host services\n\nHTTP over the phux connection.\n\n## Commands\n\nSee the [protocol](./protocol.md#commands-events-resources).\n");
