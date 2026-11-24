@@ -55,6 +55,7 @@ export const DOCS_PREFIXES = [
   "/hub-mail",
   "/enterprise",
   "/audit",
+  "/security",
   "/tailscale",
   "/clients",
   "/embedding",

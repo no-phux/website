@@ -100,6 +100,7 @@ const ORIENTATION: { file: string; slug: string; group: Group; order: number; ti
   { file: "hub-mail.md", slug: "hub-mail", group: "connect", order: 0.6 },
   { file: "enterprise.md", slug: "enterprise", group: "connect", order: 2, title: "Organizations" },
   { file: "audit.md", slug: "audit", group: "connect", order: 2.5 },
+  { file: "security.md", slug: "security", group: "connect", order: 3 },
   // Hub for driving phux. A checkout without the file skips it.
   {
     file: "building.md",
