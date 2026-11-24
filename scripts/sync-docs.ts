@@ -11,13 +11,13 @@
  * file under `_synced/`.
  *
  * phux's docs are a flat `docs/*.md` (hand-written pages) plus the generated
- * `docs/reference/*.md`. The hand-written pages are listed in ORIENTATION with
- * their slug and nav group; the reference directory is globbed, so a new
- * generated page flows through with no edit here.
+ * `docs/reference/*.md`. Each hand-written page names its own nav `group` and
+ * `order` (or `publish: false`) in source frontmatter; the reference directory
+ * is globbed. Neither needs an edit here.
  *
  * What it does, per file:
  *   1. Writes the site's collection schema frontmatter (title, summary, group,
- *      order, sourcePath, stability). The source pages carry no frontmatter.
+ *      order, sourcePath, stability), replacing the source frontmatter.
  *   1b. A directory README with children is written as `<prefix>/index.md`,
  *      and each folder gets a Fumadocs `meta.json` (title + explicit `pages`
  *      order). The URL slug stays the bare prefix either way.
@@ -154,8 +154,8 @@ async function run() {
   await rm(OUT_DIR, { recursive: true, force: true });
   await mkdir(OUT_DIR, { recursive: true });
   const versions = await readVersionMetadata();
-  const { entries, excluded } = await discover(DOCS_DIR);
-  const { written, failed } = await writeDocumentation(OUT_DIR, entries, SOURCE_REVISION, versions, siteRevision());
+  const { entries, excluded, unpublished } = await discover(DOCS_DIR);
+  const { written, failed } = await writeDocumentation(OUT_DIR, entries, SOURCE_REVISION, versions, siteRevision(), unpublished);
   await syncInstaller();
   await writeFile(
     MANIFEST_PATH,

@@ -6,7 +6,6 @@ import { GATED_LLMS_PAGES, docsPathnames, llmsTxtListsPage, publishLlmsTxt } fro
 
 const indexed = await readFile(new URL("../public/llms.txt", import.meta.url), "utf8");
 const building = "/building";
-const status = "/any-program-status";
 const libghostty = "/libghostty";
 
 async function publish(htmlFiles: string[], source = indexed): Promise<string> {
@@ -24,11 +23,9 @@ async function publish(htmlFiles: string[], source = indexed): Promise<string> {
 describe("published llms.txt", () => {
   test("publishes neither gated llms.txt line when neither page is built", async () => {
     expect(llmsTxtListsPage(indexed, building)).toBe(true);
-    expect(llmsTxtListsPage(indexed, status)).toBe(true);
     expect(llmsTxtListsPage(indexed, libghostty)).toBe(true);
     const published = await publish([]);
     expect(llmsTxtListsPage(published, building)).toBe(false);
-    expect(llmsTxtListsPage(published, status)).toBe(false);
     expect(llmsTxtListsPage(published, libghostty)).toBe(false);
     expect(published).toContain("https://docs.phux.sh/protocol");
     expect(published).toContain("https://docs.phux.sh/scripting");
@@ -37,24 +34,21 @@ describe("published llms.txt", () => {
   test("publishes only the building llms.txt line when only that page is built", async () => {
     const published = await publish(["building.html"]);
     expect(llmsTxtListsPage(published, building)).toBe(true);
-    expect(llmsTxtListsPage(published, status)).toBe(false);
     expect(llmsTxtListsPage(published, libghostty)).toBe(false);
     expect(published).toContain("https://docs.phux.sh/protocol");
   });
 
-  test("publishes only the any-program-status llms.txt line when only that page is built", async () => {
-    const published = await publish(["any-program-status.html"]);
+  test("publishes only the libghostty llms.txt line when only that page is built", async () => {
+    const published = await publish(["libghostty.html"]);
     expect(llmsTxtListsPage(published, building)).toBe(false);
-    expect(llmsTxtListsPage(published, status)).toBe(true);
-    expect(llmsTxtListsPage(published, libghostty)).toBe(false);
+    expect(llmsTxtListsPage(published, libghostty)).toBe(true);
     expect(published).toContain("https://docs.phux.sh/scripting");
   });
 
   test("publishes every gated llms.txt line when every page is built", async () => {
-    const published = await publish(["building.html", "any-program-status.html", "libghostty.html"]);
+    const published = await publish(["building.html", "libghostty.html"]);
     expect(published).toBe(indexed);
     expect(llmsTxtListsPage(published, building)).toBe(true);
-    expect(llmsTxtListsPage(published, status)).toBe(true);
     expect(llmsTxtListsPage(published, libghostty)).toBe(true);
   });
 
@@ -64,9 +58,9 @@ describe("published llms.txt", () => {
       "](https://docs.phux.sh/building#entry-points)",
     );
     expect(llmsTxtListsPage(source, building)).toBe(true);
-    const published = await publish(["any-program-status.html"], source);
+    const published = await publish(["libghostty.html"], source);
     expect(llmsTxtListsPage(published, building)).toBe(false);
-    expect(llmsTxtListsPage(published, status)).toBe(true);
+    expect(llmsTxtListsPage(published, libghostty)).toBe(true);
   });
 
   test("a trailing slash, a query or a fragment still name the gated page", () => {
@@ -88,7 +82,6 @@ describe("published llms.txt", () => {
     expect(config).toMatch(/await publishLlmsTxt\(out\)/);
     expect(GATED_LLMS_PAGES.map((page) => page.html)).toEqual([
       "building.html",
-      "any-program-status.html",
       "libghostty.html",
     ]);
   });

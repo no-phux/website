@@ -123,9 +123,16 @@ async function writeSourcePages(outDir: string, entries: Entry[], prefixes: Set<
 }
 
 /** Caller prepares outDir; returns read failures without hiding write/render errors. */
-export async function writeDocumentation(outDir: string, entries: Entry[], revision: string, versions: Versions, siteRevision: string) {
+export async function writeDocumentation(
+  outDir: string,
+  entries: Entry[],
+  revision: string,
+  versions: Versions,
+  siteRevision: string,
+  unpublished: ReadonlySet<string> = new Set(),
+) {
   const prefixes = folderPrefixes(entries);
-  const render = createPageRenderer(entries, revision, versions);
+  const render = createPageRenderer(entries, revision, versions, unpublished);
   const result = await writeSourcePages(outDir, entries, prefixes, render);
   result.written += await writeOverviewPage(outDir, versions, siteRevision);
   result.written += await writeSitePages(outDir, versions, siteRevision);

@@ -1,7 +1,7 @@
 /** Source-page presentation and immutable, catalog-aware Markdown links. */
 import { dirname, join } from "node:path";
 import { extendComparePage } from "./compare-extension";
-import { GROUPS, isDeniedDocumentation, parseFrontmatter, type Entry } from "./docs-catalog";
+import { GROUPS, parseFrontmatter, type Entry } from "./docs-catalog";
 import { sourceCommitDate } from "./sitemap-lastmod";
 
 export interface Versions { protocolVersion: string; projectVersion: string }
@@ -88,27 +88,28 @@ function unhostedFile(path: string, resolved: string, anchor: string, blob: stri
   return null;
 }
 
-function isDeniedHref(href: string, fromDir: string): boolean {
+function isUnpublishedHref(href: string, fromDir: string, unpublished: ReadonlySet<string>): boolean {
   if (/^(https?:\/\/|#|mailto:)/.test(href)) return false;
   const { path } = splitHref(href);
   if (!path) return false;
-  return isDeniedDocumentation(normalizeRepoPath(join(fromDir, path)));
+  return unpublished.has(normalizeRepoPath(join(fromDir, path)));
 }
 
-/** Drop links to denylisted sources. The label stays; the target does not. */
-function stripDeniedLinks(body: string, fromDir: string): string {
+/** Drop links to sources discovery excluded. The label stays; the target does not. */
+function stripUnpublishedLinks(body: string, fromDir: string, unpublished: ReadonlySet<string>): string {
+  if (unpublished.size === 0) return body;
   const inline = body.replace(/(!?)\[([^\]]*)\]\(([^)\s]+)\)/g, (whole, bang, label, href) => {
-    if (!isDeniedHref(href, fromDir)) return whole;
+    if (!isUnpublishedHref(href, fromDir, unpublished)) return whole;
     return bang ? "" : label;
   });
   return inline.replace(/^[ \t]*\[[^\]]+\]:[ \t]*\S+[^\n]*(?:\n|$)/gm, (line) => {
     const href = line.match(/\]:[ \t]*(\S+)/)?.[1];
-    return href && isDeniedHref(href, fromDir) ? "" : line;
+    return href && isUnpublishedHref(href, fromDir, unpublished) ? "" : line;
   });
 }
 
 /** A rewriter owns its route tables; concurrent producers cannot overwrite them. */
-function createLinkRewriter(entries: Entry[], revision: string) {
+function createLinkRewriter(entries: Entry[], revision: string, unpublished: ReadonlySet<string>) {
   const byPath = new Map<string, string>();
   for (const entry of entries) {
     const repoPath = normalizeRepoPath(entry.repoPath);
@@ -137,7 +138,7 @@ function createLinkRewriter(entries: Entry[], revision: string) {
     const fromDir = dirname(repoPath);
     // Keep the existing inline/reference-definition passes byte-for-byte in
     // scope: this is not a Markdown parser or a renderer behavior change.
-    let out = stripDeniedLinks(body, fromDir);
+    let out = stripUnpublishedLinks(body, fromDir, unpublished);
     out = out.replace(/(\]\()([^)\s]+)(\))/g, (whole, open, href, close) => {
       const next = resolveHref(href, fromDir);
       return next === null ? whole : `${open}${next}${close}`;
@@ -177,9 +178,12 @@ function pageMetadata(raw: string, entry: Entry) {
   };
 }
 
-/** Render with fixed source provenance; entries supply the hosted-link catalog. */
-export function createPageRenderer(entries: Entry[], revision: string, versions: Versions) {
-  const rewriteLinks = createLinkRewriter(entries, revision);
+/**
+ * Render with fixed source provenance; entries supply the hosted-link catalog
+ * and `unpublished` the excluded sources whose links lose their target.
+ */
+export function createPageRenderer(entries: Entry[], revision: string, versions: Versions, unpublished: ReadonlySet<string> = new Set()) {
+  const rewriteLinks = createLinkRewriter(entries, revision, unpublished);
   return function renderSourcePage(raw: string, entry: Entry): string {
     const { body, title, summary, description, stability } = pageMetadata(raw, entry);
     const extended = entry.repoPath === "docs/compare.md" ? extendComparePage(body, revision) : body;

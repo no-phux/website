@@ -44,7 +44,7 @@ export async function verifyDiscovery() {
   assert.ok(llms.startsWith(`# phux\n\n> ${SITE.tagline}\n`), "llms.txt leads with the canonical one-liner");
   assert.equal(llms.includes("programmable terminal runtime"), false, "llms.txt does not open on the old category line");
   for (const path of [
-    "/compare", "/tmux-import", "/performance",
+    "/compare", "/config", "/performance",
     "/program-protocol", "/program-sequences", "/plugins",
     "/embedding", "/protocol", "/agent-waiting",
     "/pane-command", "/terminal-mcp", "/tailscale",

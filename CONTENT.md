@@ -65,9 +65,10 @@ decisions a prerequisite for starting a terminal.
 
 `/overview` is the primary documentation home. `/docs` remains the complete
 addressable documentation index, not a competing start button. Navigation
-is derived from the catalog (`GROUPS` and `ORIENTATION` in
-`scripts/docs-catalog.ts`) by `scripts/docs-output.ts`: one labelled section per
-group, pages by `order`, public URLs and canonical sources unchanged.
+is derived by `scripts/docs-output.ts` from `GROUPS` in
+`scripts/docs-catalog.ts` and each phux `docs/*.md` page's own frontmatter
+(`group`, `order`, optional `slug`, or `publish: false`): one labelled section
+per group, pages by `order`. A new phux page needs no edit in this repo.
 
 - **Start here:** supported installation, first terminal, essential concepts,
   and the translation from tmux.

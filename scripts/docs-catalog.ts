@@ -53,94 +53,12 @@ export function parseFrontmatter(raw: string): SourceFm {
 }
 
 // ── discovery ──────────────────────────────────────────────────────────────
-/**
- * The hand-written pages, in nav order. Path is relative to DOCS_DIR.
+/*
+ * Each flat `docs/*.md` page places itself with its own frontmatter:
+ * `group` (a GROUPS key) and numeric `order`, plus optional `slug` (default:
+ * the basename), `title` and `description`. `publish: false` keeps a page off
+ * the site. A flat page with neither fails discovery.
  */
-const ORIENTATION: { file: string; slug: string; group: Group; order: number; title?: string; description?: string }[] = [
-  { file: "README.md", slug: "docs", group: "start", order: 9 },
-  { file: "install.md", slug: "installation", group: "start", order: 2 },
-  { file: "getting-started.md", slug: "getting-started", group: "start", order: 3 },
-  { file: "concepts.md", slug: "concepts", group: "start", order: 4 },
-  { file: "compare.md", slug: "compare", group: "start", order: 5 },
-  { file: "roadmap.md", slug: "roadmap", group: "start", order: 6 },
-  { file: "config.md", slug: "config", group: "customize", order: 0 },
-  { file: "keys.md", slug: "keys", group: "customize", order: 1 },
-  { file: "tmux-import.md", slug: "tmux-import", group: "customize", order: 2 },
-  { file: "migrate.md", slug: "migrate", group: "customize", order: 2.5 },
-  { file: "themes.md", slug: "themes", group: "customize", order: 3 },
-  { file: "status-bar.md", slug: "status-bar", group: "customize", order: 4 },
-  { file: "hooks.md", slug: "hooks", group: "customize", order: 5 },
-  { file: "plugins.md", slug: "plugins", group: "customize", order: 6 },
-  { file: "plugin-actions.md", slug: "plugin-actions", group: "customize", order: 6.5 },
-  { file: "distros.md", slug: "distros", group: "customize", order: 7 },
-  { file: "projects.md", slug: "projects", group: "customize", order: 8 },
-  { file: "omarchy.md", slug: "omarchy", group: "customize", order: 9 },
-  { file: "public-api.md", slug: "public-api", group: "automate", order: -0.5 },
-  { file: "agent-quickstart.md", slug: "agent-quickstart", group: "automate", order: 0 },
-  { file: "scripting.md", slug: "scripting", group: "automate", order: 1 },
-  { file: "agents.md", slug: "agents", group: "automate", order: 2 },
-  { file: "agent-shims.md", slug: "agent-shims", group: "automate", order: 2.1 },
-  { file: "agent-skill.md", slug: "agent-skill", group: "automate", order: 2.2 },
-  { file: "acp.md", slug: "acp", group: "automate", order: 3 },
-  { file: "chief-of-staff.md", slug: "chief-of-staff", group: "automate", order: 3.1 },
-  { file: "approvals.md", slug: "approvals", group: "automate", order: 2.5 },
-  {
-    file: "onepassword.md",
-    slug: "onepassword",
-    group: "automate",
-    order: 2.6,
-    title: "1Password credentials",
-    description: "Keep API credentials in 1Password and supply them to a local or remote program only when you approve its request.",
-  },
-  { file: "remote.md", slug: "remote", group: "connect", order: 0 },
-  { file: "ssh.md", slug: "ssh", group: "connect", order: 0.5 },
-  { file: "forwarding.md", slug: "forwarding", group: "connect", order: 0.55 },
-  { file: "clients.md", slug: "clients", group: "connect", order: 1 },
-  { file: "native-terminal.md", slug: "native-terminal", group: "connect", order: 0.5 },
-  { file: "hub-mail.md", slug: "hub-mail", group: "connect", order: 0.6 },
-  { file: "enterprise.md", slug: "enterprise", group: "connect", order: 2, title: "Organizations" },
-  { file: "audit.md", slug: "audit", group: "connect", order: 2.5 },
-  // Hub for driving phux. A checkout without the file skips it.
-  {
-    file: "building.md",
-    slug: "building",
-    group: "build",
-    order: -1,
-    title: "Build on phux: JSON CLI, MCP, wire protocol, OSC 7501 and plugins",
-    description: "There is no published SDK or client library yet. A program builds on the JSON CLI, MCP, the wire protocol, unpublished Rust client crates, OSC 7501, or plugins.",
-  },
-  { file: "build-a-client.md", slug: "build-a-client", group: "build", order: -0.75 },
-  { file: "any-program-status.md", slug: "any-program-status", group: "build", order: -0.5, title: "Any program can report status" },
-  { file: "program-protocol.md", slug: "program-protocol", group: "build", order: 0 },
-  { file: "program-sequences.md", slug: "program-sequences", group: "build", order: 1 },
-  { file: "host-services.md", slug: "host-services", group: "build", order: 2 },
-  { file: "troubleshooting.md", slug: "troubleshooting", group: "help", order: 0 },
-  { file: "architecture.md", slug: "architecture", group: "internals", order: 0 },
-  { file: "architecture-target.md", slug: "architecture-target", group: "internals", order: 0.1 },
-  { file: "resource-kinds.md", slug: "resource-kinds", group: "internals", order: 0.25 },
-  { file: "mirrors.md", slug: "mirrors", group: "internals", order: 0.3 },
-  { file: "authority.md", slug: "authority", group: "internals", order: 0.27, title: "Authority over pages, windows, and displays" },
-  { file: "applications.md", slug: "applications", group: "internals", order: 0.3, title: "Applications as resources" },
-  { file: "libghostty.md", slug: "libghostty", group: "internals", order: 0.5, title: "A terminal multiplexer built on libghostty — phux" },
-  { file: "decisions.md", slug: "decisions", group: "internals", order: 1 },
-  { file: "organization.md", slug: "organization", group: "internals", order: 2 },
-  { file: "organization-store.md", slug: "organization-store", group: "internals", order: 2.5 },
-  { file: "protocol.md", slug: "protocol", group: "internals", order: 3 },
-  { file: "protocol-changes.md", slug: "protocol-changes", group: "internals", order: 3.25 },
-  { file: "protocol-files.md", slug: "protocol-files", group: "internals", order: 3.5 },
-  { file: "compatibility.md", slug: "compatibility", group: "internals", order: 4 },
-  { file: "embedding.md", slug: "embedding", group: "internals", order: 5 },
-  { file: "development.md", slug: "development", group: "internals", order: 6 },
-  { file: "ci.md", slug: "ci", group: "internals", order: 6.1 },
-  { file: "ci-plan.md", slug: "ci-plan", group: "internals", order: 6.15 },
-  { file: "mutation-testing.md", slug: "mutation-testing", group: "internals", order: 6.25 },
-  { file: "windows-desktop-development.md", slug: "windows-desktop-development", group: "internals", order: 6.5 },
-  { file: "releasing.md", slug: "releasing", group: "internals", order: 7 },
-  { file: "substrate.md", slug: "substrate", group: "internals", order: 8 },
-  { file: "brand-assets.md", slug: "brand-assets", group: "internals", order: 9 },
-  { file: "design-language.md", slug: "design-language", group: "internals", order: 9.5 },
-];
-
 /** Reading order of the generated reference pages; unlisted ones follow alphabetically. */
 const REFERENCE_ORDER = [
   "cli.md", "config.md", "keys.md", "actions.md", "widgets.md", "hooks.md",
@@ -155,17 +73,6 @@ const REFERENCE_ORDER = [
 const SECTION_ROOTS: { dir: string; group: Group; urlPrefix: string }[] = [
   { dir: "reference", group: "reference", urlPrefix: "reference" },
 ];
-
-/** Repo-relative paths that must never publish. */
-const DENYLIST = new Set<string>([
-  // Internal org-ops record synced from phux. Not a public guide.
-  "docs/substrate.md",
-]);
-
-/** True when this repo-relative docs path must stay off the published site. */
-export function isDeniedDocumentation(repoPath: string): boolean {
-  return DENYLIST.has(repoPath);
-}
 
 /** Stability values that mark a doc as internal / unpublishable. */
 const EXCLUDED_STABILITY = new Set(["scratch", "draft"]);
@@ -192,8 +99,8 @@ function docsRepoPath(docsDir: string, abs: string): string {
 }
 
 /** Returns the exclusion reason, or null to keep the candidate. */
-function exclusionReason(repoPath: string, meta: Record<string, string>): string | null {
-  if (isDeniedDocumentation(repoPath)) return "denylist";
+function exclusionReason(meta: Record<string, string>): string | null {
+  if (meta.publish?.toLowerCase() === "false") return "publish:false";
   if (EXCLUDED_STABILITY.has((meta.stability ?? "").toLowerCase())) {
     return `stability:${meta.stability}`;
   }
@@ -214,44 +121,68 @@ interface Candidate {
   meta: Record<string, string>;
 }
 
-function candidateFromSource(docsDir: string, abs: string, raw: string, excluded: string[]): Candidate | null {
+interface Discovery {
+  /** Excluded sources with their reason, for the sync report. */
+  excluded: string[];
+  /** Repo paths of excluded sources; links to them are stripped. */
+  unpublished: Set<string>;
+}
+
+function candidateFromSource(docsDir: string, abs: string, raw: string, out: Discovery): Candidate | null {
   const repoPath = docsRepoPath(docsDir, abs);
   const { meta } = parseFrontmatter(raw);
-  const reason = exclusionReason(repoPath, meta);
+  const reason = exclusionReason(meta);
   if (reason) {
-    excluded.push(`${repoPath} (${reason})`);
+    out.excluded.push(`${repoPath} (${reason})`);
+    out.unpublished.add(repoPath);
     return null;
   }
   return { abs, repoPath, meta };
 }
 
-/** Fail at discovery, rather than silently dropping a new authored flat guide. */
-async function validateFlatPages(docsDir: string, excluded: string[]): Promise<void> {
-  const known = new Set(ORIENTATION.map(({ file }) => file));
-  const files = (await readdir(docsDir, { withFileTypes: true }))
-    .filter((entry) => entry.isFile() && entry.name.endsWith(".md"));
-  for (const { name } of files) {
-    if (known.has(name)) continue;
-    const abs = join(docsDir, name);
-    const candidate = candidateFromSource(docsDir, abs, await readFile(abs, "utf8"), excluded);
-    if (candidate) throw new Error(`uncatalogued documentation: ${candidate.repoPath}; add it to ORIENTATION and navigation`);
-  }
+/** Flat pages take any group but `reference`, which SECTION_ROOTS owns. */
+function isFlatGroup(value: string): value is Group {
+  return value !== "reference" && Object.hasOwn(GROUPS, value);
 }
 
-async function discoverOrientation(docsDir: string, excluded: string[]): Promise<Entry[]> {
+/** Drop one pair of matching YAML quotes. */
+function unquote(value: string | undefined): string | undefined {
+  const m = value?.match(/^(["'])(.*)\1$/);
+  return m ? m[2] : value;
+}
+
+function navPosition(repoPath: string, meta: Record<string, string>): { group: Group; order: number } {
+  const { group, order } = meta;
+  if (!group) throw new Error(`${repoPath}: frontmatter needs \`group\` and \`order\`, or \`publish: false\``);
+  if (!isFlatGroup(group)) {
+    const known = Object.keys(GROUPS).filter(isFlatGroup).join(", ");
+    throw new Error(`${repoPath}: unknown group "${group}"; use one of ${known}`);
+  }
+  const n = Number(order);
+  if (!order || !Number.isFinite(n)) throw new Error(`${repoPath}: order must be a number, got "${order ?? ""}"`);
+  return { group, order: n };
+}
+
+/** Navigation placement from a flat page's own frontmatter. */
+function flatEntry({ abs, repoPath, meta }: Candidate): Entry {
+  const slug = unquote(meta.slug) || basename(abs, ".md");
+  const entry: Entry = { repoPath, abs, slug, ...navPosition(repoPath, meta) };
+  const title = unquote(meta.title);
+  const description = unquote(meta.description);
+  if (title) entry.title = title;
+  if (description) entry.description = description;
+  return entry;
+}
+
+async function discoverFlat(docsDir: string, out: Discovery): Promise<Entry[]> {
+  const files = (await readdir(docsDir, { withFileTypes: true }))
+    .filter((entry) => entry.isFile() && entry.name.endsWith(".md"))
+    .map(({ name }) => join(docsDir, name))
+    .sort((a, b) => a.localeCompare(b));
   const entries: Entry[] = [];
-  for (const { file, ...page } of ORIENTATION) {
-    const abs = join(docsDir, file);
-    // Orientation files historically warn and skip when absent.
-    let raw: string;
-    try {
-      raw = await readFile(abs, "utf8");
-    } catch {
-      console.warn(`  skip (missing): docs/${file}`);
-      continue;
-    }
-    const candidate = candidateFromSource(docsDir, abs, raw, excluded);
-    if (candidate) entries.push({ repoPath: candidate.repoPath, abs, ...page });
+  for (const abs of files) {
+    const candidate = candidateFromSource(docsDir, abs, await readFile(abs, "utf8"), out);
+    if (candidate) entries.push(flatEntry(candidate));
   }
   return entries;
 }
@@ -285,12 +216,12 @@ function sectionEntry(candidate: Candidate, root: typeof SECTION_ROOTS[number], 
   return { repoPath, abs, slug, group: root.group, order: nonReadme.indexOf(candidate) + 1 };
 }
 
-async function discoverSection(docsDir: string, root: typeof SECTION_ROOTS[number], excluded: string[]): Promise<Entry[]> {
+async function discoverSection(docsDir: string, root: typeof SECTION_ROOTS[number], out: Discovery): Promise<Entry[]> {
   const rootDir = join(docsDir, root.dir);
   const files = (await walkMd(rootDir)).sort((a, b) => a.localeCompare(b));
   const kept: Candidate[] = [];
   for (const abs of files) {
-    const candidate = candidateFromSource(docsDir, abs, await readFile(abs, "utf8"), excluded);
+    const candidate = candidateFromSource(docsDir, abs, await readFile(abs, "utf8"), out);
     if (candidate) kept.push(candidate);
   }
   const nonReadme = kept.filter(({ abs }) => basename(abs).toLowerCase() !== "readme.md");
@@ -312,22 +243,12 @@ function uniqueEntries(entries: Entry[]): Entry[] {
   });
 }
 
-/*
- * no-phux/phux CI also imports discover(). Its ci.yml job sparse-checks out
- * this file when flat docs/*.md pages are added, renamed or deleted. The
- * caller compares base/head misses: new uncatalogued pages fail the gate;
- * pre-existing misses are reported separately. The export name, signature,
- * import graph and thrown uncatalogued-page error are a cross-repo contract.
- * Keep this module importable standalone and discover() failing loudly. A new
- * public flat phux docs page needs its ORIENTATION entry added here first.
- */
-/** Discover public pages, retaining explicit routes/order and exclusion diagnostics. */
-export async function discover(docsDir: string): Promise<{ entries: Entry[]; excluded: string[] }> {
-  const excluded: string[] = [];
-  await validateFlatPages(docsDir, excluded);
-  const entries = await discoverOrientation(docsDir, excluded);
+/** Discover public pages, with exclusion diagnostics and the unpublished sources. */
+export async function discover(docsDir: string): Promise<{ entries: Entry[] } & Discovery> {
+  const out: Discovery = { excluded: [], unpublished: new Set() };
+  const entries = await discoverFlat(docsDir, out);
   for (const root of SECTION_ROOTS) {
-    entries.push(...await discoverSection(docsDir, root, excluded));
+    entries.push(...await discoverSection(docsDir, root, out));
   }
-  return { entries: uniqueEntries(entries), excluded };
+  return { entries: uniqueEntries(entries), ...out };
 }

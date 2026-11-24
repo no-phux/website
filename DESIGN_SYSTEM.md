@@ -224,8 +224,9 @@ addressable complete index and leads the first group after the overview.
 
 The sidebar is the only navigation: the fox mark and wordmark, a pill search
 button with its shortcut, then one flat list. `scripts/docs-output.ts` derives
-it from the catalog (`scripts/docs-catalog.ts`): a quiet, always-open label per
-`GROUPS` entry in `GROUPS` order, then that group's pages by `order`. Top-level
+it from each source page's `group` and `order` frontmatter
+(`scripts/docs-catalog.ts`): a quiet, always-open label per `GROUPS` entry in
+`GROUPS` order, then that group's pages by `order`. Top-level
 folders such as `reference/` are extracted in place, so every page keeps its
 URL. Do not hand-maintain a second page list.
 
