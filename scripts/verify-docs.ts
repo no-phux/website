@@ -137,7 +137,8 @@ async function verifySearchApi(pages: { url: string }[]) {
   assert.ok(hits.length > 0 && hits.length <= 10, "at most ten results");
   assert.ok(hits.slice(0, 3).some((hit) => hit.url === `https://${DOCS_HOST}/installation#install-script`), "install script ranks near the top");
   const unbind = ((await (await search("?q=unbind+key")).json()) as Hit[]).map((hit) => hit.url);
-  assert.equal(unbind[0], `https://${DOCS_HOST}/keys#removing-a-binding`, "content outranks the link lists that point at it");
+  // The keys page itself, not an index that links to it. The heading is phux's to rename.
+  assert.ok(unbind[0]?.startsWith(`https://${DOCS_HOST}/keys#`), "content outranks the link lists that point at it");
   assert.equal((await search(`?q=${"a".repeat(201)}`)).status, 400, "an over-long q is refused");
   assert.equal((await search("", { method: "OPTIONS" })).status, 204, "CORS preflight");
   const bounced = await handler.fetch(new Request(`https://${SITE_HOST}/search.json?q=detach`), env);

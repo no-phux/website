@@ -3,130 +3,143 @@ import { mkdir, readdir, readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { discover } from "./docs-catalog";
 import { writeDocumentation } from "./docs-output";
-import { metadata, revision, siteRevision, source, state, useDocsSyncRoot, versions } from "./docs-sync.harness";
+import { guide, metadata, revision, siteRevision, source, state, useDocsSyncRoot, versions } from "./docs-sync.harness";
 
 useDocsSyncRoot();
 
-describe("documentation discovery interface", () => {
-  test("keeps technical comparison metadata from the source rather than promoting another competitor pitch", async () => {
-    await source("compare.md", "# phux vs tmux\n\nA source summary.\n\n## Next\n");
-    const { entries } = await discover(state.docs);
-    const comparison = entries.find(item => item.slug === "compare")!;
-    expect(comparison.title).toBeUndefined();
-    expect(comparison.summary).toBeUndefined();
+async function writeSite() {
+  const { entries, unpublished } = await discover(state.docs);
+  const out = join(state.root, "out");
+  await mkdir(out);
+  const result = await writeDocumentation(out, entries, revision, versions, siteRevision, unpublished);
+  return { out, result };
+}
+
+describe("flat page frontmatter", () => {
+  test("honors group, order, slug, title and description, and strips the source frontmatter", async () => {
+    await guide("install.md", {
+      slug: "installation",
+      group: "start",
+      order: 2,
+      title: '"Install phux: every platform"',
+      description: "Install, update and remove phux.",
+    }, "# Install\n\nOne command.\n\n## Channels\n\nText.\n");
+    const { entries, excluded } = await discover(state.docs);
+    expect(excluded).toEqual([]);
+    expect(entries).toEqual([{
+      repoPath: "docs/install.md",
+      abs: join(state.docs, "install.md"),
+      slug: "installation",
+      group: "start",
+      order: 2,
+      title: "Install phux: every platform",
+      description: "Install, update and remove phux.",
+    }]);
+    const { out } = await writeSite();
+    const page = await readFile(join(out, "installation.md"), "utf8");
+    expect(page).toContain('title: "Install phux: every platform"');
+    expect(page).toContain('summary: "One command."');
+    expect(page).toContain('description: "Install, update and remove phux."');
+    expect(page).not.toContain("slug: installation");
+    expect(page.split("---\n").at(-1)).toBe("## Channels\n\nText.\n");
   });
-  test("keeps canonical flat guides and ignores the historical archive", async () => {
-    const guides = ["embedding", "organization"];
-    for (const guide of guides) await source(`${guide}.md`);
-    await source("install.md");
-    await source("README.md");
+
+  test("defaults the slug to the basename and the title to the H1", async () => {
+    await guide("keys.md", { group: "customize", order: 1 }, "# Keys\n\nBindings.\n");
+    const { entries } = await discover(state.docs);
+    expect(entries).toEqual([{ repoPath: "docs/keys.md", abs: join(state.docs, "keys.md"), slug: "keys", group: "customize", order: 1 }]);
+  });
+
+  test("the README publishes as the docs map", async () => {
+    await guide("README.md", { slug: "docs", group: "start", order: 9 }, "# All docs\n\nEvery page.\n");
+    const { out } = await writeSite();
+    expect(await readFile(join(out, "docs.md"), "utf8")).toContain('sourcePath: "docs/README.md"');
+  });
+
+  test("orders pages within a group by order and groups in GROUPS order", async () => {
+    await guide("internals.md", { group: "internals", order: 0 });
+    await guide("third.md", { group: "customize", order: 2.5 });
+    await guide("first.md", { group: "customize", order: -1 });
+    await guide("second.md", { group: "customize", order: 1 });
+    await guide("started.md", { group: "start", order: 3 });
+    const { out } = await writeSite();
+    expect((await metadata(out)).pages).toEqual([
+      "---Get started---", "overview", "started",
+      "---Customize---", "first", "second", "third",
+      "---Automate---", "pane-command", "agent-waiting", "terminal-mcp",
+      "---Machines and clients---", "tailscale",
+      "---Work on phux---", "internals",
+    ]);
+  });
+
+  test("publish: false excludes the page and strips links to it, keeping the label", async () => {
+    await guide("substrate.md", { publish: false }, "# Internal\n\nKeep off the site.\n");
+    await guide(
+      "architecture.md",
+      { group: "internals", order: 0 },
+      "# Architecture\n\nA public summary.\n\n## Detail\n\nSee the [record](./substrate.md#cut) and [remote](./remote.md).\n\n[hidden]: ./substrate.md\n",
+    );
+    await guide("remote.md", { group: "connect", order: 0 });
+    const { entries, excluded, unpublished } = await discover(state.docs);
+    expect(entries.map(({ slug }) => slug)).not.toContain("substrate");
+    expect(excluded).toEqual(["docs/substrate.md (publish:false)"]);
+    expect([...unpublished]).toEqual(["docs/substrate.md"]);
+    const { out, result } = await writeSite();
+    expect(result.failed).toEqual([]);
+    const architecture = await readFile(join(out, "architecture.md"), "utf8");
+    expect(architecture).toContain("See the record and [remote](/remote).");
+    expect(architecture).not.toMatch(/substrate\.md|\/substrate/);
+    expect(await readdir(out)).not.toContain("substrate.md");
+    expect(JSON.stringify(await metadata(out))).not.toContain("substrate");
+  });
+
+  test("draft and scratch stability exclude a page even without a group", async () => {
+    await source("clients.md", "---\nstability: draft\n---\n# Clients");
+    await source("future-guide.md", "---\nstability: Scratch\n---\n# Future");
+    const { entries, excluded, unpublished } = await discover(state.docs);
+    expect(entries).toEqual([]);
+    expect(excluded.sort()).toEqual(["docs/clients.md (stability:draft)", "docs/future-guide.md (stability:Scratch)"]);
+    expect([...unpublished].sort()).toEqual(["docs/clients.md", "docs/future-guide.md"]);
+  });
+
+  test("a flat page without a group or publish: false fails, naming the file", async () => {
+    await source("future-guide.md");
+    await expect(discover(state.docs)).rejects.toThrow("docs/future-guide.md: frontmatter needs `group` and `order`, or `publish: false`");
+  });
+
+  test("an unknown group fails", async () => {
+    await guide("future-guide.md", { group: "misc", order: 1 });
+    await expect(discover(state.docs)).rejects.toThrow('docs/future-guide.md: unknown group "misc"; use one of start, customize, automate, connect, build, help, internals');
+  });
+
+  test("the reference group belongs to the generated section", async () => {
+    await guide("future-guide.md", { group: "reference", order: 1 });
+    await expect(discover(state.docs)).rejects.toThrow('docs/future-guide.md: unknown group "reference"');
+  });
+
+  test("a missing or non-numeric order fails", async () => {
+    await guide("future-guide.md", { group: "start", order: "soon" });
+    await expect(discover(state.docs)).rejects.toThrow('docs/future-guide.md: order must be a number, got "soon"');
+    await guide("future-guide.md", { group: "start" });
+    await expect(discover(state.docs)).rejects.toThrow('docs/future-guide.md: order must be a number, got ""');
+  });
+
+  test("two pages claiming one slug fail", async () => {
+    await guide("install.md", { slug: "installation", group: "start", order: 2 });
+    await guide("setup.md", { slug: "installation", group: "start", order: 3 });
+    await expect(discover(state.docs)).rejects.toThrow("duplicate slug installation: docs/install.md and docs/setup.md");
+  });
+
+  test("ignores the historical archive below docs/", async () => {
+    await guide("README.md", { slug: "docs", group: "start", order: 9 });
     await source("adr/README.md");
     await source("adr/old-decision.md");
-    const { entries, excluded } = await discover(state.docs);
-    expect(entries.map(({ slug }) => slug).sort()).toEqual(["docs", "installation", ...guides].sort());
-    expect(entries.find(({ slug }) => slug === "installation")).toMatchObject({ repoPath: "docs/install.md", group: "start", order: 2 });
-    expect(entries.find(({ slug }) => slug === "organization")).toMatchObject({ group: "internals", order: 2 });
-    expect(excluded).toEqual([]);
-    expect(state.warning).toHaveBeenCalledWith("  skip (missing): docs/clients.md");
-  });
-
-  test("publishes organization store after organization with local recovery links", async () => {
-    await source("organization.md", "# Organization\n\nSee [store and recovery](./organization-store.md).\n");
-    await source("organization-store.md", "# Organization store and recovery\n\nSee [organization](./organization.md).\n");
-    await source("protocol.md");
     const { entries } = await discover(state.docs);
-    expect(entries.find(({ slug }) => slug === "organization-store")).toMatchObject({
-      repoPath: "docs/organization-store.md", group: "internals", order: 2.5,
-    });
-    const out = join(state.root, "out");
-    await mkdir(out);
-    await writeDocumentation(out, entries, revision, versions, siteRevision);
-    const pages = (await metadata(out)).pages as string[];
-    expect(pages.indexOf("organization-store")).toBe(pages.indexOf("organization") + 1);
-    expect(pages.indexOf("protocol")).toBe(pages.indexOf("organization-store") + 1);
-    expect(await readFile(join(out, "organization.md"), "utf8")).toContain("[store and recovery](/organization-store)");
-    expect(await readFile(join(out, "organization-store.md"), "utf8")).toContain("[organization](/organization)");
+    expect(entries.map(({ slug }) => slug)).toEqual(["docs"]);
   });
+});
 
-  test("publishes host services in Build for phux with local documentation links", async () => {
-    for (const file of ["program-protocol.md", "program-sequences.md", "protocol.md"]) await source(file);
-    await source("host-services.md", "# Host services\n\nHTTP over the phux connection.\n\n## Commands\n\nSee the [protocol](./protocol.md#commands-events-resources).\n");
-    const { entries } = await discover(state.docs);
-    expect(entries.find(({ slug }) => slug === "host-services")).toMatchObject({
-      repoPath: "docs/host-services.md", group: "build", order: 2,
-    });
-    const out = join(state.root, "out");
-    await mkdir(out);
-    expect(await writeDocumentation(out, entries, revision, versions, siteRevision)).toEqual({ written: 9, failed: [] });
-    expect((await metadata(out)).pages).toEqual([
-      "---Get started---", "overview",
-      "---Automate---", "pane-command", "agent-waiting", "terminal-mcp",
-      "---Machines and clients---", "tailscale",
-      "---Build for phux---", "program-protocol", "program-sequences", "host-services",
-      "---Work on phux---", "protocol",
-    ]);
-    const guide = await readFile(join(out, "host-services.md"), "utf8");
-    expect(guide).toContain('sourcePath: "docs/host-services.md"');
-    expect(guide).toContain("[protocol](/protocol#commands-events-resources)");
-  });
-
-  test("publishes distributions beside plugins in Customize with local guide links", async () => {
-    await source("plugins.md", "# Plugins\n\nExtend phux.\n\n## More\n\nSee [Distributions](./distros.md).\n");
-    await source("distros.md", "# Distributions\n\nPortable defaults.\n\n## Write a distro\n\nCompose [plugins](./plugins.md).\n");
-    await source("projects.md");
-    const { entries, excluded } = await discover(state.docs);
-    expect(entries.find(({ slug }) => slug === "distros")).toMatchObject({
-      repoPath: "docs/distros.md", group: "customize", order: 7,
-    });
-    expect(excluded).toEqual([]);
-    const out = join(state.root, "out");
-    await mkdir(out);
-    expect(await writeDocumentation(out, entries, revision, versions, siteRevision)).toEqual({ written: 8, failed: [] });
-    expect((await metadata(out)).pages).toEqual([
-      "---Get started---", "overview", "---Customize---", "plugins", "distros", "projects",
-      "---Automate---", "pane-command", "agent-waiting", "terminal-mcp",
-      "---Machines and clients---", "tailscale",
-    ]);
-    expect(await readFile(join(out, "plugins.md"), "utf8")).toContain("[Distributions](/distros)");
-    const guide = await readFile(join(out, "distros.md"), "utf8");
-    expect(guide).toContain('title: "Distributions"');
-    expect(guide).toContain('sourcePath: "docs/distros.md"');
-    expect(guide).toContain("[plugins](/plugins)");
-  });
-
-  test("publishes tmux import after Keys in Customize with local guide links", async () => {
-    for (const file of ["config.md", "themes.md", "status-bar.md", "hooks.md", "plugins.md", "distros.md", "projects.md", "scripting.md"]) await source(file);
-    await source("keys.md", "# Keys\n\nNative bindings.\n\n## Coming from tmux\n\nSee the [tmux importer guide](./tmux-import.md).\n");
-    await source("getting-started.md", "# Getting started\n\nFirst steps.\n\n## Coming from tmux\n\nSee [Bring your tmux keys to phux](./tmux-import.md).\n");
-    await source("tmux-import.md", "# Bring your tmux keys to phux\n\nImport native bindings.\n\n## Apply and undo\n\nSee [when settings take effect](./config.md#when-a-change-takes-effect) and the [JSON error contract](./scripting.md#json-output-and-errors).\n");
-    const { entries, excluded } = await discover(state.docs);
-    expect(entries.find(({ slug }) => slug === "tmux-import")).toMatchObject({
-      repoPath: "docs/tmux-import.md", group: "customize", order: 2,
-    });
-    const customize = entries.filter(({ group }) => group === "customize").sort((a, b) => a.order - b.order);
-    expect(customize.map(({ slug }) => slug)).toEqual([
-      "config", "keys", "tmux-import", "themes", "status-bar", "hooks", "plugins", "distros", "projects",
-    ]);
-    expect(customize.map(({ order }) => order)).toEqual([0, 1, 2, 3, 4, 5, 6, 7, 8]);
-    expect(excluded).toEqual([]);
-    const out = join(state.root, "out");
-    await mkdir(out);
-    expect(await writeDocumentation(out, entries, revision, versions, siteRevision)).toEqual({ written: 16, failed: [] });
-    expect((await metadata(out)).pages).toEqual([
-      "---Get started---", "overview", "getting-started", "---Customize---",
-      "config", "keys", "tmux-import", "themes", "status-bar", "hooks", "plugins", "distros", "projects",
-      "---Automate---", "pane-command", "scripting", "agent-waiting", "terminal-mcp",
-      "---Machines and clients---", "tailscale",
-    ]);
-    expect(await readFile(join(out, "keys.md"), "utf8")).toContain("[tmux importer guide](/tmux-import)");
-    expect(await readFile(join(out, "getting-started.md"), "utf8")).toContain("[Bring your tmux keys to phux](/tmux-import)");
-    const guide = await readFile(join(out, "tmux-import.md"), "utf8");
-    expect(guide).toContain('title: "Bring your tmux keys to phux"');
-    expect(guide).toContain('sourcePath: "docs/tmux-import.md"');
-    expect(guide).toContain("[when settings take effect](/config#when-a-change-takes-effect)");
-    expect(guide).toContain("[JSON error contract](/scripting#json-output-and-errors)");
-  });
-
+describe("reference section discovery", () => {
   test("orders public section pages using all nav-order aliases, then basename", async () => {
     await source("reference/README.md");
     await source("reference/Beta.md", "---\nnav-order: -2\n---\n# Beta");
@@ -143,146 +156,6 @@ describe("documentation discovery interface", () => {
     ]);
     expect(entries.filter(({ order }) => order === 0).map(({ slug }) => slug).sort()).toEqual(["reference", "reference/nested"]);
     expect(excluded).toEqual(["docs/reference/hidden.md (stability:DRAFT)"]);
-  });
-
-  test("catalogs libghostty after architecture and skips a missing source", async () => {
-    for (const file of ["architecture.md", "decisions.md", "protocol.md"]) await source(file);
-    const absent = await discover(state.docs);
-    expect(absent.entries.some(({ slug }) => slug === "libghostty")).toBe(false);
-    expect(state.warning).toHaveBeenCalledWith("  skip (missing): docs/libghostty.md");
-
-    await source("libghostty.md", "# libghostty\n\nThe terminal engine phux renders with.\n");
-    const { entries } = await discover(state.docs);
-    expect(entries.find(({ slug }) => slug === "libghostty")).toMatchObject({
-      repoPath: "docs/libghostty.md",
-      slug: "libghostty",
-      group: "internals",
-      order: 0.5,
-      title: "A terminal multiplexer built on libghostty — phux",
-    });
-    const out = join(state.root, "out");
-    await mkdir(out);
-    await writeDocumentation(out, entries, revision, versions, siteRevision);
-    const pages = (await metadata(out)).pages as string[];
-    expect(pages.indexOf("architecture")).toBeGreaterThan(-1);
-    expect(pages.indexOf("libghostty")).toBe(pages.indexOf("architecture") + 1);
-    expect(pages.indexOf("decisions")).toBe(pages.indexOf("libghostty") + 1);
-    const page = await readFile(join(out, "libghostty.md"), "utf8");
-    expect(page).toContain('title: "A terminal multiplexer built on libghostty — phux"');
-    expect(page).toContain('summary: "The terminal engine phux renders with."');
-    expect(page).not.toMatch(/\bSDK\b/);
-  });
-
-  test("syncs when neither new docs page is in the phux checkout yet", async () => {
-    await source("program-protocol.md", "# Program protocol\n\nOSC 7501 keys.\n");
-    const { entries } = await discover(state.docs);
-    expect(entries.some(({ slug }) => slug === "building")).toBe(false);
-    expect(entries.some(({ slug }) => slug === "any-program-status")).toBe(false);
-    expect(state.warning).toHaveBeenCalledWith("  skip (missing): docs/building.md");
-    expect(state.warning).toHaveBeenCalledWith("  skip (missing): docs/any-program-status.md");
-    const out = join(state.root, "out");
-    await mkdir(out);
-    const result = await writeDocumentation(out, entries, revision, versions, siteRevision);
-    expect(result.failed).toEqual([]);
-    const pages = (await metadata(out)).pages as string[];
-    expect(pages).toContain("program-protocol");
-    expect(pages).not.toContain("building");
-    expect(pages).not.toContain("any-program-status");
-    const written = await readdir(out);
-    expect(written).not.toContain("building.md");
-    expect(written).not.toContain("any-program-status.md");
-  });
-
-  test("syncs when docs/any-program-status.md is not in the phux checkout yet", async () => {
-    await source("building.md", "# Build on phux\n\nPrograms that drive a phux server start here.\n");
-    await source("program-protocol.md", "# Program protocol\n\nOSC 7501 keys.\n");
-    const { entries } = await discover(state.docs);
-    expect(entries.some(({ slug }) => slug === "any-program-status")).toBe(false);
-    expect(state.warning).toHaveBeenCalledWith("  skip (missing): docs/any-program-status.md");
-    const out = join(state.root, "out");
-    await mkdir(out);
-    const result = await writeDocumentation(out, entries, revision, versions, siteRevision);
-    expect(result.failed).toEqual([]);
-    const pages = (await metadata(out)).pages as string[];
-    expect(pages).toContain("building");
-    expect(pages).toContain("program-protocol");
-    expect(pages).not.toContain("any-program-status");
-    expect(await readdir(out)).not.toContain("any-program-status.md");
-  });
-
-  test("syncs when docs/building.md is not in the phux checkout yet", async () => {
-    await source("any-program-status.md", "# Any program can report status\n\nA program reports with OSC 7501.\n");
-    await source("program-protocol.md", "# Program protocol\n\nOSC 7501 keys.\n");
-    const { entries } = await discover(state.docs);
-    expect(entries.some(({ slug }) => slug === "building")).toBe(false);
-    expect(state.warning).toHaveBeenCalledWith("  skip (missing): docs/building.md");
-    const out = join(state.root, "out");
-    await mkdir(out);
-    const result = await writeDocumentation(out, entries, revision, versions, siteRevision);
-    expect(result.failed).toEqual([]);
-    const pages = (await metadata(out)).pages as string[];
-    expect(pages).toContain("any-program-status");
-    expect(pages).toContain("program-protocol");
-    expect(pages).not.toContain("building");
-    expect(await readdir(out)).not.toContain("building.md");
-  });
-
-  test("accepts the phux main pages that landed ahead of the catalog PRs and skips a missing building page", async () => {
-    const absent = await discover(state.docs);
-    expect(absent.entries.some(({ slug }) => slug === "building")).toBe(false);
-    expect(state.warning).toHaveBeenCalledWith("  skip (missing): docs/building.md");
-    await source("public-api.md", "# Public terminal workflow\n\nCreate a terminal.\n");
-    await source("any-program-status.md", "# Any program can report status\n\nOSC 7501.\n");
-    await source("libghostty.md", "# libghostty in phux\n\nThe terminal engine.\n");
-    const { entries } = await discover(state.docs);
-    expect(entries.find(({ slug }) => slug === "public-api")).toMatchObject({ group: "automate", order: -0.5 });
-    expect(entries.find(({ slug }) => slug === "any-program-status")).toMatchObject({ group: "build", order: -0.5, title: "Any program can report status" });
-    expect(entries.find(({ slug }) => slug === "libghostty")).toMatchObject({
-      group: "internals",
-      order: 0.5,
-      title: "A terminal multiplexer built on libghostty — phux",
-    });
-    expect(entries.some(({ slug }) => slug === "building")).toBe(false);
-  });
-
-  test("fails visibly for an uncatalogued authored flat page", async () => {
-    await source("future-guide.md");
-    await expect(discover(state.docs)).rejects.toThrow("uncatalogued documentation: docs/future-guide.md; add it to ORIENTATION and navigation");
-  });
-
-  test("a denylisted flat page does not excuse another uncatalogued page", async () => {
-    await source("substrate.md");
-    await source("future-guide.md");
-    await expect(discover(state.docs)).rejects.toThrow("uncatalogued documentation: docs/future-guide.md; add it to ORIENTATION and navigation");
-  });
-
-  test("excludes the internal substrate doc and emits no page or link to it", async () => {
-    await source("substrate.md", "# Internal\n\nKeep off the site.\n");
-    await source(
-      "architecture.md",
-      "# Architecture\n\nA public summary.\n\n## Detail\n\nSee the [record](./substrate.md#cut) and [remote](./remote.md).\n\n[hidden]: ./substrate.md\n",
-    );
-    await source("remote.md");
-    const { entries, excluded } = await discover(state.docs);
-    expect(entries.map(({ repoPath }) => repoPath)).not.toContain("docs/substrate.md");
-    expect(entries.map(({ slug }) => slug)).not.toContain("substrate");
-    expect(excluded).toContain("docs/substrate.md (denylist)");
-    const out = join(state.root, "out");
-    await mkdir(out);
-    expect(await writeDocumentation(out, entries, revision, versions, siteRevision)).toEqual({ written: 7, failed: [] });
-    const architecture = await readFile(join(out, "architecture.md"), "utf8");
-    expect(architecture).toContain("See the record and [remote](/remote).");
-    expect(architecture).not.toMatch(/substrate\.md|\/substrate/);
-    expect(await readdir(out)).not.toContain("substrate.md");
-    expect(JSON.stringify(await metadata(out))).not.toContain("substrate");
-  });
-
-  test("still excludes draft/scratch flat pages, including unknown work in progress", async () => {
-    await source("clients.md", "---\nstability: draft\n---\n# Clients");
-    await source("future-guide.md", "---\nstability: Scratch\n---\n# Future");
-    const { entries, excluded } = await discover(state.docs);
-    expect(entries).toEqual([]);
-    expect(excluded.sort()).toEqual(["docs/clients.md (stability:draft)", "docs/future-guide.md (stability:Scratch)"]);
   });
 
   test("rejects colliding directory-index and page routes rather than overwriting", async () => {

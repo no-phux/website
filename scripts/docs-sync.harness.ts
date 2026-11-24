@@ -37,6 +37,12 @@ export async function source(file: string, body = "# Title\n\nA summary.\n\n## D
   await writeFile(path, body);
 }
 
+/** A flat source page with its own navigation frontmatter. */
+export async function guide(file: string, meta: Record<string, string | number | boolean>, body?: string) {
+  const fm = Object.entries(meta).map(([key, value]) => `${key}: ${value}`).join("\n");
+  await source(file, `---\n${fm}\n---\n${body ?? "# Title\n\nA summary.\n\n## Detail\n\nText.\n"}`);
+}
+
 export async function metadata(out: string, folder = "") {
   return JSON.parse(await readFile(join(out, folder, "meta.json"), "utf8"));
 }

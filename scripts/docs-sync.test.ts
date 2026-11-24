@@ -4,7 +4,7 @@ import { join } from "node:path";
 import { discover, type Entry } from "./docs-catalog";
 import { createPageRenderer } from "./docs-markdown";
 import { writeDocumentation } from "./docs-output";
-import { entry, metadata, render, revision, siteRevision, source, state, useDocsSyncRoot, versions } from "./docs-sync.harness";
+import { entry, guide, metadata, render, revision, siteRevision, source, state, useDocsSyncRoot, versions } from "./docs-sync.harness";
 
 useDocsSyncRoot();
 
@@ -62,7 +62,10 @@ describe("source Markdown rendering interface", () => {
 
 describe("collection output interface", () => {
   test("emits folder indexes, curated navigation and website-owned overview provenance", async () => {
-    for (const file of ["README.md", "install.md", "config.md", "reference/README.md", "reference/zebra.md", "reference/cli.md", "reference/config.md"]) await source(file);
+    await guide("README.md", { slug: "docs", group: "start", order: 9 });
+    await guide("install.md", { slug: "installation", group: "start", order: 2 });
+    await guide("config.md", { group: "customize", order: 0 });
+    for (const file of ["reference/README.md", "reference/zebra.md", "reference/cli.md", "reference/config.md"]) await source(file);
     const { entries } = await discover(state.docs);
     const out = join(state.root, "out");
     await mkdir(out);
