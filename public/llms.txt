@@ -65,7 +65,7 @@ npx skills add no-phux/skills                    # agent skills
 - [Use phux as an agent](https://docs.phux.sh/agent-quickstart): install phux and drive sessions from code.
 - [Run coding agents](https://docs.phux.sh/agents): choose an integration and verify it works.
 - [Know when Claude Code or Codex is waiting for you](https://docs.phux.sh/agent-waiting): `phux agent list` prints each pane's agent state; `blocked` means Claude Code, Codex, or another recognized agent is waiting on you.
-- [Run a command in a pane and get its output and exit code](https://docs.phux.sh/pane-command): `phux run` types a command into a pane, waits, and exits with its status; includes a tmux mapping table.
+- [Run a command in a tmux pane and get its output and exit code](https://docs.phux.sh/pane-command): tmux `send-keys`, `wait-for`, and `capture-pane` read the output and an exit-code marker; `phux run` types the command, waits, and exits with its status.
 - [Give your agent a terminal over MCP](https://docs.phux.sh/terminal-mcp): register `phux mcp`, the MCP server built into phux, so your agent can drive local panes.
 - [ACP-owned sessions](https://docs.phux.sh/acp): provider readiness, typed commands, human permissions, and uncertain outcomes.
 - [Remote access](https://docs.phux.sh/remote): connect machines and repair connections.

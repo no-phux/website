@@ -1,8 +1,24 @@
 ---
-title: Run a command in a pane and get its output and exit code
-summary: phux run types a command into a pane's shell, waits until it finishes, and exits with that command's status. From tmux: send-keys, capture-pane -p, and kill-pane map to phux send-keys, phux snapshot, and phux kill.
-description: Map tmux send-keys, capture-pane, and kill-pane to phux, then run a command and read its exit code.
+title: Run a command in a tmux pane and get its output and exit code
+summary: tmux send-keys runs a command in a pane, wait-for returns when that command signals, and capture-pane prints the screen, including an exit-code marker the command prints. phux run types the command, waits until it finishes, prints the output, and exits with that command's status.
+description: Run a command in a tmux pane with send-keys, wait-for, and capture-pane. phux run prints the output and exits with the command's status.
 ---
+
+`%0` is a pane id. `tmux list-panes -F '#{pane_id}'` prints the id of each pane in the current window.
+
+```sh
+tmux send-keys -t %0 'printf "hello\n"; printf "EXIT:%s\n" "$?"; tmux wait-for -S cmd-done' Enter
+tmux wait-for cmd-done
+tmux capture-pane -p -t %0
+```
+
+`send-keys` types the quoted text and then Enter, and the pane's shell runs that line. Single quotes leave `$?` for that shell, which expands it after `printf`.
+
+`wait-for cmd-done` returns when the pane runs `wait-for -S cmd-done`. If the pane signals first, that signal is kept, so the wait still returns. `wait-for` itself exits 0, even when the marker is `EXIT:1`.
+
+`capture-pane -p` prints the visible pane. For this command that pane contains `EXIT:0`; after `false` the marker is `EXIT:1`. Lines that have scrolled off are not in that print. `capture-pane -p -S -` starts at the beginning of the history.
+
+`phux run` prints the output and exits with the command's status.
 
 ```sh
 phux run --timeout 300 @7 'cargo test'
@@ -22,7 +38,7 @@ phux snapshot --json @7
 
 `phux send-keys` is tmux-shaped: flags go before the target, and everything after the target is a key. [Getting started](/getting-started#coming-from-tmux) has more tmux pairings. The other flags are in the [command reference](/reference/cli).
 
-`run` refuses with exit 2 when the foreground program is not a POSIX shell (`sh`, `bash`, or `zsh`). In `vim` or `less` those bytes would be keystrokes. `--force` skips that check. Do not use `run` to type into a coding agent that is already in the foreground.
+`run` drives sh, bash, zsh, and fish. It refuses with exit 2 when the program reading the pane is not a shell. In `vim` or `less` those bytes would be keystrokes. `--force` skips that check. Do not use `run` to type into a coding agent that is already in the foreground.
 
 `phux snapshot` prints the screen. It does not attach, resize, or change the pane. `--json` includes the lines, cursor, size, and title.
 

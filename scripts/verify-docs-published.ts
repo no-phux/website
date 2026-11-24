@@ -58,7 +58,7 @@ export async function verifyDiscovery() {
     "- [Embed phux](https://docs.phux.sh/embedding): put a phux terminal in your own app with `phux-gpui`, `phux-client-runtime`, or `phux-client-ffi`. None is on crates.io yet.",
     "- [Server protocol](https://docs.phux.sh/protocol): how a client talks to a phux server in length-prefixed frames, with the handshake, capabilities, and the 1.x compatibility rule.",
     "- [Know when Claude Code or Codex is waiting for you](https://docs.phux.sh/agent-waiting): `phux agent list` prints each pane's agent state; `blocked` means Claude Code, Codex, or another recognized agent is waiting on you.",
-    "- [Run a command in a pane and get its output and exit code](https://docs.phux.sh/pane-command): `phux run` types a command into a pane, waits, and exits with its status; includes a tmux mapping table.",
+    "- [Run a command in a tmux pane and get its output and exit code](https://docs.phux.sh/pane-command): tmux `send-keys`, `wait-for`, and `capture-pane` read the output and an exit-code marker; `phux run` types the command, waits, and exits with its status.",
     "- [Give your agent a terminal over MCP](https://docs.phux.sh/terminal-mcp): register `phux mcp`, the MCP server built into phux, so your agent can drive local panes.",
     "- [Reach your coding agents over Tailscale and SSH](https://docs.phux.sh/tailscale): list tailnet machines with `phux host discover`, or add one over SSH, then `phux attach`.",
   ]) {
