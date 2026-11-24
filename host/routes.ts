@@ -78,6 +78,7 @@ export const DOCS_PREFIXES = [
   "/libghostty",
   "/decisions",
   "/organization",
+  "/organization-store",
   "/protocol",
   "/protocol-changes",
   "/protocol-files",
