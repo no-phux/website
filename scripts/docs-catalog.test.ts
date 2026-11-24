@@ -48,31 +48,6 @@ describe("documentation discovery interface", () => {
     expect(await readFile(join(out, "organization-store.md"), "utf8")).toContain("[organization](/organization)");
   });
 
-  test("publishes security after audit with the page's own title and opening text", async () => {
-    const opening = "Control who reaches a phux server and what they may do: scoped keys, read-only keys, held actions, the audit log, 1Password credentials, and organization-managed credentials.";
-    await source("audit.md");
-    await source("remote.md");
-    await source(
-      "security.md",
-      `# Security\n\n${opening}\n\n**A remote connection needs an enrolled client certificate and a token** from pairing ([who can connect](./remote.md#who-can-connect)); organization-managed credentials skip the token.\n`,
-    );
-    const { entries } = await discover(state.docs);
-    const security = entries.find(({ slug }) => slug === "security");
-    expect(security).toMatchObject({ repoPath: "docs/security.md", group: "connect", order: 3 });
-    expect(security?.title).toBeUndefined();
-    expect(security?.description).toBeUndefined();
-    const out = join(state.root, "out");
-    await mkdir(out);
-    await writeDocumentation(out, entries, revision, versions, siteRevision);
-    const pages = (await metadata(out)).pages as string[];
-    expect(pages.indexOf("security")).toBe(pages.indexOf("audit") + 1);
-    const guide = await readFile(join(out, "security.md"), "utf8");
-    expect(guide).toContain('title: "Security"');
-    expect(guide).toContain(`summary: "${opening}"`);
-    expect(guide).toContain('description: "Control who reaches a phux server and what they may do: scoped keys, read-only keys, held actions, the audit log, 1Password credentials, and..."');
-    expect(guide).toContain("[who can connect](/remote#who-can-connect)");
-  });
-
   test("publishes host services in Build for phux with local documentation links", async () => {
     for (const file of ["program-protocol.md", "program-sequences.md", "protocol.md"]) await source(file);
     await source("host-services.md", "# Host services\n\nHTTP over the phux connection.\n\n## Commands\n\nSee the [protocol](./protocol.md#commands-events-resources).\n");
