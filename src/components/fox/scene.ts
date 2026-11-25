@@ -75,10 +75,15 @@ const HEAD_TURN_WALK = 1.64;
 const HEAD_TURN_REST = 0.9;
 const LOOK_TURN = 0.6; // radians of head turn at the pointer's full reach
 
-/** A cool rim on edges turning away, so the silhouette reads on the dark page. */
-function addRim(material: MeshStandardMaterial) {
+/**
+ * Grade the silver texture to cool graphite (grey first, so the cream bib and
+ * tail cool too), with a cool rim on edges turning away, so the silhouette
+ * reads on the dark page.
+ */
+function graphite(material: MeshStandardMaterial) {
   material.onBeforeCompile = shader => {
-    shader.fragmentShader = shader.fragmentShader.replace("#include <dithering_fragment>",
+    shader.fragmentShader = shader.fragmentShader.replace("#include <map_fragment>",
+      "#include <map_fragment>\n diffuseColor.rgb = vec3(0.19, 0.22, 0.26) * dot(diffuseColor.rgb, vec3(0.2126, 0.7152, 0.0722));").replace("#include <dithering_fragment>",
       "float rim = pow(1.0 - abs(dot(normal, normalize(vViewPosition))), 3.0);\n gl_FragColor.rgb += vec3(0.55, 0.66, 0.78) * rim * 0.32;\n#include <dithering_fragment>");
   };
 }
@@ -107,9 +112,13 @@ export async function startFox(canvas: HTMLCanvasElement, model: string): Promis
   renderer.toneMapping = ACESFilmicToneMapping;
   renderer.toneMappingExposure = 0.85;
   const scene = new Scene();
-  scene.environment = new PMREMGenerator(renderer).fromScene(new RoomEnvironment(), 0.04).texture;
-  scene.environmentIntensity = 0.95;
-  const key = new DirectionalLight("#fff6e8", 3.2);
+  // A restored GPU context brings back uploaded textures but not this rendered
+  // one; without a rebuild the metal has nothing to reflect and goes black.
+  const reflect = () => { scene.environment = new PMREMGenerator(renderer).fromScene(new RoomEnvironment(), 0.04).texture; };
+  reflect();
+  canvas.addEventListener("webglcontextrestored", reflect);
+  scene.environmentIntensity = 0.7;
+  const key = new DirectionalLight("#e6f0ff", 3.2);
   key.position.set(-300, 500, 400);
   key.castShadow = true;
   key.shadow.mapSize.set(1024, 1024);
@@ -131,7 +140,7 @@ export async function startFox(canvas: HTMLCanvasElement, model: string): Promis
   const bones: Record<string, Bone> = {};
   gltf.scene.traverse(o => {
     if (o instanceof SkinnedMesh) {
-      addRim(o.material as MeshStandardMaterial);
+      graphite(o.material as MeshStandardMaterial);
       o.castShadow = true;
       o.frustumCulled = false; // the skinned leap leaves the rest-pose bounds
     }
@@ -325,6 +334,7 @@ export async function startFox(canvas: HTMLCanvasElement, model: string): Promis
       observer.disconnect();
       resizer.disconnect();
       document.removeEventListener("visibilitychange", sync);
+      canvas.removeEventListener("webglcontextrestored", reflect);
       renderer.dispose();
     },
   };
