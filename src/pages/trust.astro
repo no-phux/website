@@ -1,0 +1,188 @@
+---
+// Trust page for phux Team and Enterprise: what phux holds for an org, how it
+// is protected, and the compliance status. Keep it honest: a control is
+// listed only when it ships, and planned work says "planned". Every statement
+// is derived from code: phux docs/audit.md and SECURITY.md, and the
+// control plane schema in no-phux/phux-org. When a subprocessor is added,
+// update this page 30 days before it starts processing, and bump LAST_UPDATED.
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { SITE, docsHref } from "../lib/site";
+import "../styles/privacy.css";
+
+const LAST_UPDATED = "2026-11-18";
+const CONTACT = "privacy@phall.io";
+const SECURITY = `${SITE.github}/security/policy`;
+const title = `${SITE.name} — Trust`;
+const description =
+  `How ${SITE.name} protects an organization's data: what the control plane holds, the security controls, subprocessors, and compliance status.`;
+
+const STATUS = [
+  { item: "Signed, hash-chained audit log on every host", state: "Live" },
+  { item: "Signed releases, signed channel manifests, SBOM", state: "Live" },
+  { item: "LTS channel, security fixes for 12 months", state: "Live" },
+  { item: "Data processing agreement", state: "On request for pilots" },
+  { item: "Penetration test by a third party", state: "Planned" },
+  { item: "SOC 2 Type I", state: "Planned" },
+  { item: "SLA for the hosted control plane", state: "Enterprise, at launch" },
+];
+
+const SUBPROCESSORS = [
+  { name: "Fly.io", what: "Hosting the control plane and the blind relay", where: "US" },
+  { name: "Supabase", what: "Control plane database; push gateway", where: "US" },
+  { name: "WorkOS", what: "SAML, SCIM and directory sync", where: "US" },
+  { name: "Apple, Google", what: "Push notifications to approvers' phones", where: "Global" },
+  { name: "Stripe", what: "Billing", where: "US" },
+];
+---
+
+<BaseLayout {title} {description}>
+  <article class="wrap policy">
+    <header class="policy-head">
+      <h1>Trust</h1>
+      <p class="updated">
+        Last updated <time datetime={LAST_UPDATED}>{LAST_UPDATED}</time>
+      </p>
+      <p class="lede">
+        How phux for <a href="/teams">teams</a> protects your organization's
+        data, and where our compliance work stands.
+      </p>
+    </header>
+
+    <section class="summary" aria-labelledby="short">
+      <h2 id="short">in short</h2>
+      <ul>
+        <li>
+          The organization control plane does not receive terminal streams,
+          keystrokes, pasted text, clipboard text or file contents. Your hosts
+          and clients handle that data.
+        </li>
+        <li>
+          The control plane holds identity, policy and audit metadata: who
+          ran which command, on which host, and what was decided.
+        </li>
+        <li>
+          Local sessions can continue if the control plane is unavailable.
+          Managed access uses cached policy and certificates only while those
+          credentials remain valid; synchronization and enrollment need the
+          control plane.
+        </li>
+        <li>
+          phux for teams is in early access. SOC 2 and a third-party
+          penetration test are planned, not done.
+        </li>
+      </ul>
+      <p>
+        The hosted demo processes terminal content and has separate coverage
+        in the <a href="/privacy">privacy policy</a>. Recordings and storage you
+        configure are under your control, not the organization control plane's.
+      </p>
+    </section>
+
+    <section aria-labelledby="data">
+      <h2 id="data">what phux holds for an organization</h2>
+      <p>
+        Member emails and roles, group names and policies, device names and
+        their public certificates, host names and software versions, and the
+        audit records your hosts send.
+      </p>
+      <p>
+        An audit record names the person and credential, the command, its
+        target (such as <code>terminal:3</code> or a file path), the outcome
+        and the time. The{" "}
+        <a href={docsHref("/audit")}>audit log</a>{" "}lists what is never
+        recorded. When a license sets a retention period, the control plane
+        periodically prunes expired records; deletion is not immediate.
+        SIEM delivery is being qualified. Do not rely on immediate or lossless
+        delivery: host uploads, collector availability and retention affect
+        what can arrive.
+      </p>
+    </section>
+
+    <section aria-labelledby="controls">
+      <h2 id="controls">security controls</h2>
+      <ul>
+        <li>
+          <strong>Encryption in transit.</strong> Managed device-to-host
+          connections use mutual TLS. Control-plane enrollment and reporting
+          APIs authenticate with tokens or signed requests; the self-hosted
+          service needs HTTPS termination for production use. The relay
+          forwards encrypted streams it cannot read.
+        </li>
+        <li>
+          <strong>Short-lived access.</strong> After company sign-in, a device
+          gets a certificate valid for 12 hours, scoped by your group policy.
+          Revocation takes effect when each host successfully synchronizes.
+          Hosts poll every 15 seconds by default and can retain cached state
+          during synchronization failures. Certificate expiry still applies.
+        </li>
+        <li>
+          <strong>Tamper-evident audit.</strong> Each host signs its records
+          with Ed25519 and chains each to the one before. The control plane
+          checks both on arrival and flags any break.
+        </li>
+        <li>
+          <strong>Approvals.</strong> Risky commands can wait for a person to
+          approve them, from a desktop or a phone.
+        </li>
+        <li>
+          <strong>Secrets.</strong> Join, session and admin tokens are stored
+          only as hashes.
+        </li>
+        <li>
+          <strong>Supply chain.</strong> Releases are signed, the installer
+          and <code>phux update</code> check signatures, and every release
+          publishes an SBOM.
+        </li>
+      </ul>
+    </section>
+
+    <section aria-labelledby="status">
+      <h2 id="status">compliance status</h2>
+      <div class="table-region" role="region" tabindex="0" aria-label="Compliance status">
+        <table>
+          <thead><tr><th scope="col">Item</th><th scope="col">Status</th></tr></thead>
+          <tbody>
+            {STATUS.map((s) => <tr><td>{s.item}</td><td>{s.state}</td></tr>)}
+          </tbody>
+        </table>
+      </div>
+      <p>
+        Pilots can ask for our security questionnaire answers and the draft
+        DPA at <a href={`mailto:${CONTACT}`}>{CONTACT}</a>.
+      </p>
+    </section>
+
+    <section aria-labelledby="subprocessors">
+      <h2 id="subprocessors">subprocessors</h2>
+      <p>
+        These providers will process organization data once the hosted control
+        plane launches. The planned control-plane services process organization
+        metadata. Relay hosting carries end-to-end encrypted terminal streams,
+        not their plaintext contents. Hosted-demo processing is covered
+        separately above. We will update this list 30 days before adding a
+        provider.
+      </p>
+      <div class="table-region" role="region" tabindex="0" aria-label="Subprocessors">
+        <table>
+          <thead><tr><th scope="col">Provider</th><th scope="col">Purpose</th><th scope="col">Location</th></tr></thead>
+          <tbody>
+            {SUBPROCESSORS.map((s) => <tr><td>{s.name}</td><td>{s.what}</td><td>{s.where}</td></tr>)}
+          </tbody>
+        </table>
+      </div>
+      <p>
+        Your own identity provider, SIEM and recording bucket are yours, not
+        our subprocessors. The consumer apps' providers are in the
+        <a href="/privacy">privacy policy</a>.
+      </p>
+    </section>
+
+    <section aria-labelledby="report">
+      <h2 id="report">reporting a vulnerability</h2>
+      <p>
+        Follow the <a href={SECURITY} target="_blank" rel="noopener">security
+        policy</a>. We acknowledge reports within 5 business days.
+      </p>
+    </section>
+  </article>
+</BaseLayout>
