@@ -7,7 +7,7 @@
  * Pure functions so unit tests do not need a Cloudflare runtime.
  */
 
-import { WORKER_DOC_ALIASES, docsRedirects } from "./docs-redirects";
+import { DOC_REDIRECTS } from "./docs-redirects";
 
 export const SITE_HOST = "phux.sh";
 export const DOCS_HOST = "docs.phux.sh";
@@ -62,7 +62,7 @@ export const DOCS_PREFIXES = [
   "/embedding",
   "/public-api",
   "/building",
-  // Alias of /building. The worker 301s the page; Astro's redirect is the fallback.
+  // Alias of /building. The worker 301s retired docs HTML; Astro's redirect is the fallback.
   "/build-on",
   "/build-a-client",
   "/any-program-status",
@@ -96,8 +96,8 @@ export const DOCS_PREFIXES = [
   "/windows-desktop-development",
   "/releasing",
   "/substrate",
-  // Pre-2026-10 docs URLs. Nested paths still use Astro's HTML redirects.
-  // /quickstart itself is a worker 301 onto /getting-started.
+  // Pre-2026-10 docs URLs. Exact retired paths 301 in the worker.
+  // A nested path that is not itself retired still uses Astro's HTML redirect.
   // A missing `<path>.md` for one of these aliases 301s to the canonical twin.
   "/quickstart",
   "/consumers",
@@ -183,8 +183,8 @@ export function routeRequest(host: string, url: URL): HostRoute {
     if (path === "/" || path === "/index.html" || path === "") {
       return redirectOn(DOCS_HOST, "/overview", url.search);
     }
-    // Astro emits these two as 200 meta-refresh pages. The target comes from
-    // the same redirect map the HTML build uses.
+    // Astro emits retired docs URLs as 200 meta-refresh pages. Send the HTML
+    // forms to the canonical docs URL. `.md` stays an asset for the markdown helper.
     const aliasTarget = workerHtmlAliasTarget(path);
     if (aliasTarget) {
       return redirectOn(DOCS_HOST, aliasTarget, url.search);
@@ -220,17 +220,32 @@ export function isVgpuConceptPath(pathname: string): boolean {
   return path === "/concepts/vgpu" || path.startsWith("/concepts/vgpu/");
 }
 
-/** HTML forms of the worker aliases. Targets are `docsRedirects()`, not a second copy of the paths. */
+/**
+ * HTML-only section on top of `DOC_REDIRECTS`. The map target stays the
+ * page, so `<path>.md` still 301s to that page's `.md` twin.
+ */
+const HTML_ALIAS_SECTION: Partial<Record<keyof typeof DOC_REDIRECTS, string>> = {
+  "/migrate": "coming-from-another-multiplexer",
+  "/tmux-import": "coming-from-another-multiplexer",
+};
+
+/**
+ * HTML forms of retired docs URLs. Targets come from `DOC_REDIRECTS`.
+ * `.md` is not a form: it stays an asset so the markdown helper can 301
+ * the twin. `/concepts/when-to-use` is not in the map, so its markdown
+ * response stays a 302.
+ */
 function workerHtmlAliasTarget(pathname: string): string | undefined {
-  const redirects = docsRedirects(true);
-  for (const alias of Object.keys(WORKER_DOC_ALIASES)) {
+  for (const alias of Object.keys(DOC_REDIRECTS) as (keyof typeof DOC_REDIRECTS)[]) {
     if (
       pathname === alias ||
       pathname === `${alias}/` ||
       pathname === `${alias}.html` ||
       pathname === `${alias}/index.html`
     ) {
-      return redirects[alias];
+      const section = HTML_ALIAS_SECTION[alias];
+      const target = DOC_REDIRECTS[alias];
+      return section ? `${target}#${section}` : target;
     }
   }
   return undefined;

@@ -60,7 +60,7 @@ npx skills add no-phux/skills                    # agent skills
 - [Install](https://docs.phux.sh/installation): supported platforms and installation channels.
 - [Quickstart](https://docs.phux.sh/getting-started): start, split, detach, and inspect your first terminal.
 - [Compare](https://docs.phux.sh/compare): phux, tmux, Herdr, and cmux.
-- [Import tmux keys](https://docs.phux.sh/config): `phux config import-tmux` reads a running tmux and writes a preview.
+- [Migrate from tmux](https://docs.phux.sh/config#coming-from-another-multiplexer): `phux migrate --source tmux` translates the tmux key bindings it can into phux config; `phux config import-tmux` writes a config layer from a running tmux without an agent.
 - [Performance](https://docs.phux.sh/performance): measurements published with the comparison.
 - [Use phux as an agent](https://docs.phux.sh/agent-quickstart): install phux and drive sessions from code.
 - [Run coding agents](https://docs.phux.sh/agents): choose an integration and verify it works.
