@@ -58,6 +58,7 @@ export const DOCS_PREFIXES = [
   "/security",
   "/tailscale",
   "/clients",
+  "/chat",
   "/embedding",
   "/public-api",
   "/building",
