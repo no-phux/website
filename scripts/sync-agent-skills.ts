@@ -3,7 +3,7 @@
  * sync-agent-skills.ts — publish the repo's product skills to the site.
  *
  * Copies allowlisted `.agents/skills/<name>/SKILL.md` (see
- * `scripts/product-skills`) into `public/.well-known/agent-skills/<name>/`
+ * `packaging/skills/allowlist`) into `public/.well-known/agent-skills/<name>/`
  * and regenerates `public/.well-known/agent-skills/index.json` (Agent Skills
  * Discovery RFC v0.2.0) with a sha256 digest per skill. Like `_synced/`, the
  * copied files are build inputs, not hand-editable artifacts — fix the
@@ -21,7 +21,7 @@ const SITE_ROOT = resolve(import.meta.dirname, "..");
 const ROOT = phuxRoot(SITE_ROOT);
 const SKILLS_DIR = join(ROOT, ".agents", "skills");
 const OUT_DIR = resolve(import.meta.dirname, "../public/.well-known/agent-skills");
-const ALLOWLIST = join(ROOT, "scripts", "product-skills");
+const ALLOWLIST = join(ROOT, "packaging", "skills", "allowlist");
 
 async function publishedSkills(): Promise<string[]> {
   const raw = await readFile(ALLOWLIST, "utf8");
@@ -30,15 +30,15 @@ async function publishedSkills(): Promise<string[]> {
     const name = line.replace(/#.*$/, "").trim();
     if (!name) continue;
     if (name === "beads") {
-      throw new Error("scripts/product-skills must not list beads");
+      throw new Error("packaging/skills/allowlist must not list beads");
     }
     if (!/^[A-Za-z0-9_-]+$/.test(name)) {
-      throw new Error(`invalid skill name in scripts/product-skills: ${name}`);
+      throw new Error(`invalid skill name in packaging/skills/allowlist: ${name}`);
     }
     names.push(name);
   }
   if (names.length === 0) {
-    throw new Error("scripts/product-skills is empty");
+    throw new Error("packaging/skills/allowlist is empty");
   }
   return names;
 }
