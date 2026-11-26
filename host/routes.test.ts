@@ -10,7 +10,7 @@ import {
   markdownFallbackPath,
   routeRequest,
 } from "./routes";
-import { WORKER_DOC_ALIASES, docAliasCandidates, docsRedirects } from "./docs-redirects";
+import { DOC_REDIRECTS, docAliasCandidates, docsRedirects } from "./docs-redirects";
 
 function urlOn(host: string, path: string): URL {
   return new URL(path, `https://${host}`);
@@ -94,7 +94,12 @@ describe("host routing", () => {
         status: 301,
       });
     }
-    expect(routeRequest(DOCS_HOST, urlOn(DOCS_HOST, "/quickstart/install"))).toEqual({ kind: "asset" });
+    expect(routeRequest(DOCS_HOST, urlOn(DOCS_HOST, "/quickstart/install?from=search"))).toEqual({
+      kind: "redirect",
+      location: "https://docs.phux.sh/installation?from=search",
+      status: 301,
+    });
+    expect(routeRequest(DOCS_HOST, urlOn(DOCS_HOST, "/quickstart/not-a-page"))).toEqual({ kind: "asset" });
     expect(routeRequest(DOCS_HOST, urlOn(DOCS_HOST, "/quickstart.md"))).toEqual({ kind: "asset" });
   });
 
@@ -114,6 +119,57 @@ describe("host routing", () => {
     });
   });
 
+  test("docs.phux.sh/migrate is a 301 to the config migration section", () => {
+    for (const path of ["/migrate", "/migrate/", "/migrate.html", "/migrate/index.html"]) {
+      expect(routeRequest(DOCS_HOST, urlOn(DOCS_HOST, `${path}?from=search`))).toEqual({
+        kind: "redirect",
+        location: "https://docs.phux.sh/config?from=search#coming-from-another-multiplexer",
+        status: 301,
+      });
+    }
+    expect(routeRequest(DOCS_HOST, urlOn(DOCS_HOST, "/migrate.md"))).toEqual({ kind: "asset" });
+    expect(docAliasCandidates("/migrate")).toEqual(["/config"]);
+    expect(routeRequest(SITE_HOST, urlOn(SITE_HOST, "/migrate?from=search"))).toEqual({
+      kind: "redirect",
+      location: "https://docs.phux.sh/migrate?from=search",
+      status: 301,
+    });
+  });
+
+  test("docs.phux.sh/tmux-import is a 301 to the config migration section", () => {
+    for (const path of ["/tmux-import", "/tmux-import/", "/tmux-import.html", "/tmux-import/index.html"]) {
+      expect(routeRequest(DOCS_HOST, urlOn(DOCS_HOST, `${path}?from=search`))).toEqual({
+        kind: "redirect",
+        location: "https://docs.phux.sh/config?from=search#coming-from-another-multiplexer",
+        status: 301,
+      });
+    }
+    expect(routeRequest(DOCS_HOST, urlOn(DOCS_HOST, "/tmux-import.md"))).toEqual({ kind: "asset" });
+    expect(docAliasCandidates("/tmux-import")).toEqual(["/config"]);
+  });
+
+  test("docs.phux.sh/any-program-status is a 301 to /program-protocol", () => {
+    for (const path of ["/any-program-status", "/any-program-status/", "/any-program-status.html", "/any-program-status/index.html"]) {
+      expect(routeRequest(DOCS_HOST, urlOn(DOCS_HOST, `${path}?from=search`))).toEqual({
+        kind: "redirect",
+        location: "https://docs.phux.sh/program-protocol?from=search",
+        status: 301,
+      });
+    }
+    expect(routeRequest(DOCS_HOST, urlOn(DOCS_HOST, "/any-program-status.md"))).toEqual({ kind: "asset" });
+  });
+
+  test("docs.phux.sh/build-a-client is a 301 to /building", () => {
+    for (const path of ["/build-a-client", "/build-a-client/", "/build-a-client.html", "/build-a-client/index.html"]) {
+      expect(routeRequest(DOCS_HOST, urlOn(DOCS_HOST, `${path}?from=search`))).toEqual({
+        kind: "redirect",
+        location: "https://docs.phux.sh/building?from=search",
+        status: 301,
+      });
+    }
+    expect(routeRequest(DOCS_HOST, urlOn(DOCS_HOST, "/build-a-client.md"))).toEqual({ kind: "asset" });
+  });
+
   test("docs.phux.sh/ becomes /overview", () => {
     expect(routeRequest(DOCS_HOST, urlOn(DOCS_HOST, "/"))).toEqual({
       kind: "redirect",
@@ -124,7 +180,7 @@ describe("host routing", () => {
 
   test("docs.phux.sh serves the docs tree as assets", () => {
     expect(routeRequest(DOCS_HOST, urlOn(DOCS_HOST, "/overview"))).toEqual({ kind: "asset" });
-    expect(routeRequest(DOCS_HOST, urlOn(DOCS_HOST, "/wire/l1"))).toEqual({ kind: "asset" });
+    expect(routeRequest(DOCS_HOST, urlOn(DOCS_HOST, "/installation"))).toEqual({ kind: "asset" });
   });
 
   test("distributions use the docs origin for HTML and Markdown without swallowing sibling assets", () => {
@@ -143,7 +199,12 @@ describe("host routing", () => {
       expect(routeRequest(SITE_HOST, urlOn(SITE_HOST, path))).toEqual({
         kind: "redirect", location: `https://${DOCS_HOST}${path}`, status: 301,
       });
-      expect(routeRequest(DOCS_HOST, urlOn(DOCS_HOST, path))).toEqual({ kind: "asset" });
+    }
+    expect(routeRequest(DOCS_HOST, urlOn(DOCS_HOST, "/omarchy.md"))).toEqual({ kind: "asset" });
+    for (const path of ["/omarchy", "/omarchy/index.html"]) {
+      expect(routeRequest(DOCS_HOST, urlOn(DOCS_HOST, path))).toEqual({
+        kind: "redirect", location: "https://docs.phux.sh/distros", status: 301,
+      });
     }
     expect(isDocsPath("/omarchy-old")).toBe(false);
   });
@@ -155,9 +216,16 @@ describe("host routing", () => {
           kind: "redirect", location: `https://${DOCS_HOST}${path}?from=keys`, status: 301,
         });
       }
-      expect(routeRequest(DOCS_HOST, urlOn(DOCS_HOST, path))).toEqual({ kind: "asset" });
       expect(routeRequest("phux-site.account.workers.dev", urlOn(SITE_HOST, path))).toEqual({ kind: "asset" });
     }
+    for (const path of ["/tmux-import", "/tmux-import/", "/tmux-import.html", "/tmux-import/index.html"]) {
+      expect(routeRequest(DOCS_HOST, urlOn(DOCS_HOST, `${path}?from=keys`))).toEqual({
+        kind: "redirect",
+        location: "https://docs.phux.sh/config?from=keys#coming-from-another-multiplexer",
+        status: 301,
+      });
+    }
+    expect(routeRequest(DOCS_HOST, urlOn(DOCS_HOST, "/tmux-import.md"))).toEqual({ kind: "asset" });
     for (const path of ["/tmux-import-old", "/tmux-import.png"]) {
       expect(isDocsPath(path)).toBe(false);
       expect(routeRequest(SITE_HOST, urlOn(SITE_HOST, path))).toEqual({ kind: "asset" });
@@ -284,11 +352,18 @@ describe("public concept gallery", () => {
 describe("published documentation boundaries", () => {
   test("published pages stay on the docs host for every page suffix", () => {
     for (const page of ["acp", "embedding", "organization", "chat", "installation", "substrate", "public-api", "building", "build-a-client", "forwarding", "onepassword", "design-language", "agent-shims", "plugin-actions", "protocol-changes", "any-program-status", "program-protocol", "program-sequences", "host-services", "pane-command", "agent-waiting", "terminal-mcp", "tailscale", "agent-quickstart", "libghostty", "architecture-target", "architecture-end-state", "architecture-materialization", "architecture-qualification", "architecture-qualification-evidence", "chief-of-staff"]) {
+      const retired = `/${page}` in DOC_REDIRECTS;
       for (const suffix of ["", "/", ".html", ".md", "/index.html"]) {
         const path = `/${page}${suffix}`;
         expect(isDocsPath(path)).toBe(true);
         expect(isMarketingOnlyPath(path)).toBe(false);
-        expect(routeRequest(DOCS_HOST, urlOn(DOCS_HOST, path))).toEqual({ kind: "asset" });
+        const docsRoute = routeRequest(DOCS_HOST, urlOn(DOCS_HOST, path));
+        if (retired && suffix !== ".md") {
+          expect(docsRoute.kind).toBe("redirect");
+          if (docsRoute.kind === "redirect") expect(docsRoute.status).toBe(301);
+        } else {
+          expect(docsRoute).toEqual({ kind: "asset" });
+        }
         expect(routeRequest(SITE_HOST, urlOn(SITE_HOST, path))).toEqual({
           kind: "redirect", location: `https://${DOCS_HOST}${path}`, status: 301,
         });
@@ -333,17 +408,22 @@ describe("missing markdown twins", () => {
     expect(docAliasCandidates("/concepts/when-to-use")).toEqual(["/compare", "/concepts"]);
     expect(docsRedirects(true)["/concepts/when-to-use"]).toBe("/compare");
     expect(docsRedirects(false)["/concepts/when-to-use"]).toBe("/concepts");
-    const redirects = docsRedirects(true);
-    for (const alias of Object.keys(WORKER_DOC_ALIASES)) {
-      const target = redirects[alias];
+    expect(routeRequest(DOCS_HOST, urlOn(DOCS_HOST, "/concepts/when-to-use"))).toEqual({ kind: "asset" });
+    expect(routeRequest(DOCS_HOST, urlOn(DOCS_HOST, "/concepts/when-to-use.md"))).toEqual({ kind: "asset" });
+    for (const alias of Object.keys(DOC_REDIRECTS) as (keyof typeof DOC_REDIRECTS)[]) {
+      const target = DOC_REDIRECTS[alias];
+      const location = alias === "/migrate" || alias === "/tmux-import"
+        ? `https://docs.phux.sh${target}?from=search#coming-from-another-multiplexer`
+        : `https://docs.phux.sh${target}?from=search`;
       for (const path of [alias, `${alias}/`, `${alias}.html`, `${alias}/index.html`]) {
         expect(routeRequest(DOCS_HOST, urlOn(DOCS_HOST, `${path}?from=search`))).toEqual({
           kind: "redirect",
-          location: `https://docs.phux.sh${target}?from=search`,
+          location,
           status: 301,
         });
       }
       expect(routeRequest(DOCS_HOST, urlOn(DOCS_HOST, `${alias}.md`))).toEqual({ kind: "asset" });
+      expect(docAliasCandidates(alias)).toEqual([target]);
     }
   });
 

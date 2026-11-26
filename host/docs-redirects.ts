@@ -1,10 +1,16 @@
 /**
- * Retired docs URLs. Astro serves these as HTML meta-refresh pages.
- * The worker sends `<path>.md` to the canonical page instead, because a
- * cached 301 must not stop on that stub.
+ * Retired docs URLs. Astro still emits these as HTML meta-refresh pages
+ * (`docsRedirects` in astro.config.mjs). The docs host worker 301s every
+ * HTML form to the canonical page. `<path>.md` stays an asset so the
+ * markdown helper can 301 to the canonical `.md` twin; a cached 301 must
+ * not stop on the stub.
  *
- * `/quickstart` and `/build-on` are also worker alias rules (host/routes.ts).
- * `/concepts/when-to-use` prefers /compare once that page is published.
+ * `/migrate` and `/tmux-import` HTML add `#coming-from-another-multiplexer`
+ * in the worker. The target here stays `/config` so `.md` goes to
+ * `/config.md`.
+ *
+ * `/concepts/when-to-use` is not in this map. Its markdown response is a
+ * 302 chosen per request (`docAliasCandidates`).
  */
 export const WORKER_DOC_ALIASES = {
   "/quickstart": "/getting-started",

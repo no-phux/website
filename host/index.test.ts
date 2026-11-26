@@ -130,6 +130,8 @@ describe("markdown negotiation", () => {
       ["/consumers/getting-started.md", "/agents.md"],
       ["/quickstart.md", "/getting-started.md"],
       ["/build-on.md", "/building.md"],
+      ["/migrate.md", "/config.md"],
+      ["/tmux-import.md", "/config.md"],
     ]) {
       const requested: string[] = [];
       const response = await handler.fetch(new Request(`https://docs.phux.sh${path}?from=cite`), {
@@ -319,6 +321,22 @@ describe("markdown negotiation", () => {
     });
     expect(response.status).toBe(301);
     expect(response.headers.get("location")).toBe("https://docs.phux.sh/quickstart/install.md?from=cite");
+  });
+
+  test("retired docs HTML redirects before assets are fetched", async () => {
+    for (const [path, location] of [
+      ["/migrate?from=search", "https://docs.phux.sh/config?from=search#coming-from-another-multiplexer"],
+      ["/tmux-import?from=search", "https://docs.phux.sh/config?from=search#coming-from-another-multiplexer"],
+      ["/any-program-status?from=search", "https://docs.phux.sh/program-protocol?from=search"],
+      ["/build-a-client?from=search", "https://docs.phux.sh/building?from=search"],
+    ] as const) {
+      const response = await handler.fetch(
+        new Request(`https://docs.phux.sh${path}`, { headers: { accept: "text/html" } }),
+        { ASSETS: { fetch: async () => { throw new Error(`${path} must not fetch assets`); } } },
+      );
+      expect(response.status).toBe(301);
+      expect(response.headers.get("location")).toBe(location);
+    }
   });
 
   test("docs.phux.sh/quickstart redirects before assets are fetched", async () => {
